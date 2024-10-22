@@ -1,0 +1,72 @@
+DATASET
+
+Se guardan los estados en los que Pacman pasa por una interseccion
+
+
+
+He decidido quitar la variable de "currentLevelTime" y "levelCount"
+He decidido quitar la variable de "pillsState" que devuelve una secuencia de 250 1s y 0s indicando si una pill concreta se ha comido
+He decidido quitar la variable de "pillWasEaten" y "powerPillWasEaten"
+He decidido quitar la variable de "powerPillsState" ya que devuelve una secuecia de 4 1s y 0s, y no sirve esa representacion
+He decidido quitar la variable de "pacmanLivesRemaining" no sirve de nada saber cuantas vidas quedan
+He decidido quitar la variable de "pacmanReceivedExtraLife" ya que solo se recive cuando se alcanzan los 10000 puntos y no afecta en nada
+He decidido quitar la variable de "mazeIndex" ya que es el indice del tablero que se esta jugando actualmente y de momento solo vamos a jugar con el primer nivel
+
+
+
+He añadido 3 columnas adicionales, con la diferencia de las puntuaciones obtenidas en los 10, 25 y 50 anteriores ticks de ejecucion (-1 en el caso de que no se pueda calcular)
+He añadido 4 columnas, guardando la distancia del "path mas corto" a los fantasmas (-1 si esta en la carcel)
+He añadido 2 columnas indicando la distancia a la PP mas cercana "del path mas corto" y la distancia "euclidea " (-1 si no existe ninguna activa)
+He añadido 1 columna, con el numero de PP restantes. Puede ser util para saber si Pacman tiene que jugar mas agresivo o mas defensivo
+
+
+?? He añadido 1 columna con la distancia del path mas corto a la pill mas cercana (puede ser util cuando ya no quedan PP y no hay fantasmas cerca)
+?? He añadido 1 columna, con el tiempo restante de la PP activa (sería añadir el tiempo edible de cada fantasma)
+
+
+
+Características que se guardan finalmente por cada estado:
+
+
+
+
+
+
+
+He creado una nueva clase ExecutorGenerateDataSet que se encarga de generar el DataSet cuando se ejecuta el juego
+
+He creado una nueva carpeta en "game" llamada "dataSet" que contiene las dos clases que se encargan de recopilar 
+el estado del juego
+
+
+
+----
+He creado una nueva clase ExecutorConectionNN que se encarga de conectarse através de un socket con python
+	- Se pasa un estado del juego procesado, atraves del socket
+	- Se procesa y se calcula el resultado con una red Neuronal
+	- Se recibe através del socket el movimiento que debe realiar Pacman
+	- Pacman ejecuta ese movimiento
+	
+
+
+
+
+
+
+
+
+
+FALTA DE HACER (por prioridad)
+	- Poner bien nombres cabeceras
+	- Repasar todo el codigo y cambiarlo un poco, xq hay funciones copiadas del chat
+	- Calcular variables nuevas
+	- Generar un Dataset mucho mas extenso
+
+
+
+Dudas tutoria mañana:
+	- Como hago para crear un DataSet mucho mas extenso ??
+		- Ejecutando todas las practicas de años anteriores entre sí multiples veces y solo guardando los datos 
+		  con mas puntuacion (superior a X umbral) ???
+
+

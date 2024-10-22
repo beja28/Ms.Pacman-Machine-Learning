@@ -1,0 +1,17 @@
+Pasos para abrir un archivo CSV correctamente en Excel:
+
+Abrir el archivo CSV en Excel:	
+	Si toda la información aparece en una sola columna, selecciona la columna A (donde se encuentra toda la información).
+
+Usar la herramienta 'Texto en Columnas':
+	Ve al menú Datos y selecciona Texto en Columnas.
+
+Elegir el delimitador:
+	Se abrirá una ventana con dos opciones: selecciona Delimitado y haz clic en Siguiente.
+
+Elegir la coma como delimitador:
+	En la siguiente pantalla, selecciona Coma como delimitador y desmarca cualquier otra opción (como Tabulación).
+	Haz clic en Finalizar.
+
+Verifica la separación de los datos:
+	Los datos ahora deberían estar separados en columnas individuales.

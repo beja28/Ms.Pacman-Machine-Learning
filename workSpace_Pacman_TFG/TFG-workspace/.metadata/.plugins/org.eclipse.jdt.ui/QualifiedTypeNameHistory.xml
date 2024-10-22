@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<qualifiedTypeNameHistroy>
+    <fullyQualifiedTypeName name="dataset.creator.DataSetRecorder"/>
+    <fullyQualifiedTypeName name="pacman.game.data.GameDataInterface"/>
+    <fullyQualifiedTypeName name="pacman.game.dataSet.DataSetRecorder"/>
+    <fullyQualifiedTypeName name="pacman.game.Game"/>
+    <fullyQualifiedTypeName name="pacman.game.Constants.GHOST"/>
+    <fullyQualifiedTypeName name="pacman.ExecutorGenerateDataSet"/>
+    <fullyQualifiedTypeName name="pacman.game.Constants.MOVE"/>
+    <fullyQualifiedTypeName name="java.nio.file.StandardOpenOption"/>
+</qualifiedTypeNameHistroy>
