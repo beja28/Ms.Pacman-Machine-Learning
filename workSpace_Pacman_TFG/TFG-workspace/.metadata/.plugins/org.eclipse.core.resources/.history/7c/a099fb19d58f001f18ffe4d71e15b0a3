@@ -1,0 +1,181 @@
+package pacman.game.dataSet;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import pacman.game.Game;
+
+
+public class DataSetRecorder {
+    
+    private List<String> totalGameStates;  //Para almacenar los distintos estados del juego
+    private List<String> validGameStates;
+
+    public DataSetRecorder() {
+        this.totalGameStates = new ArrayList<>();
+        this.validGameStates = new ArrayList<>();
+    }
+
+    
+    /*
+     * 	Guarda un estado del juego, si MsPacman se encuentra en un posicion, procesa los datos
+     * 	elimando caracteristicas que no son utiles y agreagando/calculando nuevas caracteristicas
+     * */
+    public void collectGameState(Game game) {
+    	
+    	//Se recoge el estado del juego y se eliminan las caracteristicas que no queremos
+    	String filteredState = filterGameState(game.getGameState());
+    	
+    	//Agregar el resto de variables
+    	
+    	
+    	
+    	
+    	
+    	
+    	
+    	
+    	
+    	
+    	
+    	
+    	
+    	//Si MsPacman se encuentra en una INTERSECCION...
+    	if(isPacmanAtJunction) {   		
+    		validGameStates.add(filteredState);
+    	}
+    	
+    	totalGameStates.add(filteredState);
+    }
+
+    
+    
+    //Filtra un string del estado del texto, para quitar las variables que no quiero
+    public String filterGameState(String gameState) {
+        
+    	//Lista con las variables que se deben eliminar del estado del juego
+        List<String> variablesAEliminar = DataSetVariables.VARIABLES_BORRAR_GAME_STATE;
+        
+        //Lista con todas las variables del estado del juego
+        List<String> todasLasVariables = DataSetVariables.VARIABLES_GAME_STATE;
+        
+        //Lista para almacenar los valores filtrados
+        List<String> filteredState = new ArrayList<>();
+        
+        //Convertimos el string del estado del juego en una lista
+        String[] gameStateArray = gameState.split(",");
+
+        //Recorremos todas las variables del estado del juego
+        for (int i = 0; i < todasLasVariables.size(); i++) {
+            // Solo agregamos las variables que no estan en la lista de variables a eliminar
+            if (!variablesAEliminar.contains(todasLasVariables.get(i))) {
+                filteredState.add(gameStateArray[i]);
+            }
+        }
+
+        //Convertimos la lista filtrada de nuevo a un string separado por comas
+        return String.join(",", filteredState);    
+    }   
+    
+    
+    
+ // Calcular la diferencia de puntuación en ticks anteriores
+    public int calculateScoreDifference(int currentScore, List<Integer> previousScores, int ticks) {
+        if (previousScores.size() >= ticks) {
+            return currentScore - previousScores.get(previousScores.size() - ticks);
+        }
+        return -1;  // No se puede calcular
+    }
+
+    
+    /*
+    // Calcular la distancia del "path más corto" a un objetivo
+    public int calculateShortestPathDistance(Game game, int pacmanIndex, int targetIndex) {
+        if (targetIndex == -1) {
+            return -1;  // El objetivo no está disponible (por ejemplo, si el fantasma está en la cárcel)
+        }
+        return game.getShortestPathDistance(pacmanIndex, targetIndex);
+    }
+
+    // Calcular la distancia euclídea a un objetivo
+    public double calculateEuclideanDistance(Game game, int pacmanIndex, int targetIndex) {
+        if (targetIndex == -1) {
+            return -1;  // No hay objetivo
+        }
+        return game.getEuclideanDistance(pacmanIndex, targetIndex);
+    }
+
+    // Obtener el número de Power Pills restantes
+    public int getRemainingPowerPills(Game game) {
+        return game.getActivePowerPillsIndices().length;
+    }
+
+    // Obtener el tiempo restante de la Power Pill activa
+    public int getRemainingPPTime(Game game) {
+        return game.getTimeOfPowerPillActive();  // O el método que devuelva el tiempo restante
+    }
+
+    // Añadir nuevas variables al estado del juego
+    public String addNewVariablesToGameState(Game game, String gameState, List<Integer> previousScores) {
+        int scoreDiff10 = calculateScoreDifference(game.getScore(), previousScores, 10);
+        int scoreDiff25 = calculateScoreDifference(game.getScore(), previousScores, 25);
+        int scoreDiff50 = calculateScoreDifference(game.getScore(), previousScores, 50);
+
+        int distanceToGhost = calculateShortestPathDistance(game, game.getPacmanCurrentNodeIndex(), game.getGhostCurrentNodeIndex());
+        double euclideanToPP = calculateEuclideanDistance(game, game.getPacmanCurrentNodeIndex(), game.getClosestPowerPill());
+        
+        int remainingPPills = getRemainingPowerPills(game);
+        int remainingPPTime = getRemainingPPTime(game);
+
+        // Añadir los resultados a gameState como cadena separada por comas
+        return gameState + "," + scoreDiff10 + "," + scoreDiff25 + "," + scoreDiff50
+               + "," + distanceToGhost + "," + euclideanToPP + "," + remainingPPills + "," + remainingPPTime;
+    }
+	*/
+    
+    
+    /*
+    // Recoger el estado del juego, añadir las variables nuevas y almacenarlo
+    public void collectGameState(Game game) {
+        String state = filterGameState(game.getGameState());
+        state = addNewVariablesToGameState(game, state, previousScores);
+        
+        if(game.isJunction(game.getPacmanCurrentNodeIndex())) {
+            validGameStates.add(state);
+        }
+        
+        totalGameStates.add(state);
+        previousScores.add(game.getScore());  // Actualizar lista de puntuaciones
+    }
+    */
+    
+    
+    
+    //Guardar los estados del juego recogidos en el formato indicado
+    public void saveDataToType(String fileName, String type, boolean show_header) throws IOException {
+        List<String> fileContent = new ArrayList<>();
+
+        //Primero lunea con los nombres de los campos
+        if (show_header) {
+            fileContent.add(String.join(",", DataSetVariables.restarListas(DataSetVariables.VARIABLES_GAME_STATE, DataSetVariables.VARIABLES_BORRAR_GAME_STATE)));
+        }
+        
+        
+        //Estados
+        fileContent.addAll(validGameStates);
+        Files.write(Paths.get(fileName + "." + type), fileContent, StandardCharsets.UTF_8);
+    }
+    
+    
+    //Guardar ambos archivos
+    public void saveData(String fileName, boolean show_header) throws IOException {
+    	saveDataToType(fileName, "txt", show_header);
+    	saveDataToType(fileName, "csv", show_header);
+    }
+}

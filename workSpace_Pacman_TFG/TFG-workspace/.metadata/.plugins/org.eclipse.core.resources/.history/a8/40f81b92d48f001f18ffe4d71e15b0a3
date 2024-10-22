@@ -1,0 +1,5 @@
+package pacman.game.data;
+
+public class GameDataFactory {
+
+}
