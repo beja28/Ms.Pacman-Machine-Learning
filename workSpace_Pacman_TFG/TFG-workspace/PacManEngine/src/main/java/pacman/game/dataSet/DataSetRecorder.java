@@ -3,6 +3,7 @@ package pacman.game.dataSet;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
@@ -224,22 +225,48 @@ public class DataSetRecorder {
     
     
     public void saveDataToCsv(String fileName, boolean show_header) throws IOException {
-        List<String> fileContent = new ArrayList<>();
-        String filePath = fileName + ".csv";
+    	List<String> fileContent = new ArrayList<>();
+
+        //Nombre de la carpeta donde queremos guardar los dataSets
+        String folderName = "dataSet"; 
+
+        // Construir la ruta completa de la carpeta
+        Path folderPath = Paths.get(folderName);
+
+        // Mostrar el directorio de trabajo actual (para depuración)
+        System.out.println("Directorio de trabajo actual: " + System.getProperty("user.dir"));
+
+        // Crear la carpeta si no existe
+        if (!Files.exists(folderPath)) {
+            try {
+                Files.createDirectories(folderPath); // Crea la carpeta 'data'
+                System.out.println("Carpeta creada: " + folderPath.toAbsolutePath());
+            } catch (IOException e) {
+                System.err.println("Error al crear la carpeta: " + folderPath.toAbsolutePath());
+                e.printStackTrace();
+            }
+        }
+
+        // Construir la ruta completa del archivo (carpeta + nombre de archivo)
+        Path filePath = folderPath.resolve(fileName + ".csv"); // data/fileName.type
 
         // Verificar si el archivo ya existe
-        boolean fileExists = Files.exists(Paths.get(filePath));
+        boolean fileExists = Files.exists(filePath);
 
-        // Si se quiere mostrar el encabezado y el archivo no existe, añadirlo
-        if (show_header && !fileExists) {
-            fileContent.add(String.join(",", DataSetVariables.getFinalGameState()));
+        // Si el archivo no existe, añadir el encabezado
+        if (!fileExists && show_header) {
+            fileContent.add(String.join(",", DataSetVariables.restarListas(DataSetVariables.VARIABLES_GAME_STATE, DataSetVariables.VARIABLES_BORRAR_GAME_STATE)));
         }
 
         // Añadir los estados del juego (filas)
         fileContent.addAll(validGameStates);
 
         // Guardar los datos en el archivo en modo APPEND (añadir al final)
-        Files.write(Paths.get(filePath), fileContent, StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+        Files.write(filePath, fileContent, StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+
+        // Mensaje de confirmación
+        System.out.println("Datos guardados en: " + filePath.toAbsolutePath());
+
     }
     
 }

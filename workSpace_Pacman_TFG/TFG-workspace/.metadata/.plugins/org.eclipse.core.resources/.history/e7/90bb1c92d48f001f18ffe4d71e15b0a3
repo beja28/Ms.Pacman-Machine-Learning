@@ -1,5 +1,0 @@
-package pacman.game.data;
-
-public interface GameDataInterface {
-
-}
