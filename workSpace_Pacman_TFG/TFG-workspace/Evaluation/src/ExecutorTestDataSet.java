@@ -42,7 +42,7 @@ public class ExecutorTestDataSet {
                 .build();
 
     	
-    	for(int i = 0; i < 10000; i++) {
+    	for(int i = 0; i < 1; i++) {
     		//PacmanController pacMan = new HumanController(new KeyBoardInput());
             PacmanController pacMan = new es.ucm.fdi.ici.c2223.practica1.grupo06.MsPacMan();
             GhostController ghosts = new es.ucm.fdi.ici.c2324.practica1.grupo08.Ghosts();
