@@ -1,1 +1,1 @@
-![Mi imagen](imagenes/prueba.png)
+![Mi imagen](images/Imagen1.png)
