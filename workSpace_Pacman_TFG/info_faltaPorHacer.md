@@ -14,12 +14,11 @@
 
 ##### Cosas de menor importancia
 
-- Repasar todo el codigo y cambiarlo un poco, xq hay funciones copiadas del chat
-- Modificar la clase de ExecutorGenerateDataSet para que reciba el numero de ejecuciones que se quiere hacer
-Conseguir que cada vez que se genera un DataSet se guarde informacion relaccionada
-- Si es la primera vez que se crea el DataSet, se debe crear un archivo .txt y añadir la informacion 
-- Si ya hay un DataSet creado y se modifica (se añaden nuevas filas) --> Se debe añadir al .txt relaccionado con ese dataSet
-		  una nueva fila con la fecha de la modificacion y las nuevas filas que se han añadido, y el pacman y lso fantasmas usado
+- Modificar la clase de *"ExecutorGenerateDataSet"* para que reciba el numero de ejecuciones que se quiere hacer y el nombre del archivo .csv
+- Quitar las funcion de runGame que no se usan en la clase de *"ExecutorGenerateDataSet"*
+- Conseguir que cada vez que se genera un DataSet se guarde informacion relaccionada
+	- Si es la primera vez que se crea el DataSet, se debe crear un archivo .txt y añadir la informacion 
+	- Si ya hay un DataSet creado y se modifica (se añaden nuevas filas) --> Se debe añadir al .txt relaccionado con ese dataSet una nueva fila con la fecha de la modificacion y las nuevas filas que se han añadido, y el pacman y lso fantasmas usado
 - Calcular variables nuevas
 
 

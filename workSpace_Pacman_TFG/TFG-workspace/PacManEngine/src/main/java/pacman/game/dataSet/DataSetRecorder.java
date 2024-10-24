@@ -7,9 +7,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import pacman.game.Constants.GHOST;
 import pacman.game.Constants.MOVE;
@@ -18,14 +16,12 @@ import pacman.game.Game;
 
 public class DataSetRecorder {
     
-    private List<String> totalGameStates;  //Para almacenar los distintos estados del juego
     private List<String> validGameStates;
     private List<Integer> previousScores;
     
     private final Game game;
 
     public DataSetRecorder(Game game) {
-        this.totalGameStates = new ArrayList<>();
         this.validGameStates = new ArrayList<>();
         this.previousScores =new ArrayList<>();
         this.game = game;
@@ -33,33 +29,31 @@ public class DataSetRecorder {
 
     
     /*
-     * 	Guarda un estado del juego, si MsPacman se encuentra en un posicion, procesa los datos
+     * 	Guarda un estado del juego, si Pacman se encuentra en un posicion, procesa los datos
      * 	elimando caracteristicas que no son utiles y agreagando/calculando nuevas caracteristicas
      * */
     public void collectGameState(MOVE pacmanMove) {
-    	
-    	//Se recoge el estado del juego y se eliminan las caracteristicas que no queremos
-    	List<String> filteredState = filterGameState(game.getGameState());
-    	
-    	filteredState.add(0, pacmanMove.toString());
-    	
-    	//Agregar el resto de variables
-    	String finalState = addNewVariablesToGameState(filteredState, previousScores);    	
-    	
-    	
-    	
-    	//Si MsPacman se encuentra en una INTERSECCION...
-    	if(game.isJunction(game.getPacmanCurrentNodeIndex())) {   		
+    	    	
+    	//Si Pacman se encuentra en una INTERSECCION...
+    	if(game.isJunction(game.getPacmanCurrentNodeIndex())) {
+    		
+    		//Se recoge el estado del juego y se eliminan las caracteristicas que no queremos
+        	List<String> filteredState = filterGameState(game.getGameState());
+        	
+        	//Se añade la etiqueta (la posicion de Pacman) 
+        	filteredState.add(0, pacmanMove.toString());
+        	
+        	//Se calculan las nuevas variables que queremos, y se añaden
+        	String finalState = addNewVariablesToFilteredState(filteredState);    		
+    		
     		validGameStates.add(finalState);
     	}
     	
-    	totalGameStates.add(finalState);
-    	previousScores.add(game.getScore());  // Actualizar lista de puntuaciones
+    	previousScores.add(game.getScore());
     }
 
     
-    
-    //Filtra un string del estado del texto, para quitar las variables que no quiero
+    //Filtra un string con el estado del juego, quita las variables que no queremos y devuelve una lista con las restantes
     public List<String> filterGameState(String gameState) {
         
     	//Lista con las variables que se deben eliminar del estado del juego
@@ -82,28 +76,26 @@ public class DataSetRecorder {
             }
         }
 
-        //Convertimos la lista filtrada de nuevo a un string separado por comas
-        //return String.join(",", filteredState);
+        //Se devuelve en formato de lista
         return filteredState;
     }   
     
-    
-    
-    // Calcula la diferencia de puntuación en ticks anteriores
+        
+    // Calcula la diferencia de puntuacion en estados anteriores
     public int calculateScoreDifference(int currentScore, List<Integer> previousScores, int ticks) {
     	
         if (previousScores.size() >= ticks) {
             return currentScore - previousScores.get(previousScores.size() - ticks);
         }
-        
-        return -1;  // No se puede calcular
+                
+        //En caso de que no se pueda calcular
+        return -1;
     }
 
-    
-    
-    // Calcula la distancia del camino mas corto entre dos puntos
+        
+    // Calcula la distancia del "path" mas corto entre dos nodos
     public int calculateShortestPathDistance(int pacmanNode, int targetNode) {
-    	//El fantasma esta en la carcel
+   
         if (targetNode == -1) {
             return -1;
         }
@@ -112,55 +104,55 @@ public class DataSetRecorder {
     }
 
     
-    // Encontrar la Power Pill activa más cercana
+    // Retorma el nodo de la Power Pill activa mas cercana a Pacman
     public int findNearestActivePP(Game game, int pacmanNode) {
         int[] activePowerPills = game.getActivePowerPillsIndices(); // Obtener todas las PP activas
 
         if (activePowerPills.length == 0) {
-            return -1; // No hay Power Pills activas
+            return -1; // No hay ninguna activa
         }
 
-        int nearestPP = activePowerPills[0]; // Inicializar con la primera Power Pill activa
-        int shortestPathDistance = game.getShortestPathDistance(pacmanNode, nearestPP); // Distancia del camino más corto
+        int nearestPP = activePowerPills[0];	//Por defecto la primera
+        int shortestPathDistance = game.getShortestPathDistance(pacmanNode, nearestPP);
 
-        // Recorrer las Power Pills activas para encontrar la más cercana
-        for (int ppNode : activePowerPills) {
-            int pathDistance = game.getShortestPathDistance(pacmanNode, ppNode);
+        // Recorre el resto de las PP activas hasta encontrar la mas cercana
+        for (int i=0; i<activePowerPills.length; i++) {
+        	int ppNodo = activePowerPills[i];
+            int dist = game.getShortestPathDistance(pacmanNode, ppNodo);
 
             // Actualizar si encontramos una PP más cercana
-            if (pathDistance < shortestPathDistance) {
-                shortestPathDistance = pathDistance;
-                nearestPP = ppNode;
+            if (dist < shortestPathDistance) {
+                shortestPathDistance = dist;
+                nearestPP = ppNodo;
             }
         }
 
-        return nearestPP; // Retornar el nodo de la PP más cercana
+        return nearestPP;
     }
     
     
-    
-    // Calcular la distancia del camino más corto a la PP activa más cercana
+    // Calcula la distancia del camino más corto a la PP activa más cercana
     public int calculatePathDistanceToNearestPP(int pacmanNode) {
         int nearestPP = findNearestActivePP(game, pacmanNode); // Encontrar la PP más cercana
 
         if (nearestPP == -1) {
-            return -1; // No hay Power Pills activas
+            return -1; // No hay PP activas
         }
 
-        // Calcular y devolver la distancia del camino más corto
+        // Calcula y devuelve la distancia del camino más corto
         return game.getShortestPathDistance(pacmanNode, nearestPP);
     }
 
     
-    // Calcular la distancia euclídea a la PP activa más cercana
+    // Calcula la distancia euclidea a la PP activa más cercana
     public int calculateEuclideanDistanceToNearestPP(int pacmanNode) {
         int nearestPP = findNearestActivePP(game, pacmanNode); // Encontrar la PP más cercana
 
         if (nearestPP == -1) {
-            return -1; // No hay Power Pills activas
+            return -1; // No hay
         }
 
-        // Calcular y devolver la distancia euclídea
+        //Calcula y devuelve la distancia euclidea
         return (int) game.getEuclideanDistance(pacmanNode, nearestPP);
     }
     
@@ -173,11 +165,8 @@ public class DataSetRecorder {
     }
 
     
-    
-
-    
-    // Añadir nuevas variables al estado del juego
-    public String addNewVariablesToGameState(List<String> gameState, List<Integer> previousScores) {
+    // Añade nuevas variables al estado del juego
+    public String addNewVariablesToFilteredState(List<String> gameState) {
     	//3 variables adicionales con las puntuaciones obtenidas en los 10, 25 y 50 anteriores ticks de ejecucion
     	int scoreDiff10 = calculateScoreDifference(game.getScore(), previousScores, 10);
         int scoreDiff25 = calculateScoreDifference(game.getScore(), previousScores, 25);
@@ -204,69 +193,47 @@ public class DataSetRecorder {
 
         return String.join(",", gameState);
     }
-	
     
-    
+        
     /*
-    // Recoger el estado del juego, añadir las variables nuevas y almacenarlo
-    public void collectGameState(Game game) {
-        String state = filterGameState(game.getGameState());
-        state = addNewVariablesToGameState(game, state, previousScores);
-        
-        if(game.isJunction(game.getPacmanCurrentNodeIndex())) {
-            validGameStates.add(state);
-        }
-        
-        totalGameStates.add(state);
-        previousScores.add(game.getScore());  // Actualizar lista de puntuaciones
-    }
-    */
-    
-    
-    
+     * Funcion que añade los datos de los estados del juego calculados a un archivo .csv
+     * 		- Si el archivo ya existe se añaden los estados
+     * 		- Si el archivo no existe, se crea y se añaden las cabeceras de las columnas, y se añaden los estados 
+     * */
     public void saveDataToCsv(String fileName, boolean show_header) throws IOException {
     	List<String> fileContent = new ArrayList<>();
 
         //Nombre de la carpeta donde queremos guardar los dataSets
-        String folderName = "dataSet"; 
+        String folderName = "new_dataSets"; 
 
-        // Construir la ruta completa de la carpeta
+        //Crear ruta
         Path folderPath = Paths.get(folderName);
 
-        // Mostrar el directorio de trabajo actual (para depuración)
-        System.out.println("Directorio de trabajo actual: " + System.getProperty("user.dir"));
-
-        // Crear la carpeta si no existe
+        //Si no existe la carpeta se crea
         if (!Files.exists(folderPath)) {
             try {
-                Files.createDirectories(folderPath); // Crea la carpeta 'data'
-                System.out.println("Carpeta creada: " + folderPath.toAbsolutePath());
+                Files.createDirectories(folderPath);
             } catch (IOException e) {
-                System.err.println("Error al crear la carpeta: " + folderPath.toAbsolutePath());
                 e.printStackTrace();
             }
         }
 
-        // Construir la ruta completa del archivo (carpeta + nombre de archivo)
-        Path filePath = folderPath.resolve(fileName + ".csv"); // data/fileName.type
+        // Ruta completa del csv (carpeta + nombre))
+        Path filePath = folderPath.resolve(fileName + ".csv");
 
-        // Verificar si el archivo ya existe
+        // Se comprueba si hay un archivo existente con ese nombre
         boolean fileExists = Files.exists(filePath);
 
-        // Si el archivo no existe, añadir el encabezado
+        // Si no existe, se crea y se añade el encabezado
         if (!fileExists && show_header) {
-            fileContent.add(String.join(",", DataSetVariables.restarListas(DataSetVariables.VARIABLES_GAME_STATE, DataSetVariables.VARIABLES_BORRAR_GAME_STATE)));
+            fileContent.add(String.join(",", DataSetVariables.getFinalGameState()));
         }
 
-        // Añadir los estados del juego (filas)
+        // Se añaden los estados calculados
         fileContent.addAll(validGameStates);
 
-        // Guardar los datos en el archivo en modo APPEND (añadir al final)
+        // Se uardan los datos en el archivo .csv en modo APPEND (añadir al final)
         Files.write(filePath, fileContent, StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
-
-        // Mensaje de confirmación
-        System.out.println("Datos guardados en: " + filePath.toAbsolutePath());
-
     }
     
 }
