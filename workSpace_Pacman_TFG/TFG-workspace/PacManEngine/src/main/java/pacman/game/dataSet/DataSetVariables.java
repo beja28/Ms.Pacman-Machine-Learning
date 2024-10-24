@@ -51,23 +51,22 @@ public class DataSetVariables {
 	
 	//Recibe dos listas de strings y agrega los strings de la segunda lista a la primera
 	public static List<String> agregarListas(List<String> stringsTotales, List<String> stringsAgregar) {
-	    // Creamos una nueva lista basada en variablesGameState
+	    // Creamos una nueva lista
 	    List<String> listaConAñadidos = new ArrayList<>(stringsTotales);
 
-	    // Añadimos las variables de variablesAñadirGameState a la lista
+	    // Añadimos las variables
 	    listaConAñadidos.addAll(stringsAgregar);
 
-	    // Retornamos la lista resultante
+	    // Se retorna la lista resultante
 	    return listaConAñadidos;
 	}
-	
 	
 	
 	public static List<String> getFinalGameState(){
 		//Elimnar encabezados del GameState que no queremos
 		List<String> filterGameState = restarListas(VARIABLES_GAME_STATE, VARIABLES_BORRAR_GAME_STATE);
 		
-		//Agregar nuevos encabezados
+		//Agregar los nuevos encabezados
 		List<String> finalGameState = agregarListas(filterGameState, VARIABLES_AGREGAR_GAME_STATE);
 		
 		//Agregar la etiqueta
@@ -75,6 +74,5 @@ public class DataSetVariables {
 		
 		return finalGameState;
 	}
-	
 	
 }

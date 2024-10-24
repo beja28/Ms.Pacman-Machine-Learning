@@ -51,21 +51,21 @@
 | pacmanLastMoveMade          | Último movimiento realizado por Pacman.                                     |
 | ghost1NodeIndex             | Índice del nodo actual del primer fantasma.                                 |
 | ghost1EdibleTime            | Tiempo restante en el que el primer fantasma es comestible.                 |
-| ghost1LairTime              | Tiempo que el primer fantasma debe pasar en su guarida antes de salir.       |
+| ghost1LairTime              | Tiempo que el primer fantasma debe pasar en la carcel  antes de salir.       |
 | ghost1LastMove              | Último movimiento realizado por el primer fantasma.                         |
 | ghost2NodeIndex             | Índice del nodo actual del segundo fantasma.                                |
 | ghost2EdibleTime            | Tiempo restante en el que el segundo fantasma es comestible.                |
-| ghost2LairTime              | Tiempo que el segundo fantasma debe pasar en su guarida antes de salir.     |
+| ghost2LairTime              | Tiempo que el segundo fantasma debe pasar en la carcel  antes de salir.     |
 | ghost2LastMove              | Último movimiento realizado por el segundo fantasma.                        |
 | ghost3NodeIndex             | Índice del nodo actual del tercer fantasma.                                 |
 | ghost3EdibleTime            | Tiempo restante en el que el tercer fantasma es comestible.                 |
-| ghost3LairTime              | Tiempo que el tercer fantasma debe pasar en su guarida antes de salir.      |
+| ghost3LairTime              | Tiempo que el tercer fantasma debe pasar en la carcel  antes de salir.      |
 | ghost3LastMove              | Último movimiento realizado por el tercer fantasma.                         |
 | ghost4NodeIndex             | Índice del nodo actual del cuarto fantasma.                                 |
 | ghost4EdibleTime            | Tiempo restante en el que el cuarto fantasma es comestible.                 |
-| ghost4LairTime              | Tiempo que el cuarto fantasma debe pasar en su guarida antes de salir.      |
+| ghost4LairTime              | Tiempo que el cuarto fantasma debe pasar en la carcel antes de salir.      |
 | ghost4LastMove              | Último movimiento realizado por el cuarto fantasma.                         |
-| timeOfLastGlobalReversal    | Tiempo en el que ocurrió la última inversión global de direcciones.         |
+| timeOfLastGlobalReversal    | Tiempo en el que ocurrió la última inversión global.         |
 | pacmanWasEaten              | Indica si Pacman fue comido (booleano).                                     |
 | ghost1Eaten                 | Indica si el primer fantasma fue comido (booleano).                         |
 | ghost2Eaten                 | Indica si el segundo fantasma fue comido (booleano).                        |
@@ -78,7 +78,7 @@
 | ghost2Distance              | Distancia al segundo fantasma desde Pacman.                                 |
 | ghost3Distance              | Distancia al tercer fantasma desde Pacman.                                  |
 | ghost4Distance              | Distancia al cuarto fantasma desde Pacman.                                  |
-| euclideanDistanceToPp       | Distancia euclidiana a la Power Pill más cercana.                           |
-| pathDistanceToPp            | Distancia calculada en el camino a la Power Pill más cercana.               |
+| euclideanDistanceToPp       | Distancia "euclidea" de Pacman, a la Power Pill más cercana.                           |
+| pathDistanceToPp            | Distancia del "path", de Pacman a la Power Pill más cercana.               |
 | remainingPp                 | Número de Power Pills restantes en el juego.                                |
 
