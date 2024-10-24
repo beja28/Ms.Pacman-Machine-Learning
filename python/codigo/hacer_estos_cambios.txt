@@ -1,0 +1,5 @@
+
+- Crear un archivo .py para LAS REDES NEURONALES
+- Crear un archivo .py para PREPROCESAR LOS DATOS
+
+Crear un archivo .py main para llamar a la funciones de preprocesar y de redes neuronales
