@@ -1,4 +1,4 @@
-## MEMORIA
+Move## MEMORIA
 
 
 He leido el CSV con pandas
@@ -20,7 +20,7 @@ A la hora de preprocesar los datos, las variables booleanas las he procesado pon
 
 Despues convierto el dataset ya codificado en un tensor.
 
-Tengo que separar mis variables en Caracteristicas y Etiquetas. Como las etiquetas son lo que va a predecir y aprender el modelo, voy a poner la variable pacmanWasEaten, ya que es lo que me interesa saber al final,
+Tengo que separar mis variables en Caracteristicas y Etiquetas. Como las etiquetas son lo que va a predecir y aprender el modelo, voy a poner la variable nextMove, ya que es lo que me interesa saber al final,
 	el resto de variables las usare para hacer las predicciones.
 
 Preguntar si es interesante ir añadioendo todos los estudios de que funcion de perdida, activacion, optimizacion es mejor, e ir comparando resultados con graficas.
