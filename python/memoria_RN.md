@@ -37,3 +37,7 @@ Ajustado el modelo simple de pytorch con batches y siguiendo la estructura de la
 Despues de eso entrene este modelo.
 
 Tengo que mirar las diferencias que hay entre los datos de entrenamiento y los datos de cross validation (cv)
+
+He creado dos funciones para guardar los resultados de entrenamiento con la fecha de este
+
+Organización del codigo en modulos (main, models, preprocessing)
