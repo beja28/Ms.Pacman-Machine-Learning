@@ -1,5 +1,5 @@
 import pacman.Executor;
-import pacman.ExecutorGenerateDataSet;
+import pacman.ExecutorSocketConection;
 import pacman.controllers.GhostController;
 import pacman.controllers.HumanController;
 import pacman.controllers.KeyBoardInput;
@@ -35,7 +35,7 @@ es.ucm.fdi.ici.c2223.practica2.grupo02.Ghosts (3704)
 public class ExecutorTest {
 
     public static void main(String[] args) {
-    	ExecutorGenerateDataSet executor = new ExecutorGenerateDataSet.Builder()
+    	ExecutorSocketConection executor = new ExecutorSocketConection.Builder()
                 .setTickLimit(4000)
                 .setVisual(true)
                 .setScaleFactor(2.5)

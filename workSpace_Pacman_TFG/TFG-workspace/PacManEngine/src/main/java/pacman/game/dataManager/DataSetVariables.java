@@ -1,4 +1,4 @@
-package pacman.game.dataSet;
+package pacman.game.dataManager;
 
 import java.util.ArrayList;
 import java.util.Arrays;
