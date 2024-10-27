@@ -30,8 +30,17 @@ import pacman.game.GameView;
 import pacman.game.comms.BasicMessenger;
 import pacman.game.comms.Messenger;
 import pacman.game.dataManager.DataSetRecorder;
+import pacman.game.dataManager.GameStateFilter;
 import pacman.game.internal.POType;
 import pacman.game.util.Stats;
+
+// Socket
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.Socket;
 
 /**
  * This class may be used to execute the game in timed or un-timed modes, with
@@ -41,7 +50,7 @@ import pacman.game.util.Stats;
  * (although you may create sub-packages in these packages).
  */
 @SuppressWarnings("unused")
-public class ExecutorGenerateDataSet {
+public class ExecutorSocketConection {
 	private final boolean pacmanPO;
 	private final boolean ghostPO;
 	private final boolean ghostsMessage;
@@ -144,10 +153,10 @@ public class ExecutorGenerateDataSet {
 			return this;
 		}
 
-		public ExecutorGenerateDataSet build() {
+		public ExecutorSocketConection build() {
 			System.err.println("MsPacMan Engine - Ingeniería de Comportamientos Inteligentes. Version "
-					+ ExecutorGenerateDataSet.VERSION);
-			return new ExecutorGenerateDataSet(pacmanPO, ghostPO, ghostsMessage, messenger, scaleFactor, setDaemon,
+					+ ExecutorSocketConection.VERSION);
+			return new ExecutorSocketConection(pacmanPO, ghostPO, ghostsMessage, messenger, scaleFactor, setDaemon,
 					visuals, tickLimit, timeLimit, poType, sightLimit, peek, pacmanPOvisual, ghostsPOvisual);
 		}
 
@@ -162,7 +171,7 @@ public class ExecutorGenerateDataSet {
 		}
 	}
 
-	private ExecutorGenerateDataSet(boolean pacmanPO, boolean ghostPO, boolean ghostsMessage, Messenger messenger,
+	private ExecutorSocketConection(boolean pacmanPO, boolean ghostPO, boolean ghostsMessage, Messenger messenger,
 			double scaleFactor, boolean setDaemon, boolean visuals, int tickLimit, int timeLimit, POType poType,
 			int sightLimit, Function<Game, String> peek, boolean pacmanPOvisual, boolean ghostsPOvisual) {
 		this.pacmanPO = pacmanPO;
@@ -327,8 +336,27 @@ public class ExecutorGenerateDataSet {
 	public int runGame(Controller<MOVE> pacManController, GhostController ghostController, int delay) {
 		Game game = setupGame();
 
-		// Instancia de la clase que recopila los datos
-		DataSetRecorder dataRecorder = new DataSetRecorder(game);
+		// CAMBIAR LUEGO
+		
+		GameStateFilter gameFilter = new GameStateFilter(game);
+		
+		
+		// Instancia de la clase que maneja el socket
+		
+		String host = "localhost";
+	    int port = 12345;
+	    Socket socket;
+	    PrintWriter out;
+	    BufferedReader in;
+	    try {
+	        socket = new Socket(host, port);
+	        out = new PrintWriter(socket.getOutputStream(), true);
+	        in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+	    } catch (Exception e) {
+	        System.out.println("Error al conectar con el servidor: " + e.getMessage());
+	        return -1; // Termina si no se puede conectar
+	    }
+		
 		
 		precompute(pacManController, ghostController);
 
@@ -340,15 +368,47 @@ public class ExecutorGenerateDataSet {
 			if (tickLimit != -1 && tickLimit < game.getTotalTime()) {
 				break;
 			}
-			handlePeek(game);			
+			handlePeek(game);		
 			
+			
+			MOVE pacmanMove = MOVE.NEUTRAL;
+			
+			
+			// Solo pide calcular el movimineto de Pacman, cuando pasa por una interseccion
+			if(game.isJunction(game.getPacmanCurrentNodeIndex())) {
+				
+				// Obtener gamaState filtrado
+				String filteredGameState = gameFilter.getActualGameState();
+				
+				
+				try {
+					// Pasar gameState filtrado por el socket				
+					out.println(filteredGameState);
+
+					// Obtener respuesta del socket con el movimiento
+					String respuesta = in.readLine();
+					
+					System.out.println(respuesta);
+					
+					pacmanMove = MOVE.valueOf(respuesta);
+					
+				} catch (Exception e) {
+		            System.out.println("Error durante la comunicación con el servidor: " + e.getMessage());
+		            break; // Finaliza el bucle si ocurre un error de comunicación
+		        }
+			}
+			
+			
+			
+							
+			// Pacman ejecuta ese movimiento
+			/*
 			game.advanceGame(pacManController.getMove(getPacmanCopy(game), System.currentTimeMillis() + timeLimit),
 					ghostControllerCopy.getMove(getGhostsCopy(game), System.currentTimeMillis() + timeLimit));
+			*/
 			
-			MOVE pacmanMove = pacManController.getMove(getPacmanCopy(game), System.currentTimeMillis() + timeLimit);
-
-			// RECOPILAR EL ESTADO DEL JUEGO
-			dataRecorder.collectGameState(pacmanMove);
+			game.advanceGame(pacmanMove,
+					ghostControllerCopy.getMove(getGhostsCopy(game), System.currentTimeMillis() + timeLimit));
 			
 			try {
 				Thread.sleep(delay);
@@ -361,17 +421,11 @@ public class ExecutorGenerateDataSet {
 		}
 		System.out.println(game.getScore());
 
-		// Guardo los datos
-		try {
-			dataRecorder.saveDataToCsv("gameData_PRUEBAS", true);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
 		postcompute(pacManController, ghostController);
 
 		return game.getScore();
 	}
+	
 
 	/**
 	 * Run a game in asynchronous mode: the game waits until a move is returned. In
@@ -881,9 +935,9 @@ public class ExecutorGenerateDataSet {
 	}
 
 	public static void logError(String msg, Exception e) {
-		if (ExecutorGenerateDataSet.ERROR_LOG_LEVEL < 0)
+		if (ExecutorSocketConection.ERROR_LOG_LEVEL < 0)
 			System.err.println(msg);
-		if (ExecutorGenerateDataSet.ERROR_LOG_LEVEL < 1)
+		if (ExecutorSocketConection.ERROR_LOG_LEVEL < 1)
 			e.printStackTrace(System.err);
 
 	}

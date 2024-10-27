@@ -1,5 +1,4 @@
 import pacman.Executor;
-import pacman.ExecutorGenerateDataSet;
 import pacman.ExecutorSocketConection;
 import pacman.controllers.GhostController;
 import pacman.controllers.HumanController;
@@ -33,25 +32,23 @@ es.ucm.fdi.ici.c2223.practica2.grupo02.Ghosts (3704)
 
 
 
-public class ExecutorTestDataSet {
+public class ExecutorTestSocketConection {
 
     public static void main(String[] args) {
-    	ExecutorGenerateDataSet executor = new ExecutorGenerateDataSet.Builder()
+    	ExecutorSocketConection executor = new ExecutorSocketConection.Builder()
                 .setTickLimit(4000)
-                .setVisual(false)
+                .setVisual(true)
                 .setScaleFactor(2.5)
                 .build();
 
     	
-    	for(int i = 0; i < 1; i++) {
-    		//PacmanController pacMan = new HumanController(new KeyBoardInput());
-            PacmanController pacMan = new es.ucm.fdi.ici.c2223.practica1.grupo06.MsPacMan();
-            GhostController ghosts = new es.ucm.fdi.ici.c2324.practica1.grupo08.Ghosts();
-            
-            System.out.println( 
-                executor.runGame(pacMan, ghosts, 0) //last parameter defines speed
-            ); 
-    	}            
+    	//PacmanController pacMan = new HumanController(new KeyBoardInput());
+        PacmanController pacMan = new es.ucm.fdi.ici.c2223.practica1.grupo06.MsPacMan();
+        GhostController ghosts = new es.ucm.fdi.ici.c2324.practica1.grupo08.Ghosts();
+        
+        System.out.println( 
+            executor.runGame(pacMan, ghosts, 40) //last parameter defines speed
+        );             
     }
 	
 }

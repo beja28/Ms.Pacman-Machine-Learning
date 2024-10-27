@@ -1,12 +1,12 @@
 ## FALTA DE HACER (por prioridad)
 
 
-##### CREAR una nueva clase "ExecutorConectionNN" que se encarga de conectarse através de un socket con python
-- Las clases que se necesiten crear para el socket, se tienen crear en la **carpeta "socket"** del game
-- Se pasa un estado del juego modificado, atraves del socket
-- Se procesa y se calcula el resultado con una red Neuronal
-- Se recibe através del socket el movimiento que debe realizar Pacman
-- Pacman ejecuta ese movimiento
+##### SOCKET
+- Completar el codigo de la clase **"socketConection"** que inicializa el socket, y tendrá una funcion para mandar mensajes por el socket, y para recibir
+- El manejo de **excepciones** con try-cath tmb habrá que hacerlo dentro de esa clase
+- Buscar una forma de separar las clases que filtran el estado del juego
+ 	- En clases que se usan para crear el DataSet
+	- En clases que se usan para filtrar un estado del juego
 
 
 
@@ -15,7 +15,7 @@
 ##### Cosas de menor importancia
 
 - Modificar la clase de *"ExecutorGenerateDataSet"* para que reciba el numero de ejecuciones que se quiere hacer y el nombre del archivo .csv
-- Quitar las funcion de runGame que no se usan en la clase de *"ExecutorGenerateDataSet"*
+- Quitar las funcion de runGame que no se usan en la clase de *"ExecutorGenerateDataSet"* y "*ExecutorScoketConection*"
 - Conseguir que cada vez que se genera un DataSet se guarde informacion relaccionada
 	- Si es la primera vez que se crea el DataSet, se debe crear un archivo .txt y añadir la informacion 
 	- Si ya hay un DataSet creado y se modifica (se añaden nuevas filas) --> Se debe añadir al .txt relaccionado con ese dataSet una nueva fila con la fecha de la modificacion y las nuevas filas que se han añadido, y el pacman y lso fantasmas usado

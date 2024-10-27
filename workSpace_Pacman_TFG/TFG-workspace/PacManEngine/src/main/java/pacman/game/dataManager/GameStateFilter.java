@@ -1,56 +1,40 @@
-package pacman.game.dataSet;
+package pacman.game.dataManager;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 
-import pacman.game.Constants.GHOST;
-import pacman.game.Constants.MOVE;
 import pacman.game.Game;
+import pacman.game.Constants.GHOST;
 
+public class GameStateFilter {
 
-public class DataSetRecorder {
-    
-    private List<String> validGameStates;
-    private List<Integer> previousScores;
-    
-    private final Game game;
-
-    public DataSetRecorder(Game game) {
-        this.validGameStates = new ArrayList<>();
-        this.previousScores =new ArrayList<>();
-        this.game = game;
-    }
-
-    
-    /*
-     * 	Guarda un estado del juego, si Pacman se encuentra en un posicion, procesa los datos
-     * 	elimando caracteristicas que no son utiles y agreagando/calculando nuevas caracteristicas
-     * */
-    public void collectGameState(MOVE pacmanMove) {
-    	    	
-    	//Si Pacman se encuentra en una INTERSECCION...
-    	if(game.isJunction(game.getPacmanCurrentNodeIndex())) {
-    		
-    		//Se recoge el estado del juego y se eliminan las caracteristicas que no queremos
-        	List<String> filteredState = filterGameState(game.getGameState());
-        	
-        	//Se añade la etiqueta (la posicion de Pacman) 
-        	filteredState.add(0, pacmanMove.toString());
-        	
-        	//Se calculan las nuevas variables que queremos, y se añaden
-        	String finalState = addNewVariablesToFilteredState(filteredState);    		
-    		
-    		validGameStates.add(finalState);
-    	}
+	private Game game;
+	private List<Integer> previousScores;
+	
+	
+	public GameStateFilter(Game game) {
+		this.game = game;
+		this.previousScores = new ArrayList<>();
+	}
+		
+	
+	public void addPreviousScore(Integer score) {
+		this.previousScores.add(score);
+	}
+	
+	
+	//Obtiene el estado actual del juego filtrado
+    public String getActualGameState() {
     	
-    	previousScores.add(game.getScore());
+    	//Se recoge el estado del juego y se eliminan las caracteristicas que no queremos
+    	List<String> filteredState = filterGameState(game.getGameState());
+    	
+      	//Se calculan las nuevas variables que queremos, y se añaden
+    	String finalState = addNewVariablesToFilteredState(filteredState);
+    	
+    	return finalState;
     }
+    
 
     
     //Filtra un string con el estado del juego, quita las variables que no queremos y devuelve una lista con las restantes
@@ -82,7 +66,7 @@ public class DataSetRecorder {
     
         
     // Calcula la diferencia de puntuacion en estados anteriores
-    public int calculateScoreDifference(int currentScore, List<Integer> previousScores, int ticks) {
+    public int calculateScoreDifference(int currentScore, int ticks) {
     	
         if (previousScores.size() >= ticks) {
             return currentScore - previousScores.get(previousScores.size() - ticks);
@@ -168,9 +152,9 @@ public class DataSetRecorder {
     // Añade nuevas variables al estado del juego
     public String addNewVariablesToFilteredState(List<String> gameState) {
     	//3 variables adicionales con las puntuaciones obtenidas en los 10, 25 y 50 anteriores ticks de ejecucion
-    	int scoreDiff10 = calculateScoreDifference(game.getScore(), previousScores, 10);
-        int scoreDiff25 = calculateScoreDifference(game.getScore(), previousScores, 25);
-        int scoreDiff50 = calculateScoreDifference(game.getScore(), previousScores, 50);
+    	int scoreDiff10 = calculateScoreDifference(game.getScore(), 10);
+        int scoreDiff25 = calculateScoreDifference(game.getScore(), 25);
+        int scoreDiff50 = calculateScoreDifference(game.getScore(), 50);
         gameState.add(scoreDiff10 + "");
     	gameState.add(scoreDiff25 + "");
     	gameState.add(scoreDiff50 + "");    	
@@ -193,47 +177,6 @@ public class DataSetRecorder {
 
         return String.join(",", gameState);
     }
-    
-        
-    /*
-     * Funcion que añade los datos de los estados del juego calculados a un archivo .csv
-     * 		- Si el archivo ya existe se añaden los estados
-     * 		- Si el archivo no existe, se crea y se añaden las cabeceras de las columnas, y se añaden los estados 
-     * */
-    public void saveDataToCsv(String fileName, boolean show_header) throws IOException {
-    	List<String> fileContent = new ArrayList<>();
-
-        //Nombre de la carpeta donde queremos guardar los dataSets
-        String folderName = "new_dataSets"; 
-
-        //Crear ruta
-        Path folderPath = Paths.get(folderName);
-
-        //Si no existe la carpeta se crea
-        if (!Files.exists(folderPath)) {
-            try {
-                Files.createDirectories(folderPath);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        // Ruta completa del csv (carpeta + nombre))
-        Path filePath = folderPath.resolve(fileName + ".csv");
-
-        // Se comprueba si hay un archivo existente con ese nombre
-        boolean fileExists = Files.exists(filePath);
-
-        // Si no existe, se crea y se añade el encabezado
-        if (!fileExists && show_header) {
-            fileContent.add(String.join(",", DataSetVariables.getFinalGameState()));
-        }
-
-        // Se añaden los estados calculados
-        fileContent.addAll(validGameStates);
-
-        // Se uardan los datos en el archivo .csv en modo APPEND (añadir al final)
-        Files.write(filePath, fileContent, StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
-    }
-    
+	
+	
 }
