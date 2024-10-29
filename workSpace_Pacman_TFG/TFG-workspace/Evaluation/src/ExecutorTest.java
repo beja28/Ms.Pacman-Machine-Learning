@@ -1,5 +1,4 @@
-import pacman.Executor;
-import pacman.ExecutorSocketConection;
+import pacman.ExecutorModes;
 import pacman.controllers.GhostController;
 import pacman.controllers.HumanController;
 import pacman.controllers.KeyBoardInput;
@@ -35,7 +34,7 @@ es.ucm.fdi.ici.c2223.practica2.grupo02.Ghosts (3704)
 public class ExecutorTest {
 
     public static void main(String[] args) {
-    	ExecutorSocketConection executor = new ExecutorSocketConection.Builder()
+    	ExecutorModes executor = new ExecutorModes.Builder()
                 .setTickLimit(4000)
                 .setVisual(true)
                 .setScaleFactor(2.5)
@@ -46,7 +45,7 @@ public class ExecutorTest {
         GhostController ghosts = new es.ucm.fdi.ici.c2324.practica1.grupo08.Ghosts();
         
         System.out.println( 
-            executor.runGame(pacMan, ghosts, 1) //last parameter defines speed
+            executor.runGame(pacMan, ghosts, 30) //last parameter defines speed
         );     
     }
 	

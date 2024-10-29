@@ -10,7 +10,7 @@ import java.net.Socket;
 import pacman.controllers.GhostController;
 import pacman.controllers.PacmanController;
 
-public class socketPrueba {
+public class socketPython {
 
     
     
