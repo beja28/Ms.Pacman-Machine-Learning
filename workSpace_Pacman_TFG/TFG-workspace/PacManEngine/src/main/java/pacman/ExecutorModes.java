@@ -252,10 +252,18 @@ public class ExecutorModes {
 	
 	
 
-	public void runGameGenerateDataSet(Controller<MOVE> pacManController, GhostController ghostController, int iter, String fileName) {
+	public void runGameGenerateDataSet(Controller<MOVE> pacManController, GhostController ghostController, int iter, String fileName, boolean DEBUG) {
 		
 		int delay = 0;	//El delay entre las ejecuciones es 0, porque queremos que se ejecute lo mas rapido posible
 		
+		long inicio = 0;
+		long lineasIniciales = 0;
+		
+		if(DEBUG) {
+			inicio = System.nanoTime();
+			lineasIniciales = DataSetRecorder.contarLineas(fileName);
+		}
+				
 		for(int i = 0;i<iter;i++) {
 			
 			Game game = setupGame();
@@ -297,16 +305,41 @@ public class ExecutorModes {
 					gv.repaint();
 				}
 			}
-			System.out.println(game.getScore());
+			
 
 			// Guardo los datos
 			try {
 				dataRecorder.saveDataToCsv(fileName, true);
+				
+				if(DEBUG) {
+					System.out.println(i + ". Estados correctamente guardados en: " + fileName + ".csv con score: " + game.getScore());
+				}
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 
 			postcompute(pacManController, ghostController);
+		}
+		
+		if(DEBUG) {
+			
+			long fin = System.nanoTime();  // Tiempo final
+	        long duracion = fin - inicio;  // Duracion en ns
+
+	        // Convertir nanosegundos a segundos
+	        long segundosTotales = duracion / 1_000_000_000;
+	        long horas = segundosTotales / 3600;
+	        long minutos = (segundosTotales % 3600) / 60;
+	        long segundos = segundosTotales % 60;
+	        
+	        
+	        
+	        long lineasFinales = DataSetRecorder.contarLineas(fileName);
+	        long lineasCreadas = lineasFinales - lineasIniciales;
+
+	        System.out.println("\n\n[DEBUG] Información de ejecución:\n");
+	        System.out.printf("\tTiempo total: %d horas, %d minutos, %d segundos%n", horas, minutos, segundos);
+	        System.out.println("\tLineas iniciales: " + lineasIniciales + ", Lineas creadas: " + lineasCreadas + ", Lineas finales: " + lineasFinales);
 		}
 	}
 	
@@ -409,12 +442,12 @@ public class ExecutorModes {
 	private void precompute(Controller<MOVE> pacManController, GhostController ghostController) {
 		String ghostName = ghostController.getClass().getCanonicalName();
 		String pacManName = pacManController.getClass().getCanonicalName();
-		System.out.print("Precompute " + ghostName);
+		//System.out.print("Precompute " + ghostName);
 		pacManController.preCompute(ghostName);
-		System.out.println(" ...done");
-		System.out.print("Precompute " + pacManName);
+		//System.out.println(" ...done");
+		//System.out.print("Precompute " + pacManName);
 		ghostController.preCompute(pacManName);
-		System.out.println(" ...done");
+		//System.out.println(" ...done");
 
 	}
 

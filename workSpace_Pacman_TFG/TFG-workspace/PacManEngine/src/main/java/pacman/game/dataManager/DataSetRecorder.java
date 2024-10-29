@@ -1,5 +1,8 @@
 package pacman.game.dataManager;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -89,6 +92,47 @@ public class DataSetRecorder {
 
         // Se uardan los datos en el archivo .csv en modo APPEND (añadir al final)
         Files.write(filePath, fileContent, StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+    }
+    
+    
+    
+    // Para contar cuentas lineas tiene un .csv
+    public static int contarLineas(String fileName) {
+    	
+    	String folderName = "new_dataSets";
+        Path folderPath = Paths.get(folderName);
+
+        // Sino existe la carpeta se crea
+        if (!Files.exists(folderPath)) {
+            try {
+                Files.createDirectories(folderPath);
+            } catch (IOException e) {
+                e.printStackTrace();
+                return 0;
+            }
+        }
+
+        // Ruta completa del archivo
+        Path filePath = folderPath.resolve(fileName + ".csv");
+        File archivo = filePath.toFile();
+
+        // Se verifica si el archivo existe
+        if (!archivo.exists()) {
+            return 0;	//Si no existe, tiene 0 lineas
+        }
+
+        int lineas = 0;
+
+        try (BufferedReader br = new BufferedReader(new FileReader(archivo))) {
+            while (br.readLine() != null) {
+                lineas++;
+            }
+        } catch (IOException e) {
+            System.out.println("Error al leer el archivo: " + e.getMessage());
+            return 0;
+        }
+
+        return lineas;
     }
     
 }

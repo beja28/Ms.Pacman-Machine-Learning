@@ -9,4 +9,5 @@
 - He creado una **nueva carpeta dentro del "*game*" llamada "*socket*"** que contiene una clase llamada ***"socketPython"***, que se encarga de establecer la conexión con un puerto del sistema. Cuenta con funciones para **mandar y recibir información** através del socket
 - He creado una **nueva clase "*ExecutorModes*"** similar a la clase existente de "*Executor*" que contiene las funciones necesarias para ejecutar:
 	- Modo de **creación del DataSet *"runGameGenerateDataSet":*** se encarga de guardar los estados **filtrados** de las distintas ejecuciones del juego en un archivo .csv
+	Además, recibe el *numero de ejecuciones* que se desea realizar, el *nombre del arhivo* donde se quieren guardar los datos, y si se quiere *mostrar información durante la ejecución*
 	- Modo de **conexión con Python a través del socket *"runGameSocketConection:"*** se encarga de **establecer la conexión através del socket con python**. Además envía la información de los estados del juego através del socket y **recibe el movimiento que debe realizar Pacman**
