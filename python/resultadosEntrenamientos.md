@@ -17,3 +17,11 @@
 
 <br>
 <br>
+
+❖	2do entrenamiento con Pytorch (modelo simple) - 30/10/24 (19:20 - 20:15)
+  
+![Codigo](images/02_entrenamiento_PYTORCH_codigo_30_10_24)
+![Resultado](images/02_entrenamiento_PYTORCH_resultado_30_10_24.png)
+
+<br>
+<br>

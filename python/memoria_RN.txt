@@ -29,3 +29,11 @@ Ajustado el modelo simple de pytorch con batches y siguiendo la estructura de la
 Despues de eso entrene este modelo.
 
 Tengo que mirar las diferencias que hay entre los datos de entrenamiento y los datos de cross validation (cv)
+
+--------------
+
+Preproceso una sola linea del estado del juego que me llega por el socket desde java, para ello, primero cargo esta lista de strings y le asigno a 
+	cada variable su tipo.
+Trato de codificar las variables categoricas como haciamos en el csv. (Me esta fallando)
+
+Separo la clase models en dos, una para cada modelo.
