@@ -1,6 +1,5 @@
 from preprocessing import preprocess_csv
-#from model_pytorch import train_pytorch_nn, save_model_pth
-#from model_sklearn import cross_validate_sklearn_mlp, save_model_mlp
+from models import train_pytorch_nn, save_model_pth, cross_validate_sklearn_mlp, save_model_mlp
 import torch
 import os
 from sklearn.model_selection import train_test_split
@@ -58,10 +57,11 @@ train_loader = DataLoader(train_dataset, batch_size=100, shuffle=True)
 
 # --- ENTRENAMIENTO DE REDES NEURONALES ---
 
-# # Entrenar el modelo con PyTorch
-#pytorch_model = train_pytorch_nn(X_cv_tensor, Y_cv_tensor, train_loader, n_features, n_classes)
-#save_model_pth(pytorch_model, path_trained)
+# Entrenar el modelo con PyTorch
+pytorch_model = train_pytorch_nn(X_train_tensor, Y_train_tensor, X_cv_tensor, Y_cv_tensor, n_features, n_classes, train_loader)
+save_model_pth(pytorch_model, path_trained)
 
-# # Entrenar con MLP de Scikit-learn
-# mlp_model = cross_validate_sklearn_mlp(X, Y)
-# save_model_mlp(mlp_model, path_trained)
+# Entrenar con MLP de Scikit-learn
+mlp_model = cross_validate_sklearn_mlp(X, Y)
+save_model_mlp(mlp_model, path_trained)
+
