@@ -10,7 +10,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import pacman.game.Constants.GHOST;
 import pacman.game.Constants.MOVE;
@@ -20,7 +22,8 @@ import pacman.game.Game;
 public class DataSetRecorder {
     
     private List<String> validGameStates;
-    private GameStateFilter gameStateFilter;;
+    private GameStateFilter gameStateFilter;
+    private Set<Integer> junctionNodes;
     
     private final Game game;
 
@@ -28,13 +31,15 @@ public class DataSetRecorder {
         this.validGameStates = new ArrayList<>();
         this.gameStateFilter = new GameStateFilter(game);
         this.game = game;
+        this.junctionNodes = new HashSet<>();
+        loadJunctionIndices();
     }
     
     
     public void collectGameState(MOVE pacmanMove) {
     	
     	//Si Pacman se encuentra en una INTERSECCION...
-    	if(game.isJunction(game.getPacmanCurrentNodeIndex())) {
+    	if(junctionNodes.contains(game.getPacmanCurrentNodeIndex())) {
     		
     		//Se recoge el estado del juego y se eliminan las caracteristicas que no queremos
         	List<String> filteredState = gameStateFilter.filterGameState(game.getGameState());
@@ -96,7 +101,16 @@ public class DataSetRecorder {
     
     
     
-    // Para contar cuentas lineas tiene un .csv
+    
+    public void loadJunctionIndices() {
+        int[] nodos = game.getJunctionIndices();
+        for (int node : nodos) {
+        	junctionNodes.add(node);
+        }
+    }
+    
+    
+ 
     public static int contarLineas(String fileName) {
     	
     	String folderName = "new_dataSets";
