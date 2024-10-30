@@ -151,8 +151,7 @@ public class ExecutorModes {
 		}
 
 		public ExecutorModes build() {
-			System.err.println("MsPacMan Engine - Ingeniería de Comportamientos Inteligentes. Version "
-					+ ExecutorModes.VERSION);
+			System.err.println("TFG - Pacman-Machine-Learning");
 			return new ExecutorModes(pacmanPO, ghostPO, ghostsMessage, messenger, scaleFactor, setDaemon,
 					visuals, tickLimit, timeLimit, poType, sightLimit, peek, pacmanPOvisual, ghostsPOvisual);
 		}
@@ -206,7 +205,7 @@ public class ExecutorModes {
 
 	
 	
-	public int runGame(Controller<MOVE> pacManController, GhostController ghostController, int delay) {
+	public void runGame(Controller<MOVE> pacManController, GhostController ghostController, int delay, boolean showJunctions) {
         Game game = setupGame();
 
         precompute(pacManController, ghostController);
@@ -215,12 +214,8 @@ public class ExecutorModes {
 
         GhostController ghostControllerCopy = ghostController.copy(ghostPO);
         
-        
-        // Lista con las distintas posiciones de los estados guardados en el DataSet
-        List<Integer> intersecciones = Arrays.asList(151, 153, 163, 165, 177, 188, 189, 201, 213, 225, 237, 308, 348, 361, 386, 399, 430, 456, 475, 480, 516, 540, 561, 598, 599, 628, 640, 691, 716, 728, 753, 810, 820, 832, 834, 859, 883, 936, 948, 960, 972, 984, 996, 1008, 1020, 1211, 1223, 1259, 1271);
-        
-        // Convertir la lista a un array de enteros
-        int[] nodeIndices = intersecciones.stream().mapToInt(Integer::intValue).toArray();
+        //System.out.println(Arrays.toString(game.getJunctionIndices()));
+        //System.out.println(game.getJunctionIndices().length);
 
         while (!game.gameOver()) {
             if (tickLimit != -1 && tickLimit < game.getTotalTime()) {
@@ -231,8 +226,9 @@ public class ExecutorModes {
                     pacManController.getMove(getPacmanCopy(game), System.currentTimeMillis() + timeLimit),
                     ghostControllerCopy.getMove(getGhostsCopy(game), System.currentTimeMillis() + timeLimit));
             
-            // Llamar a la función con el array
-	        GameView.addPoints(game, Color.RED, nodeIndices);
+            
+            if(showJunctions) GameView.addPoints(game, Color.RED, game.getJunctionIndices());
+	        
 
             try {
                 Thread.sleep(delay);
@@ -246,8 +242,6 @@ public class ExecutorModes {
         System.out.println(game.getScore());
         
         postcompute(pacManController, ghostController);
-        
-        return game.getScore();
     }
 	
 	
@@ -256,13 +250,8 @@ public class ExecutorModes {
 		
 		int delay = 0;	//El delay entre las ejecuciones es 0, porque queremos que se ejecute lo mas rapido posible
 		
-		long inicio = 0;
-		long lineasIniciales = 0;
-		
-		if(DEBUG) {
-			inicio = System.nanoTime();
-			lineasIniciales = DataSetRecorder.contarLineas(fileName);
-		}
+		long inicio = System.nanoTime();
+		long lineasIniciales = DataSetRecorder.contarLineas(fileName);
 				
 		for(int i = 0;i<iter;i++) {
 			
@@ -312,7 +301,7 @@ public class ExecutorModes {
 				dataRecorder.saveDataToCsv(fileName, true);
 				
 				if(DEBUG) {
-					System.out.println(i + ". Estados correctamente guardados en: " + fileName + ".csv con score: " + game.getScore());
+					System.out.println("[DEBUG] " + i + ". Estados correctamente guardados en: " + fileName + ".csv con score: " + game.getScore());
 				}
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -321,26 +310,23 @@ public class ExecutorModes {
 			postcompute(pacManController, ghostController);
 		}
 		
-		if(DEBUG) {
-			
-			long fin = System.nanoTime();  // Tiempo final
-	        long duracion = fin - inicio;  // Duracion en ns
+		long fin = System.nanoTime();  // Tiempo final
+        long duracion = fin - inicio;  // Duracion en ns
 
-	        // Convertir nanosegundos a segundos
-	        long segundosTotales = duracion / 1_000_000_000;
-	        long horas = segundosTotales / 3600;
-	        long minutos = (segundosTotales % 3600) / 60;
-	        long segundos = segundosTotales % 60;
-	        
-	        
-	        
-	        long lineasFinales = DataSetRecorder.contarLineas(fileName);
-	        long lineasCreadas = lineasFinales - lineasIniciales;
+        // Convertir nanosegundos a segundos
+        long segundosTotales = duracion / 1_000_000_000;
+        long horas = segundosTotales / 3600;
+        long minutos = (segundosTotales % 3600) / 60;
+        long segundos = segundosTotales % 60;
+        
+        
+        
+        long lineasFinales = DataSetRecorder.contarLineas(fileName);
+        long lineasCreadas = lineasFinales - lineasIniciales;
 
-	        System.out.println("\n\n[DEBUG] Información de ejecución:\n");
-	        System.out.printf("\tTiempo total: %d horas, %d minutos, %d segundos%n", horas, minutos, segundos);
-	        System.out.println("\tLineas iniciales: " + lineasIniciales + ", Lineas creadas: " + lineasCreadas + ", Lineas finales: " + lineasFinales);
-		}
+        System.out.println("\n\n[INFO] Información de ejecución:\n");
+        System.out.printf("\tTiempo total: %d horas, %d minutos, %d segundos%n", horas, minutos, segundos);
+        System.out.println("\tLineas iniciales: " + lineasIniciales + ", Lineas creadas: " + lineasCreadas + ", Lineas finales: " + lineasFinales);
 	}
 	
 	

@@ -13,6 +13,7 @@
 
 - Calcular variables nuevas
 - Crear una funcion en DataSetRecorder, que seleccione la carpeta donde se quieren guardar los DataSets y otra que reciba el nombre del archivo .csv
+- Mejorar la salida del DEBUG del DataSet, para que muestre día hora, iteraciones, tamaño...
 
 
 

@@ -33,7 +33,7 @@ es.ucm.fdi.ici.c2223.practica2.grupo02.Ghosts (3704)
 
 public class ExecutorTestDataSet {
 	
-	private final static int ITERS = 5;
+	private final static int ITERS = 15000;
 
     public static void main(String[] args) {
     	ExecutorModes executor = new ExecutorModes.Builder()
@@ -48,7 +48,7 @@ public class ExecutorTestDataSet {
         GhostController ghosts = new es.ucm.fdi.ici.c2324.practica1.grupo08.Ghosts();
         
         
-        executor.runGameGenerateDataSet(pacMan, ghosts, ITERS, "gameData_PRUEBASasdasd", true);          
+        executor.runGameGenerateDataSet(pacMan, ghosts, ITERS, "03_gameStatesData", true);          
     }
 	
 }
