@@ -12,6 +12,7 @@
 ##### Cosas de menor importancia
 
 - Calcular variables nuevas
+- Crear una funcion en DataSetRecorder, que seleccione la carpeta donde se quieren guardar los DataSets y otra que reciba el nombre del archivo .csv
 
 
 
