@@ -14,7 +14,7 @@ from config import Config
 directorio_actual = os.path.dirname(os.path.abspath(__file__))
 
 # Construir la ruta que sube dos niveles desde 'codigo' y entra en 'DataSets'
-dataset_path = os.path.join(directorio_actual, '..', '..', 'DataSets', '01_gameStatesData.csv')
+dataset_path = os.path.join(directorio_actual, '..', '..', 'DataSets', '03_gameStatesData.csv')
 
 # Normalizar la ruta para evitar problemas con distintos sistemas operativos
 dataset_path = os.path.normpath(dataset_path)
@@ -41,7 +41,7 @@ path_trained = os.path.normpath(path_trained)
 """
     Cargar modelo PyTorch
 """
-model_filename = 'pytorch_model_2024-10-30.pth'
+model_filename = 'pytorch_model_2024-10-31.pth'
 full_model_path = os.path.join(path_trained, model_filename)
 modelPytorch = MyModelPyTorch(n_features, n_classes)
 
@@ -79,17 +79,21 @@ while True:
     #print(preprocessed_state)
     
     # Convertir el estado preprocesado a tensor
-    input_tensor = torch.tensor(preprocessed_state, dtype=torch.float32).unsqueeze(0)  # Agregar dimensión para batch (modelo espera recibir un batch de un solo ejemplo)
-    
-    print(n_features)
-    
+    input_tensor = torch.tensor(preprocessed_state.values, dtype=torch.float32).unsqueeze(0)
+        
     # Realizar la predicción
     with torch.no_grad():  # No calcular gradientes
         prediccion = modelPytorch(input_tensor)
+    
+    # Seleccionar el índice con el valor máximo para obtener el movimiento predicho
+    predicted_index = torch.argmax(prediccion)
+    
+    moves = ['RIGHT', 'LEFT', 'UP', 'DOWN', 'NEUTRAL']
+    predicted_move = moves[predicted_index]
 
     # Responder con algo diferente según lo recibido
     if mensaje:
-        respuesta = f"{prediccion}\n"  # Agrega un salto de línea al final
+        respuesta = f"{predicted_move}\n"  # Agrega un salto de línea al final
         conn.sendall(respuesta.encode('utf-8'))  # Enviar respuesta codificada en UTF-8
 
 conn.close()

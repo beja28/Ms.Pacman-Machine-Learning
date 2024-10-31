@@ -18,7 +18,7 @@ from torch.utils.data import TensorDataset, DataLoader
 directorio_actual = os.path.dirname(os.path.abspath(__file__))
 
 # Construir la ruta que sube dos niveles desde 'codigo' y entra en 'DataSets'
-dataset_path = os.path.join(directorio_actual, '..', '..', 'DataSets', '01_gameStatesData.csv')
+dataset_path = os.path.join(directorio_actual, '..', '..', 'DataSets', '03_gameStatesData.csv')
 
 # Normalizar la ruta para evitar problemas con distintos sistemas operativos
 dataset_path = os.path.normpath(dataset_path)
@@ -39,6 +39,7 @@ X, Y = preprocess_csv(dataset_path)
 # Configuramos los parámetros de la red
 n_features = X.shape[1]
 n_classes = 5  # 5 posibles movimientos de Pac-Man
+
 
 # Dividimos el conjunto de datos
 X_train, X_, y_train, y_ = train_test_split(X, Y, test_size=0.50, random_state=1)
