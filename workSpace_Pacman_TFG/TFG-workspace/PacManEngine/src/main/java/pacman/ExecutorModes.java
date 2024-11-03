@@ -66,6 +66,10 @@ public class ExecutorModes {
 	private boolean ghostsPOvisual;
 	private static String VERSION = "4.4.0(ICI 24-25 stable version)";
 
+	private Socket socket;
+    private PrintWriter out;
+    private BufferedReader in;
+
 	private static int ERROR_LOG_LEVEL = 2; // 0: no log, 1: error message, 2: error message + stack trace
 
 	public static class Builder {
@@ -328,6 +332,38 @@ public class ExecutorModes {
         System.out.printf("\tTiempo total: %d horas, %d minutos, %d segundos%n", horas, minutos, segundos);
         System.out.println("\tLineas iniciales: " + lineasIniciales + ", Lineas creadas: " + lineasCreadas + ", Lineas finales: " + lineasFinales);
 	}
+
+	private int connectToSocket(String host, int port) {
+        try {
+            socket = new Socket(host, port);
+            out = new PrintWriter(socket.getOutputStream(), true);
+            in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            return 0; // Conexión exitosa
+        } catch (Exception e) {
+            System.out.println("Error al conectar con el servidor: " + e.getMessage());
+            return -1;
+        }
+    }
+
+    private void sendGameState(String gameState) {
+        if (out != null) {
+            out.println(gameState);
+        }
+    }
+
+    private String receivePacmanMove() throws Exception {
+        return in != null ? in.readLine() : null;
+    }
+
+    private void closeSocket() {
+        try {
+            if (socket != null && !socket.isClosed()) {
+                socket.close();
+            }
+        } catch (Exception e) {
+            System.out.println("Error al cerrar el socket: " + e.getMessage());
+        }
+    }
 	
 	
 	
@@ -340,25 +376,12 @@ public class ExecutorModes {
 		
 		// Instancia de la clase que maneja el socket
 		
-		String host = "localhost";
-	    int port = 12345;
-	    Socket socket;
-	    PrintWriter out;
-	    BufferedReader in;
-	    try {
-	        socket = new Socket(host, port);
-	        out = new PrintWriter(socket.getOutputStream(), true);
-	        in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-	    } catch (Exception e) {
-	        System.out.println("Error al conectar con el servidor: " + e.getMessage());
-	        return -1; // Termina si no se puede conectar
-	    }
-		
+		if (connectToSocket("localhost", 12345) == -1) {
+            return -1; 
+        }
 		
 		precompute(pacManController, ghostController);
-
 		GameView gv = (visuals) ? setupGameView(pacManController, game) : null;
-
 		GhostController ghostControllerCopy = ghostController.copy(ghostPO);
 
 		while (!game.gameOver()) {
@@ -367,23 +390,19 @@ public class ExecutorModes {
 			}
 			handlePeek(game);		
 			
-			
 			MOVE pacmanMove = MOVE.NEUTRAL;
-			
 			
 			// Solo pide calcular el movimineto de Pacman, cuando pasa por una interseccion
 			if(game.isJunction(game.getPacmanCurrentNodeIndex())) {
-				
 				// Obtener gamaState filtrado
 				String filteredGameState = gameFilter.getActualGameState();				
 				
 				try {
 					// Pasar gameState filtrado por el socket				
-					out.println(filteredGameState);
+					sendGameState(filteredGameState);
 
 					// Obtener respuesta del socket con el movimiento
-					String respuesta = in.readLine();
-					
+					String respuesta = receivePacmanMove();
 					System.out.println(respuesta);
 					
 					pacmanMove = MOVE.valueOf(respuesta);
