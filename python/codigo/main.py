@@ -18,7 +18,7 @@ from torch.utils.data import TensorDataset, DataLoader
 directorio_actual = os.path.dirname(os.path.abspath(__file__))
 
 # Construir la ruta que sube dos niveles desde 'codigo' y entra en 'DataSets'
-dataset_path = os.path.join(directorio_actual, '..', '..', 'DataSets', '01_gameStatesData.csv')
+dataset_path = os.path.join(directorio_actual, '..', '..', 'DataSets', '03_gameStatesData.csv')
 
 # Normalizar la ruta para evitar problemas con distintos sistemas operativos
 dataset_path = os.path.normpath(dataset_path)
@@ -34,34 +34,41 @@ path_trained = os.path.normpath(path_trained)
 # --- PREPROCESAMIENTO ---
 
 # Preprocesamiento del CSV
-X, Y = preprocess_csv(dataset_path)
+#X, Y = preprocess_csv(dataset_path)
+grouped_df = preprocess_csv(dataset_path)
 
-# Configuramos los parámetros de la red
-n_features = X.shape[1]
-n_classes = 5  # 5 posibles movimientos de Pac-Man
+for key, group in grouped_df:
 
-# Dividimos el conjunto de datos
-X_train, X_, y_train, y_ = train_test_split(X, Y, test_size=0.50, random_state=1)
-X_cv, X_test, y_cv, y_test = train_test_split(X_, y_, test_size=0.20, random_state=1)
+    print('Grupo de la interseccion : ', key)
 
-# Convertir a tensores
-X_train_tensor = torch.tensor(X_train.values, dtype=torch.float32)
-X_cv_tensor = torch.tensor(X_cv.values, dtype=torch.float32)
-Y_train_tensor = torch.tensor(y_train.values, dtype=torch.long)
-Y_cv_tensor = torch.tensor(y_cv.values, dtype=torch.float32)
+    # Variables independientes (X) y dependientes (Y)
+    X = group.drop(columns=['PacmanMove']) 
+    Y = group['PacmanMove']
 
-# Crear DataLoader
-train_dataset = TensorDataset(X_train_tensor, Y_train_tensor)
-train_loader = DataLoader(train_dataset, batch_size=100, shuffle=True)
+    # Configuramos los parámetros de la red
+    n_features = X.shape[1]
+    n_classes = 5  # 5 posibles movimientos de Pac-Man
 
+    # Dividimos el conjunto de datos
+    X_train, X_, y_train, y_ = train_test_split(X, Y, test_size=0.50, random_state=1)
+    X_cv, X_test, y_cv, y_test = train_test_split(X_, y_, test_size=0.20, random_state=1)
 
+    # Convertir a tensores
+    X_train_tensor = torch.tensor(X_train.values, dtype=torch.float32)
+    X_cv_tensor = torch.tensor(X_cv.values, dtype=torch.float32)
+    Y_train_tensor = torch.tensor(y_train.values, dtype=torch.long)
+    Y_cv_tensor = torch.tensor(y_cv.values, dtype=torch.float32)
 
-# --- ENTRENAMIENTO DE REDES NEURONALES ---
+    # Crear DataLoader
+    train_dataset = TensorDataset(X_train_tensor, Y_train_tensor)
+    train_loader = DataLoader(train_dataset, batch_size=100, shuffle=True)
 
-# # Entrenar el modelo con PyTorch
-#pytorch_model = train_pytorch_nn(X_cv_tensor, Y_cv_tensor, train_loader, n_features, n_classes)
-#save_model_pth(pytorch_model, path_trained)
+    # --- ENTRENAMIENTO DE REDES NEURONALES ---
 
-# # Entrenar con MLP de Scikit-learn
-# mlp_model = cross_validate_sklearn_mlp(X, Y)
-# save_model_mlp(mlp_model, path_trained)
+    # # Entrenar el modelo con PyTorch
+    #pytorch_model = train_pytorch_nn(X_cv_tensor, Y_cv_tensor, train_loader, n_features, n_classes)
+    #save_model_pth(pytorch_model, path_trained)
+
+    # # Entrenar con MLP de Scikit-learn
+    # mlp_model = cross_validate_sklearn_mlp(X, Y)
+    # save_model_mlp(mlp_model, path_trained)

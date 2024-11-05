@@ -44,14 +44,13 @@ def preprocess_csv(path):
     # Concatenamos el DataFrame codificado con el resto de columnas
     df_final_encoded = pd.concat([df.drop(columns=columns_to_encode), encoded_df], axis=1)
     
-    df_final_encoded.to_csv('D:/Documentos/diego/Universidad/4 Curso/pruebaCsv.csv', index =False)
+    # df_final_encoded.to_csv('D:/Documentos/diego/Universidad/4 Curso/pruebaCsv.csv', index =False)
 
-        
-    # Variables independientes (X) y dependientes (Y)
-    X = df_final_encoded.drop(columns=['PacmanMove']) 
-    Y = df_final_encoded['PacmanMove']
-    
-    return X, Y
+    # Dividimos el dataframe por intersecciones
+
+    grouped_df = df_final_encoded.groupby(['pacmanCurrentNodeIndex'])
+
+    return grouped_df
 
 def preprocess_game_state(game_state, path):
     
