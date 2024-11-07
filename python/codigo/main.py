@@ -1,6 +1,6 @@
 from preprocessing import preprocess_csv
 #from model_pytorch import train_pytorch_nn, save_model_pth
-#from model_sklearn import cross_validate_sklearn_mlp, save_model_mlp
+#from model_sklearn import MLPModel
 import torch
 import os
 from sklearn.model_selection import train_test_split
@@ -64,5 +64,6 @@ train_loader = DataLoader(train_dataset, batch_size=100, shuffle=True)
 #save_model_pth(pytorch_model, path_trained)
 
 # # Entrenar con MLP de Scikit-learn
-# mlp_model = cross_validate_sklearn_mlp(X, Y)
-# save_model_mlp(mlp_model, path_trained)
+# mlp_model = MLPModel()
+# mlp_model.train_and_cross_validate(X, Y)
+# mlp_model.save_model(path_trained)

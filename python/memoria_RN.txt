@@ -37,3 +37,9 @@ Preproceso una sola linea del estado del juego que me llega por el socket desde 
 Trato de codificar las variables categoricas como haciamos en el csv. (Me esta fallando)
 
 Separo la clase models en dos, una para cada modelo.
+-------------
+Tuve que volver a entenar el modelo sklearn 2 veces, y arreglar algun fallo a la hora de sacar la prediccion, ya que tenia puesto:        
+ prediccion = mlp_model.predict([preprocessed_state]), en vez de prediccion = mlp_model.predict(preprocessed_state), me estaba contando que le enviaba un array de 3 dim, por culpa de los [].
+Ya funciona el modelo sklearn, falta analizar ambos modelos.
+ 
+
