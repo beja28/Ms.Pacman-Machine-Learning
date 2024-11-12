@@ -1,3 +1,1 @@
-conviene crear un Config.py donde se guarden las rutas relativas y n_features y n_classes
-habria que hacer como una serie de comandos para compilar (-p (entrena pytorch) -s (entrena sklearn) -e (envia prediccion a java))
-hice un comando para q use o sklearn o pytorch a la hora de enviar una prediccion, pero falta para lo de entrenar
+implementar la explicabilidad
