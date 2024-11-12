@@ -41,5 +41,8 @@ Separo la clase models en dos, una para cada modelo.
 Tuve que volver a entenar el modelo sklearn 2 veces, y arreglar algun fallo a la hora de sacar la prediccion, ya que tenia puesto:        
  prediccion = mlp_model.predict([preprocessed_state]), en vez de prediccion = mlp_model.predict(preprocessed_state), me estaba contando que le enviaba un array de 3 dim, por culpa de los [].
 Ya funciona el modelo sklearn, falta analizar ambos modelos.
- 
+-------------
+En el main he creado una serie de comandos, tanto para elegir el modelo para sacar la prediccion, como para elegir el modelo a entrenar.
+Para ello tuve que modificar el codigo de prueba_socket, separandolo en funciones (modularizarlo).
+Quiero hacer lo mismo para utilizar SHAP a la hora de sacar la explicabilidad de la red neuronal
 
