@@ -43,3 +43,13 @@ class MLPModel:
         # Guardar el modelo en un archivo
         joblib.dump(self.mlp, final_path)
         print(f'Modelo MLP guardado en {final_path}')
+
+    @staticmethod
+    def load_model(filepath):
+        """
+        Carga un modelo MLP desde un archivo .pkl.
+        """
+        if not os.path.exists(filepath):
+            raise FileNotFoundError(f"El archivo {filepath} no existe.")
+        print(f"Cargando el modelo desde {filepath}...")
+        return joblib.load(filepath)
