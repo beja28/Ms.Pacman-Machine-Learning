@@ -44,7 +44,7 @@ def preprocess_csv(path):
     # Concatenamos el DataFrame codificado con el resto de columnas
     df_final_encoded = pd.concat([df.drop(columns=columns_to_encode), encoded_df], axis=1)
     
-    df_final_encoded.to_csv('D:/Documentos/diego/Universidad/4 Curso/pruebaCsv.csv', index =False)
+    # df_final_encoded.to_csv('D:/Documentos/diego/Universidad/4 Curso/pruebaCsv.csv', index =False)
 
         
     # Variables independientes (X) y dependientes (Y)
