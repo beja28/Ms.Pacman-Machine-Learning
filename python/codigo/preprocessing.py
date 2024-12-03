@@ -46,6 +46,7 @@ def preprocess_csv(path):
     
     # df_final_encoded.to_csv('D:/Documentos/diego/Universidad/4 Curso/pruebaCsv.csv', index =False)
 
+        
     # Dividimos el dataframe por intersecciones
 
     grouped_df = df_final_encoded.groupby(['pacmanCurrentNodeIndex'])
