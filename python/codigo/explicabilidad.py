@@ -26,7 +26,7 @@ class explicabilidad:
         try:
             """Implementación de SHAP para explicar las predicciones del modelo."""
             if isinstance(model, torch.nn.Module): # Comprueba que tipo de modelo es
-                background_data = X.sample(n=200)
+                background_data = X.sample(n=500)
                 data_tensor = torch.tensor(background_data.values, dtype=torch.float32)
                 
                 # Configurar dispositivo
@@ -36,16 +36,16 @@ class explicabilidad:
                 
                 explainer = shap.DeepExplainer(model, data_tensor)
                 
-                data_to_explain = X.sample(n=10)
+                data_to_explain = X.sample(n=50)
                 data_to_explain_tensor = torch.tensor(data_to_explain.values, dtype=torch.float32).to(device)
                 
                 shap_values = explainer.shap_values(data_to_explain_tensor)
                 shap.summary_plot(shap_values, data_to_explain, plot_type="bar")
             else:
-                background_data = shap.sample(X, 200)
+                background_data = shap.sample(X, 500)
                 explainer = shap.KernelExplainer(model.predict, background_data)
 
-                data_to_explain = X.sample(n=100)
+                data_to_explain = X.sample(n=50)
                 shap_values = explainer.shap_values(data_to_explain) # Calcula los valores SHAP
                 shap.summary_plot(shap_values, data_to_explain, plot_type="bar") # Gráfico de los datos SHAP
 
@@ -57,7 +57,7 @@ class explicabilidad:
         """Implementación de Feature Importance utilizando Permutation Importance."""
         if hasattr(model, 'predict'): # Hay que comprobar que tiene método predict porque es necesario más adelante
             # Función que evalúa el impacto de cada característica
-            X_sampled = X.sample(n=500, random_state=42)  # Muestra de 500 instancias
+            X_sampled = X.sample(n=1500, random_state=42)  # Muestra de 500 instancias
             Y_sampled = Y[X_sampled.index]  # Etiquetas correspondientes a las muestras
             print(f"Usando {X_sampled.shape[0]} muestras para Permutation Importance.")
             # n_repeats (cuántas veces se permutará cada característica. + grande / + resultado / + tmp computo)
@@ -66,7 +66,7 @@ class explicabilidad:
                 model, 
                 X_sampled, 
                 Y_sampled, 
-                n_repeats=5,  # Reducir repeticiones para mejorar rendimiento
+                n_repeats=10,  # Reducir repeticiones para mejorar rendimiento
                 random_state=1
             )    # Calcula la permutación
             importances = results.importances_mean # Almaceno array de valores. + valor / + influencia
