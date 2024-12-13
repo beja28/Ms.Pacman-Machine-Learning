@@ -91,13 +91,13 @@ def main():
             if args.train_model == "pytorch":
                 """ Entrenar el modelo con PyTorch """
                 pytorch_model = train_pytorch_nn(X_cv_tensor, Y_cv_tensor, train_loader, n_features, n_classes)
-                save_model_pth(pytorch_model, path_trained)
+                save_model_pth(pytorch_model, path_trained, key)
 
             elif args.train_model == "sklearn":
                 """ Entrenar con MLP de Scikit-learn """
                 mlp_model = MLPModel()
                 mlp_model.train_and_cross_validate(X, Y)
-                mlp_model.save_model(path_trained)   
+                mlp_model.save_model_mlp(path_trained, key)   
                 
     elif args.command == "explain":
         explicador = explicabilidad()
@@ -111,7 +111,7 @@ def main():
             # Pasa el modelo correctamente al predictor
             predictor = PyTorchPredictor(model)
         elif args.model == "sklearn":
-            model = MLPModel.load_model(os.path.join(path_trained, "mlp_trained_model_2024-11-07.pkl"))
+            model = MLPModel.load_model_mlp(os.path.join(path_trained, "mlp_trained_model_2024-11-07.pkl"))
         
         if args.technique == "feature_importance":
             explicador.ejecutar_explicabilidad(model, args.technique, X_cv, y_cv)

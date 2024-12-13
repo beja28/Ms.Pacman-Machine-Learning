@@ -33,19 +33,23 @@ class MLPModel:
 
         return cv_results
 
-    def save_model(self, path_trained):
-        """
-        Guarda el modelo entrenado en un archivo .pkl con la fecha actual en el nombre.
-        """
+    def save_model_mlp(self, path_trained, key):
+        
+        # Crear una carpeta con la fecha actual
         date_str = datetime.now().strftime('%Y-%m-%d')
-        final_path = os.path.join(path_trained, f'mlp_trained_model_{date_str}.pkl')
+        folder_path = os.path.join(path_trained, f'models_{date_str}')
+        os.makedirs(folder_path, exist_ok=True)
+        
+        # Crear el nombre del archivo incluyendo el identificador 'key'
+        model_filename = f'mlp_trained_model_{date_str}_{key}.pkl'
+        final_path = os.path.join(folder_path, model_filename)
         
         # Guardar el modelo en un archivo
         joblib.dump(self.mlp, final_path)
         print(f'Modelo MLP guardado en {final_path}')
 
-    @staticmethod
-    def load_model(filepath):
+    
+    def load_model_mlp(filepath):
         """
         Carga un modelo MLP desde un archivo .pkl.
         """
