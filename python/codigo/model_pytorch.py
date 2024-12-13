@@ -62,15 +62,21 @@ def train_pytorch_nn(x_cv_tensor, Y_cv_tensor, train_loader, n_features, n_class
     
     return model
 
-# Guardar el modelo entrenado en un archivo
-def save_model_pth(model, path_trained):
-    
-    # Obtener la fecha actual
+def save_model_pth(model, path_trained, key):
+    """
+    Guarda el modelo entrenado en un archivo .pth con la fecha actual en el nombre.
+    Crea una carpeta para cada fecha y guarda los modelos con un identificador único (key).
+    """
+    # Crear una carpeta con la fecha actual
     date_str = datetime.now().strftime('%Y-%m-%d')
+    folder_path = os.path.join(path_trained, f'models_{date_str}')
+    os.makedirs(folder_path, exist_ok=True)
     
-    # Ruta para guardar el modelo
-    final_path = os.path.join(path_trained, f'pytorch_model_{date_str}.pth')
+    # Crear el nombre del archivo incluyendo el identificador 'key'
+    model_filename = f'pytorch_model_{date_str}_{key}.pth'
+    final_path = os.path.join(folder_path, model_filename)
     
+    # Guardar el modelo
     torch.save(model.state_dict(), final_path)
     print(f'Modelo guardado en {final_path}')
     
