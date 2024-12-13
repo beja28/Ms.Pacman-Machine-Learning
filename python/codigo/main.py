@@ -39,30 +39,9 @@ path_trained = os.path.normpath(path_trained)
 # --- PREPROCESAMIENTO ---
 grouped_df  = preprocess_csv(dataset_path)
 
-for key, group in grouped_df:
-    print('Grupo de la interseccion : ', key)
-
-    # Variables independientes (X) y dependientes (Y)
-    X = group.drop(columns=['PacmanMove']) 
-    Y = group['PacmanMove']
-
-    # Configuramos los parámetros de la red
-    n_features = X.shape[1]
-    n_classes = 5  # 5 posibles movimientos de Pac-Man
-
-    # Dividimos el conjunto de datos
-    X_train, X_, y_train, y_ = train_test_split(X, Y, test_size=0.50, random_state=1)
-    X_cv, X_test, y_cv, y_test = train_test_split(X_, y_, test_size=0.20, random_state=1)
-
-    # Convertir a tensores
-    X_train_tensor = torch.tensor(X_train.values, dtype=torch.float32)
-    X_cv_tensor = torch.tensor(X_cv.values, dtype=torch.float32)
-    Y_train_tensor = torch.tensor(y_train.values, dtype=torch.long)
-    Y_cv_tensor = torch.tensor(y_cv.values, dtype=torch.float32)
-
-    # Crear DataLoader
-    train_dataset = TensorDataset(X_train_tensor, Y_train_tensor)
-    train_loader = DataLoader(train_dataset, batch_size=100, shuffle=True)
+# Configuramos los parámetros de la red
+n_features = grouped_df[0].shape[1]
+n_classes = 5  # 5 posibles movimientos de Pac-Man
 
 def main():
     parser = argparse.ArgumentParser(description="Selecciona si quieres entrenar un modelo o utilizar uno para enviar la predicción o realizar la explicabilidad")
@@ -90,17 +69,36 @@ def main():
         start_socket(args.model, n_features, n_classes)
         
     elif args.command == "train_model":
-        if args.train_model == "pytorch":
-            """ Entrenar el modelo con PyTorch """
-            pytorch_model = train_pytorch_nn(X_cv_tensor, Y_cv_tensor, train_loader, n_features, n_classes)
-            save_model_pth(pytorch_model, path_trained)
+        for key, group in grouped_df:
+            print('Grupo de la interseccion : ', key)
 
-        elif args.train_model == "sklearn":
-            """ Entrenar con MLP de Scikit-learn """
-            mlp_model = MLPModel()
-            mlp_model.train_and_cross_validate(X, Y)
-            mlp_model.save_model(path_trained)
-    
+            # Variables independientes (X) y dependientes (Y)
+            X = group.drop(columns=['PacmanMove']) 
+            Y = group['PacmanMove']
+            # Dividimos el conjunto de datos
+            X_train, X_, y_train, y_ = train_test_split(X, Y, test_size=0.50, random_state=1)
+            X_cv, X_test, y_cv, y_test = train_test_split(X_, y_, test_size=0.20, random_state=1)
+
+            # Convertir a tensores
+            X_train_tensor = torch.tensor(X_train.values, dtype=torch.float32)
+            X_cv_tensor = torch.tensor(X_cv.values, dtype=torch.float32)
+            Y_train_tensor = torch.tensor(y_train.values, dtype=torch.long)
+            Y_cv_tensor = torch.tensor(y_cv.values, dtype=torch.float32)
+
+            # Crear DataLoader
+            train_dataset = TensorDataset(X_train_tensor, Y_train_tensor)
+            train_loader = DataLoader(train_dataset, batch_size=100, shuffle=True)
+            if args.train_model == "pytorch":
+                """ Entrenar el modelo con PyTorch """
+                pytorch_model = train_pytorch_nn(X_cv_tensor, Y_cv_tensor, train_loader, n_features, n_classes)
+                save_model_pth(pytorch_model, path_trained)
+
+            elif args.train_model == "sklearn":
+                """ Entrenar con MLP de Scikit-learn """
+                mlp_model = MLPModel()
+                mlp_model.train_and_cross_validate(X, Y)
+                mlp_model.save_model(path_trained)   
+                
     elif args.command == "explain":
         explicador = explicabilidad()
         if args.model == "pytorch":
