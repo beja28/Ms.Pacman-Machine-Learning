@@ -42,7 +42,7 @@ grouped_df  = preprocess_csv(dataset_path)
 # Configuramos los parámetros de la red
 #acceder al primer grupo por ej
 first_group = grouped_df.get_group((next(iter(grouped_df.groups)),))
-n_features = first_group.shape[1]
+n_features = first_group.drop(columns=['PacmanMove']).shape[1]
 
 n_classes = 5  # 5 posibles movimientos de Pac-Man
 

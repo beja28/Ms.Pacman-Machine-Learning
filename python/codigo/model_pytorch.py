@@ -20,7 +20,6 @@ class MyModelPyTorch(nn.Module):
 def train_pytorch_nn(x_cv_tensor, Y_cv_tensor, train_loader, n_features, n_classes):
     
     model = MyModelPyTorch(n_features, n_classes)
-    
     loss_fn = nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
     
