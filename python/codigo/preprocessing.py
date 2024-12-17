@@ -43,9 +43,6 @@ def preprocess_csv(path):
     
     # Concatenamos el DataFrame codificado con el resto de columnas
     df_final_encoded = pd.concat([df.drop(columns=columns_to_encode), encoded_df], axis=1)
-    
-    # df_final_encoded.to_csv('D:/Documentos/diego/Universidad/4 Curso/pruebaCsv.csv', index =False)
-
         
     # Dividimos el dataframe por intersecciones
 
@@ -101,12 +98,11 @@ def preprocess_game_state(game_state, path):
         # Agregar al nuevo diccionario solo si la clave no está en columns_to_encode
         if k not in columns_to_encode:
             filtered_state[k] = v
-
-    # Si hay claves duplicadas entre los dos diccionarios, se sobreescriben los valores de encoded_state sobre filtered_state
-    combined_state = {**filtered_state, **encoded_state}
+            
+    filtered_df = pd.DataFrame([filtered_state])
+    combined_df = pd.concat([filtered_df, encoded_state], axis=1)
         
-    print(list(combined_state.keys()))
-    return list(combined_state.values())
+    return combined_df
 
     
 # Función para convertir tipos de datos

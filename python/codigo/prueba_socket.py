@@ -25,31 +25,39 @@ path_trained = os.path.normpath(path_trained)
 
 
 
-def model_for_prediction(model_type,n_features, n_classes):
+def model_for_prediction(model_type, n_features, n_classes, intersection_id=None):
+    """
+    Cargar el modelo deseado basándose en la intersección.
+    """
 
-    """
-    Cargar el modelo deseado
-    """
     if model_type == 'sklearn':
-        model_filename= 'mlp_trained_model_2024-11-07.pkl' 
-        full_model_path = os.path.join(path_trained, model_filename)
-        mlp_model = joblib.load(full_model_path)  
+        model_filename = f'mlp_trained_model_2024-12-13_({intersection_id},).pkl'
+        full_model_path = os.path.join(path_trained, 'models_2024-12-13', model_filename)
+                
+        mlp_model = joblib.load(full_model_path)
         return mlp_model, None
+    
     elif model_type == 'pytorch':
-        model_filename = 'pytorch_model_2024-10-31.pth'
-        full_model_path = os.path.join(path_trained, model_filename)
+       
+        model_filename = f'pytorch_model_2024-12-14_({intersection_id},).pth'
+        full_model_path = os.path.join(path_trained, 'models_2024-12-14', model_filename)
+        
         modelPytorch = MyModelPyTorch(n_features, n_classes)
         modelPytorch.load_state_dict(torch.load(full_model_path, weights_only=True))
         modelPytorch.eval()
         return None, modelPytorch
+    
     else:
-            raise ValueError("Modelo no reconocido. Elige 'pytorch' o 'sklearn'.")
+        raise ValueError("Modelo no reconocido. Elige 'pytorch' o 'sklearn'.")
 
 
-def get_prediction(model_type, mensaje, mlp_model=None, modelPytorch=None):
+def get_prediction(model_type, mensaje, n_features, n_classes):
     
     preprocessed_state = preprocess_game_state(mensaje, dataset_path)
     
+    intersection_id = identify_intersection(preprocessed_state) # envio el estado del juego como un diccionario
+    # Cargar el modelo para la predicción
+    mlp_model, modelPytorch = model_for_prediction(model_type, n_features, n_classes, intersection_id)
     # Convertir el estado preprocesado a tensor o array, segun el modelo
     
     if model_type == 'pytorch':
@@ -68,6 +76,15 @@ def get_prediction(model_type, mensaje, mlp_model=None, modelPytorch=None):
     predicted_move = moves[predicted_index]
     
     return predicted_move
+
+def identify_intersection(preprocessed_state):
+    
+    intersection = preprocessed_state.get('pacmanCurrentNodeIndex', None)
+    
+    return intersection.iloc[0]
+    
+    
+
     
     
 def start_socket(model_type, n_features, n_classes):
@@ -88,8 +105,7 @@ def start_socket(model_type, n_features, n_classes):
     conn, addr = server_socket.accept()
     print(f"Conectado con {addr}")
 
-    # Cargar el modelo para la predicción
-    mlp_model, modelPytorch = model_for_prediction(model_type, n_features, n_classes)
+    
 
     #Recibir datos
     while True:
@@ -101,7 +117,7 @@ def start_socket(model_type, n_features, n_classes):
         print(f"Datos recibidos: {mensaje}")
         
         # Obtener la predicción usando el modelo seleccionado
-        predicted_move = get_prediction(model_type, mensaje, mlp_model, modelPytorch)
+        predicted_move = get_prediction(model_type, mensaje, n_features, n_classes)
         
         respuesta = f"{predicted_move}\n" 
         conn.sendall(respuesta.encode('utf-8'))  # Enviar respuesta codificada en UTF-8
