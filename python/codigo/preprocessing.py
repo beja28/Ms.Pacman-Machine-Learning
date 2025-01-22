@@ -29,7 +29,6 @@ def preprocess_csv(path):
     # Aplicamos el mapeo
     df['PacmanMove'] = df['PacmanMove'].map(move_mapping)
     
-    #print(df)
     encoder = OneHotEncoder(categories=[categories[col] for col in columns_to_encode], sparse_output=False, drop=None)
     
     one_hot_encoded = encoder.fit_transform(df[columns_to_encode])
@@ -80,10 +79,7 @@ def preprocess_game_state(game_state, path):
     
     
     # Convertimos a DataFrame
-    encoded_state = pd.DataFrame(one_hot_encoded, columns=encoder.get_feature_names_out(columns_to_encode))
-    
-    #encoded_state.to_csv('D:/Documentos/diego/Universidad/4 Curso/pruebaGS.csv', index =False)
-    
+    encoded_state = pd.DataFrame(one_hot_encoded, columns=encoder.get_feature_names_out(columns_to_encode))    
     
     # Casteo las variables booleanas
     for key in boolean_col:
