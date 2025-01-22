@@ -47,8 +47,18 @@ class explicabilidad:
 
                 data_to_explain = X.sample(n=50)
                 shap_values = explainer.shap_values(data_to_explain) # Calcula los valores SHAP
-                shap.summary_plot(shap_values, data_to_explain, plot_type="bar") # Gráfico de los datos SHAP
-
+                #shap.summary_plot(shap_values, data_to_explain, plot_type="bar") # Gráfico de los datos SHAP
+                shap_values_sample =  shap_values[0]
+                explanation = shap.Explanation(values=shap_values_sample,
+                                base_values=explainer.expected_value,
+                                data=data_to_explain.iloc[0])
+                shap.waterfall_plot(explanation)
+                plt.show()  # Mantenemos la ventana abierta
+                shap.force_plot(explanation)
+                plt.show()  # Mantenemos la ventana abierta
+                
+                
+  
         except Exception as e:
             print(f"Error durante la explicabilidad SHAP: {e}")
 
