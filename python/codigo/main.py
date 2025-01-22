@@ -2,7 +2,7 @@ from preprocessing import preprocess_csv
 from model_pytorch import train_pytorch_nn, save_model_pth
 from model_sklearn import MLPModel
 from prueba_socket import start_socket 
-from explicabilidad import explicabilidad
+from explicabilidad import Explicabilidad
 from Pytorch_Predictor import PyTorchPredictor
 from model_pytorch import MyModelPyTorch
 import torch
@@ -103,29 +103,57 @@ def main():
                 mlp_model.save_model_mlp(path_trained, key)   
                 
     elif args.command == "explain":
-        explicador = explicabilidad()
-        if args.model == "pytorch":
-            # Crea una instancia del modelo
-            model = MyModelPyTorch(n_features, n_classes)
-            # Carga los pesos
-            model.load_state_dict(torch.load(os.path.join(path_trained, "pytorch_model_2024-10-31.pth")))
-            # Cambia el modelo a modo evaluación
-            model.eval()
-            # Pasa el modelo correctamente al predictor
-            predictor = PyTorchPredictor(model)
-        elif args.model == "sklearn":
-            model = MLPModel.load_model_mlp(os.path.join(path_trained, "mlp_trained_model_2024-11-07.pkl"))
+        print("a")
+
+        explicador = Explicabilidad()
         
-        if args.technique == "feature_importance":
-            explicador.ejecutar_explicabilidad(model, args.technique, X_cv, y_cv)
-        elif args.technique == "lime":
+        # Especifica la carpeta donde se encuentran los modelos
+        model_directory = os.path.join(path_trained, "models_2024-12-13")
+        
+        # Obtener los archivos de modelo del directorio
+        model_files = [f for f in os.listdir(model_directory) if f.endswith(('.pkl', '.pth'))]
+         
+        if len(model_files) != len(grouped_df):
+            print("Error: El número de modelos no coincide con el número de grupos.")
+            return
+
+        # Iterar sobre los archivos de modelo y los grupos del DataFrame al mismo tiempo
+        for (key, group), model_filename in zip(grouped_df, model_files):
+            print(f"Explicabilidad para el grupo: {key}, usando el modelo: {model_filename}")
+
+            # Variables independientes (X) y dependientes (Y)
+            X = group.drop(columns=['PacmanMove'])
+            Y = group['PacmanMove']
+
+            # Dividimos el conjunto de datos
+            X_train, X_, y_train, y_ = train_test_split(X, Y, test_size=0.50, random_state=1)
+            X_cv, X_test, y_cv, y_test = train_test_split(X_, y_, test_size=0.20, random_state=1)
+
+            # Cargar el modelo correspondiente
+            full_model_path = os.path.join(model_directory, model_filename)
+            
             if args.model == "pytorch":
+                # Crea una instancia del modelo
+                model = MyModelPyTorch(n_features, n_classes)
+                # Carga los pesos
+                model.load_state_dict(torch.load(full_model_path, weights_only=True))
+                model.eval()
                 predictor = PyTorchPredictor(model)
+            elif args.model == "sklearn":
+                model = MLPModel.load_model_mlp(full_model_path)
+            
+            if args.technique == "feature_importance":
+                explicador.ejecutar_explicabilidad(model, model_filename, args.technique, X_cv, y_cv)
+            elif args.technique == "lime":
+                if args.model == "pytorch":
+                    predictor = PyTorchPredictor(model)
+                else:
+                    predictor = model  # Los modelos de Scikit-Learn ya tienen predict_proba
+                explicador.ejecutar_explicabilidad(predictor, model_filename, args.technique, X_cv)
             else:
-                predictor = model  # Los modelos de Scikit-Learn ya tienen predict_proba
-            explicador.ejecutar_explicabilidad(predictor, args.technique, X_cv)
-        else:
-            explicador.ejecutar_explicabilidad(model, args.technique, X_cv)
+                explicador.ejecutar_explicabilidad(model, model_filename, args.technique, X_cv)
+        
+        explicador.generar_grafico_explicabilidad_global(path_trained)
 
 
 if __name__ == "__main__":
