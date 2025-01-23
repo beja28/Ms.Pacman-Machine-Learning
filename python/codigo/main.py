@@ -103,12 +103,15 @@ def main():
                 mlp_model.save_model_mlp(path_trained, key)   
                 
     elif args.command == "explain":
-        print("a")
 
         explicador = Explicabilidad()
         
-        # Especifica la carpeta donde se encuentran los modelos
-        model_directory = os.path.join(path_trained, "models_2024-12-13")
+        """ 
+        --------------------------------------------------------------------------------------------------
+        Importante seleccionar la carpeta de los modelos sklearn o pytorch para que funcione correctamente
+        --------------------------------------------------------------------------------------------------
+        """
+        model_directory = os.path.join(path_trained, "models_2024-12-14")
         
         # Obtener los archivos de modelo del directorio
         model_files = [f for f in os.listdir(model_directory) if f.endswith(('.pkl', '.pth'))]
@@ -153,7 +156,7 @@ def main():
             else:
                 explicador.ejecutar_explicabilidad(model, model_filename, args.technique, X_cv)
         
-        explicador.generar_grafico_explicabilidad_global(path_trained)
+        explicador.generar_grafico_explicabilidad_global(directorio_actual, args.model)
 
 
 if __name__ == "__main__":
