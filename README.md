@@ -35,6 +35,63 @@ Este repositorio incluye un archivo `requirements.txt` que especifica las versio
    pip install -r requirements.txt
    ```
 
+### Cómo ejecutar el programa
+
+El programa incluye diferentes comandos que permiten entrenar modelos, realizar predicciones y aplicar técnicas de explicabilidad. A continuación, se detallan los comandos disponibles:
+
+#### 1. **Seleccionar un modelo para predicción**
+
+```bash
+python main.py model <model>
+```
+
+- `<model>`: Puede ser `pytorch` o `sklearn`, dependiendo del modelo que quieras usar.
+
+**Ejemplo**:
+
+```bash
+python main.py model pytorch
+```
+
+#### 2. **Entrenar un modelo**
+
+```bash
+python main.py train_model <train_model>
+```
+
+- `<train_model>`: Puede ser `pytorch` o `sklearn`, según el modelo que desees entrenar.
+
+**Ejemplo**:
+
+- Entrenar el modelo PyTorch:
+  ```bash
+  python main.py train_model pytorch
+  ```
+- Entrenar el modelo Scikit-Learn:
+  ```bash
+  python main.py train_model sklearn
+  ```
+
+#### 3. **Realizar explicabilidad**
+
+```bash
+python main.py explain <model> <technique>
+```
+
+- `<model>`: Selecciona el modelo a explicar (`pytorch` o `sklearn`).
+- `<technique>`: Técnica de explicabilidad a aplicar (`shap`, `feature_importance`, o `lime`).
+
+**Ejemplos**:
+
+- Explicar el modelo PyTorch usando SHAP:
+  ```bash
+  python main.py explain pytorch shap
+  ```
+- Explicar el modelo Scikit-Learn usando LIME:
+  ```bash
+  python main.py explain sklearn lime
+  ```
+
 ### Notas
 
 - Asegúrate de tener una versión de Python compatible (3.8 o superior se recomienda).
