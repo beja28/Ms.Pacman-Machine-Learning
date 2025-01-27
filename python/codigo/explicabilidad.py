@@ -105,7 +105,7 @@ class Explicabilidad:
     def explicabilidad_lime(self, model, model_filename, X):
         """Implementación de LIME para explicar las predicciones del modelo (funciona para Scikit-Learn y PyTorch)."""
         try:
-            # Si X no es un DataFrame, conviértelo en uno para manejar las características adecuadamente
+            # Si X no es un DataFrame, se convierte en uno para manejar las características adecuadamente
             if not isinstance(X, pd.DataFrame):
                 X = pd.DataFrame(X, columns=model.feature_names_in_)
 
@@ -154,13 +154,6 @@ class Explicabilidad:
     def generar_grafico_explicabilidad_global(self, directorio_actual, model):
         """Genera un gráfico que combine la explicabilidad global de todas las redes y lo guarda en un archivo."""
 
-        images_dir = os.path.join(directorio_actual, '..', 'images')
-        images_dir = os.path.normpath(images_dir)
-        
-        # Crear la ruta completa para la carpeta 'Explicabilidad' dentro de 'images'
-        explicabilidad_dir = os.path.join(images_dir, 'Explicabilidad')
-        os.makedirs(explicabilidad_dir, exist_ok=True)
-
         # Combinar todos los valores SHAP
         shap_exps = [exp for exp in self.explicaciones if exp["technique"] == "shap"]
         if shap_exps:
@@ -173,40 +166,30 @@ class Explicabilidad:
 
             # Obtener los nombres de las características (usados en todos los modelos)
             feature_names = shap_exps[0]["feature_names"]
-          
-            # Reducir `mean_shap_values` a una dimension
-            mean_shap_values_reduced = np.mean(mean_shap_values, axis=1)
                        
             # Ordenar por la importancia (de mayor a menor)
-            sorted_idx = np.argsort(mean_shap_values_reduced)[::-1]
+            sorted_idx = np.argsort(mean_shap_values)[::-1]
 
             # Ordenar nombres y valores
-            sorted_feature_names = feature_names[sorted_idx]
-            sorted_mean_shap_values = mean_shap_values_reduced[sorted_idx]
+            sorted_feature_names = np.array(feature_names)[sorted_idx]
+            sorted_mean_shap_values = mean_shap_values[sorted_idx]
 
             # Crear gráfico de barras
-            plt.figure(figsize=(10, 6))
+            plt.figure(figsize=(10, 20))
             plt.barh(sorted_feature_names, sorted_mean_shap_values, color='skyblue')
             plt.gca().invert_yaxis()  # Invertir el eje Y para que el de mayor importancia quede arriba
-            plt.xlabel("Importancia media de SHAP")
-            plt.ylabel("Características")
+            plt.xlabel("Importancia media de SHAP", fontsize=10)
+            plt.ylabel("Características", fontsize=10)
             plt.title("Importancia global de características (SHAP)")
             
             # Ajustar el tamaño de las etiquetas del eje Y
-            plt.yticks(fontsize=8)  # Tamaño de letra más pequeño para las etiquetas del eje Y
+            plt.yticks(fontsize=14)  # Tamaño de letra más pequeño para las etiquetas del eje Y
 
             # Ajustar el espaciado de los nombres de las características
             plt.subplots_adjust(left=0.2, right=0.8, top=0.9, bottom=0.1)
-
-            # Guardar gráfico
             
-            if model == "pytorch":
-                shap_plot_path = os.path.join(explicabilidad_dir, "explicabilidad_shap_pytorch.png")
-            elif model == "sklearn":
-                shap_plot_path = os.path.join(explicabilidad_dir, "explicabilidad_shap_sklearn.png")
-                     
-            plt.savefig(shap_plot_path)  # Guardar gráfico como imagen
-            plt.close()  # Cerrar la figura para evitar que se muestre
+            plt.show()
+
 
         # Generar gráfico de Importancia de características global
         feature_importance_exps = [exp for exp in self.explicaciones if exp["technique"] == "feature_importance"]
@@ -223,24 +206,20 @@ class Explicabilidad:
                 importancias_mean = combined_importances.groupby('Feature')['Importance'].mean().sort_values(ascending=False)
 
                 # Generar la gráfica combinada de Feature Importance
-                plt.figure(figsize=(10, 6))
+                plt.figure(figsize=(10, 20))
                 importancias_mean.plot(kind='barh', color='skyblue')
                 plt.gca().invert_yaxis()
                 plt.xlabel("Mean Importance")
-                plt.ylabel("Features", fontsize=5)
+                plt.ylabel("Features", fontsize=10)
                 plt.title("Importancia Global de Características")
 
                 # Ajustar el tamaño de las etiquetas del eje Y
-                plt.yticks(fontsize=8)  # Tamaño de letra más pequeño para las etiquetas del eje Y
+                plt.yticks(fontsize=14)  # Tamaño de letra más pequeño para las etiquetas del eje Y
 
                 # Ajustar el espaciado de los nombres de las características
                 plt.subplots_adjust(left=0.2, right=0.8, top=0.9, bottom=0.1)
-
-                # Solo para sklearn
-                importance_plot_path = os.path.join(explicabilidad_dir, "explicabilidad_importancia_feature_sklearn.png")
-
-                plt.savefig(importance_plot_path)  # Guardar gráfico como imagen
-                plt.close()
+                
+                plt.show()
 
         # Generar gráfico LIME global
         lime_exps = [exp for exp in self.explicaciones if exp["technique"] == "lime"]
@@ -251,20 +230,15 @@ class Explicabilidad:
             plt.title("Explicabilidad global de LIME")
             
             # Ajustar el tamaño de las etiquetas del eje Y
-            plt.yticks(fontsize=8)  # Tamaño de letra más pequeño para las etiquetas del eje Y
+            plt.yticks(fontsize=10)  # Tamaño de letra más pequeño para las etiquetas del eje Y
 
             # Ajustar el espaciado de los nombres de las características
             plt.subplots_adjust(left=0.2, right=0.8, top=0.9, bottom=0.1)
             plt.subplots_adjust(left=0.4)
             
-            if model == "pytorch":
-                lime_plot_path = os.path.join(explicabilidad_dir, "explicabilidad_lime_pytorch.png")
-            elif model == "sklearn":            
-                lime_plot_path = os.path.join(explicabilidad_dir, "explicabilidad_lime_sklearn.png")
-                
-            plt.savefig(lime_plot_path)  # Guardar gráfico como imagen
-            plt.close()
-
-        print("Las gráficas de explicabilidad se han guardado en el directorio 'images/Explicabilidad'.")
+            plt.xlabel('Valor de impacto', fontsize=10)
+            plt.ylabel('Características', fontsize=10)
+            
+            plt.show()
 
 
