@@ -11,19 +11,21 @@ import os
 class Explicabilidad:
     def __init__(self):
         self.explicaciones = []  # Almacena resultados de explicabilidad
+        self.dic_map = {} # Diccionario para almacenar los valores SHAP organizados por interseccion 
 
-    def ejecutar_explicabilidad(self, model, model_filename, technique, X, Y=None):
+    def ejecutar_explicabilidad(self, model, model_filename, technique, X, key, Y=None):
         """Ejecuta la técnica de explicabilidad seleccionada."""
         if technique == "shap":
-            self.explicabilidad_shap(model, model_filename, X)
+            self.explicabilidad_shap(model, model_filename, X, key)
         elif technique == "feature_importance":
             self.explicabilidad_feature_importance(model, model_filename, X, Y)
         elif technique == "lime":
             self.explicabilidad_lime(model, model_filename, X)
     
-    def explicabilidad_shap(self, model, model_filename, X):
+    def explicabilidad_shap(self, model, model_filename, X, key):
         """Implementación de SHAP para explicar las predicciones del modelo."""
         try:
+            print({key})
             shap_values_global = None
             feature_names = X.columns  # Guardamos los nombres de las características
 
@@ -62,6 +64,9 @@ class Explicabilidad:
                 "shap_values": shap_values_global, 
                 "feature_names": feature_names
             })
+            
+            # Guardar los valores SHAP en un diccionario estructurado por intersección y característica
+            self.dic_map[key] = {feature: value for feature, value in zip(feature_names, shap_values[0])}
         
         except Exception as e:
             print(f"Error durante la explicabilidad SHAP: {e}")
@@ -151,7 +156,7 @@ class Explicabilidad:
             print(f"Error durante la explicabilidad LIME: {e}")
         
         
-    def generar_grafico_explicabilidad_global(self, directorio_actual, model):
+    def generar_grafico_explicabilidad_global(self, model):
         """Genera un gráfico que combine la explicabilidad global de todas las redes y lo guarda en un archivo."""
 
         # Combinar todos los valores SHAP
@@ -166,13 +171,18 @@ class Explicabilidad:
 
             # Obtener los nombres de las características (usados en todos los modelos)
             feature_names = shap_exps[0]["feature_names"]
-                       
+            
+            if model == "pytorch":                           
+                # Reducir `mean_shap_values` a una dimension
+                mean_shap_values = np.mean(mean_shap_values, axis=1)              
+                      
             # Ordenar por la importancia (de mayor a menor)
             sorted_idx = np.argsort(mean_shap_values)[::-1]
 
             # Ordenar nombres y valores
             sorted_feature_names = np.array(feature_names)[sorted_idx]
             sorted_mean_shap_values = mean_shap_values[sorted_idx]
+            
 
             # Crear gráfico de barras
             plt.figure(figsize=(10, 20))
@@ -240,5 +250,60 @@ class Explicabilidad:
             plt.ylabel('Características', fontsize=10)
             
             plt.show()
+
+
+    def calcular_impacto_por_interseccion(self):
+        """
+        Calcula el impacto total de cada característica en cada intersección.
+
+        shap_values_dict: diccionario con estructura {intersección: {característica: valores SHAP}}
+                        (los valores SHAP pueden ser un array con valores para cada clase de salida)
+
+        Retorna un diccionario con el impacto promedio por intersección y característica.
+        """
+        impacto_intersecciones = {}
+
+        for interseccion, caracteristicas in self.dic_map.items():
+            impacto_intersecciones[interseccion] = {
+                feature: np.mean(shap_values)  # Promedio absoluto del impacto de la característica
+                for feature, shap_values in caracteristicas.items()
+            }
+
+        return impacto_intersecciones
+
+    def guardar_explicabilidad_txt(self, directorio, model):
+        """
+        Guarda un archivo TXT para cada característica con el impacto en cada intersección.
+        
+        impacto_intersecciones: dict con {interseccion: {caracteristica: impacto}}
+        directorio: ruta donde se guardarán los archivos
+        carpeta: subcarpeta donde almacenar los txt
+        """
+        
+        if model == "pytorch":       
+            path_completo = os.path.join(directorio, "mapas_explicabilidad_pytorch")
+            os.makedirs(path_completo, exist_ok=True)  # Crea la carpeta si no existe
+        elif model == "sklearn":
+            path_completo = os.path.join(directorio, "mapas_explicabilidad_sklearn")
+            os.makedirs(path_completo, exist_ok=True)  # Crea la carpeta si no existe
+        
+        impacto_intersecciones = self.calcular_impacto_por_interseccion()
+
+        # Transponer el diccionario para agrupar por característica en lugar de intersección
+        caracteristicas = set()
+        for impactos in impacto_intersecciones.values():
+            caracteristicas.update(impactos.keys())
+
+        # Escribir un archivo para cada característica
+        for feature in caracteristicas:
+            file_path = os.path.join(path_completo, f"{feature}.txt")
+            with open(file_path, "w") as f:
+                for interseccion, impactos in impacto_intersecciones.items():
+                    if feature in impactos:
+                        f.write(f"Intersección {interseccion}: {impactos[feature]:.6f}\n")
+
+        print(f"Archivos guardados en: {path_completo}")
+
+
 
 
