@@ -146,17 +146,18 @@ def main():
                 model = MLPModel.load_model_mlp(full_model_path)
             
             if args.technique == "feature_importance":
-                explicador.ejecutar_explicabilidad(model, model_filename, args.technique, X_cv, y_cv)
+                explicador.ejecutar_explicabilidad(model, model_filename, args.technique, X_cv, key, y_cv)
             elif args.technique == "lime":
                 if args.model == "pytorch":
                     predictor = PyTorchPredictor(model)
                 else:
                     predictor = model  # Los modelos de Scikit-Learn ya tienen predict_proba
-                explicador.ejecutar_explicabilidad(predictor, model_filename, args.technique, X_cv)
+                explicador.ejecutar_explicabilidad(predictor, model_filename, args.technique, X_cv, key)
             else:
-                explicador.ejecutar_explicabilidad(model, model_filename, args.technique, X_cv)
+                explicador.ejecutar_explicabilidad(model, model_filename, args.technique, X_cv, key)
         
-        explicador.generar_grafico_explicabilidad_global(directorio_actual, args.model)
+        explicador.generar_grafico_explicabilidad_global(args.model)
+        explicador.guardar_explicabilidad_txt(directorio_actual, args.model)
 
 
 if __name__ == "__main__":
