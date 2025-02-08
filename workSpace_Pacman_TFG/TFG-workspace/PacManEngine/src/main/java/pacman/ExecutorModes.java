@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import pacman.controllers.Controller;
 import pacman.controllers.GhostController;
 import pacman.controllers.HumanController;
+import pacman.controllers.PacmanController;
 import pacman.game.Constants.GHOST;
 import pacman.game.Constants.MOVE;
 import pacman.game.Drawable;
@@ -246,15 +247,30 @@ public class ExecutorModes {
 	
 	
 
-	public void runGameGenerateDataSet(Controller<MOVE> pacManController, GhostController ghostController, int iter, String fileName, boolean DEBUG) {
+	public void runGameGenerateDataSet(Controller<MOVE> pacManController, GhostController ghostController, int iter, String fileName, boolean DEBUG, int min_score) {
+		
+		System.out.println("\n\n[INFO] Comenzando a generar DataSet en archivo: '" + fileName + "'\n");
+		System.out.printf("\tNumero de iteraciones: " + iter + "\n");
+		if(min_score==-1) {
+			System.out.printf("\tScore Minimo Desactivado \n");
+		}else {
+			System.out.printf("\tScore Minimo establecido en: " + min_score + "\n");
+		}
+		if(DEBUG) {
+			System.out.printf("\tModo de depuración activado \n\n");
+		}else {
+			System.out.printf("\tModo de depuración desactivado \n\n");
+		}
+		
+		
 		
 		int delay = 0;	//El delay entre las ejecuciones es 0, porque queremos que se ejecute lo mas rapido posible
-		int min_score = 3500;;
 		List<Integer> savedScores = new ArrayList<>();
 		
 		long inicio = System.nanoTime();
 		long lineasIniciales = DataSetRecorder.contarLineas(fileName);
-				
+		
+						
 		for(int i = 0;i<iter;i++) {
 			
 			Game game = setupGame();
@@ -296,23 +312,37 @@ public class ExecutorModes {
 					gv.repaint();
 				}
 			}
-			
 
-			// Solo se guardan los datos si el score ha sido "bueno" --> Supongo 3500
-			if(game.getScore() > min_score) {
-				
+			if (min_score == -1) { // Se guardan todos los datos
 				try {
 					dataRecorder.saveDataToCsv(fileName, true);
 					savedScores.add(game.getScore());
-					
-					if(DEBUG) {
-						System.out.println("[DEBUG] " + i + ". Estados correctamente guardados en: " + fileName + ".csv con score: " + game.getScore());
+
+					if (DEBUG) {
+						System.out.println("[DEBUG] " + i + ". Estados correctamente guardados en: " + fileName
+								+ ".csv con score: " + game.getScore());
 					}
+
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
+			} else {
+				// Solo se guardan los datos si el score ha sido mayor
+				if (game.getScore() > min_score) {
+
+					try {
+						dataRecorder.saveDataToCsv(fileName, true);
+						savedScores.add(game.getScore());
+
+						if (DEBUG) {
+							System.out.println("[DEBUG] " + i + ". Estados correctamente guardados en: " + fileName
+									+ ".csv con score: " + game.getScore());
+						}
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
 			}
-			
 
 			postcompute(pacManController, ghostController);
 		}
@@ -338,11 +368,114 @@ public class ExecutorModes {
         //Calcular puntuacion media
         if (!savedScores.isEmpty()) {
             double media = savedScores.stream().mapToInt(Integer::intValue).average().orElse(0.0);
-            System.out.println("[INFO] Puntuación media de las partidas guardadas: " + media);
+            System.out.println("\tPuntuación media de las partidas guardadas: " + media);
         } else {
-            System.out.println("[INFO] No se guardaron partidas con puntuaciones mayores a " + min_score);
+            System.out.println("\tNo se guardaron partidas con puntuaciones mayores a " + min_score);
         }
 	}
+	
+	
+	
+	
+	public void runGameGenerateMultiDataSet(List<PacmanController> pacManControllers, List<GhostController> ghostControllers, int iter, String fileName, boolean DEBUG, int min_score) {
+	    
+	    System.out.println("\n\n[INFO] Comenzando a generar DataSet en archivo: '" + fileName + "'\n");
+	    System.out.printf("\tNumero de iteraciones por combinación: " + iter + "\n");
+	    if(min_score==-1) {
+	        System.out.printf("\tScore Minimo Desactivado \n");
+	    } else {
+	        System.out.printf("\tScore Minimo establecido en: " + min_score + "\n");
+	    }
+	    if(DEBUG) {
+	        System.out.printf("\tModo de depuración activado \n\n");
+	    } else {
+	        System.out.printf("\tModo de depuración desactivado \n\n");
+	    }
+	    
+	    int combinaciones = pacManControllers.size() * ghostControllers.size();
+	    int juegosTotales = combinaciones * iter;
+	    System.out.printf("\tNumero de combinaciones posibles: %d\n", combinaciones);
+	    System.out.printf("\tNumero total de partidas a jugar: %d\n\n", juegosTotales);
+	    
+	    int delay = 0;
+	    List<Integer> savedScores = new ArrayList<>();
+	    long inicio = System.nanoTime();
+	    long lineasIniciales = DataSetRecorder.contarLineas(fileName);
+	    
+	    
+	    //Se generan todas las combinaciones posibles
+	    for (Controller<MOVE> pacManController : pacManControllers) {
+	        for (GhostController ghostController : ghostControllers) {
+	            for (int i = 0; i < iter; i++) {
+	                
+	                Game game = setupGame();
+	                DataSetRecorder dataRecorder = new DataSetRecorder(game);
+	                precompute(pacManController, ghostController);
+	                GameView gv = (visuals) ? setupGameView(pacManController, game) : null;
+	                GhostController ghostControllerCopy = ghostController.copy(ghostPO);
+	                
+	                while (!game.gameOver()) {
+	                    if (tickLimit != -1 && tickLimit < game.getTotalTime()) {
+	                        break;
+	                    }
+	                    handlePeek(game);
+	                    
+	                    MOVE pacmanMove = pacManController.getMove(getPacmanCopy(game), System.currentTimeMillis() + timeLimit);
+	                    dataRecorder.collectGameState(pacmanMove);
+	                    
+	                    game.advanceGame(pacmanMove,
+	                        ghostControllerCopy.getMove(getGhostsCopy(game), System.currentTimeMillis() + timeLimit));
+	                    
+	                    try {
+	                        Thread.sleep(delay);
+	                    } catch (Exception e) {
+	                    }
+	                    
+	                    if (visuals) {
+	                        gv.repaint();
+	                    }
+	                }
+	                
+	                if (min_score == -1 || game.getScore() > min_score) {
+	                    try {
+	                        dataRecorder.saveDataToCsv(fileName, true);
+	                        savedScores.add(game.getScore());
+							if (DEBUG) {
+								System.out.println("[DEBUG] " + i + ". " + pacManController.getName() + " vs "
+										+ ghostController.getName() + " - Estados guardados en: " + fileName
+										+ ".csv con score: " + game.getScore());
+							}
+	                    } catch (IOException e) {
+	                        e.printStackTrace();
+	                    }
+	                }
+	                
+	                postcompute(pacManController, ghostController);
+	            }
+	        }
+	    }
+	    
+	    long fin = System.nanoTime();
+	    long duracion = fin - inicio;
+	    long segundosTotales = duracion / 1_000_000_000;
+	    long horas = segundosTotales / 3600;
+	    long minutos = (segundosTotales % 3600) / 60;
+	    long segundos = segundosTotales % 60;   
+	    long lineasFinales = DataSetRecorder.contarLineas(fileName);
+	    long lineasCreadas = lineasFinales - lineasIniciales;
+	    
+	    System.out.println("\n\n[INFO] Información de ejecución:\n");
+	    System.out.printf("\tTiempo total: %d horas, %d minutos, %d segundos%n", horas, minutos, segundos);
+	    System.out.println("\tLineas iniciales: " + lineasIniciales + ", Lineas creadas: " + lineasCreadas + ", Lineas finales: " + lineasFinales);
+	    
+	    if (!savedScores.isEmpty()) {
+	        double media = savedScores.stream().mapToInt(Integer::intValue).average().orElse(0.0);
+	        System.out.println("\tPuntuación media de las partidas guardadas: " + media);
+	    } else {
+	        System.out.println("\tNo se guardaron partidas con puntuaciones mayores a " + min_score);
+	    }
+	}
+	
 	
 	
 	
@@ -433,6 +566,56 @@ public class ExecutorModes {
 
 		return game.getScore();
 	}
+	
+	
+	/*
+	 * AQUI HAY QUE MIRAR COMO CARGAR LOS DATOS DEL .TXT, LUEGO VER DE QUE FORMA OBTENER UN COLOR U OTRO
+	 * EN FUNCION DEL VALOR DE LA CARACTERISTICA EN CADA INTERSECCION
+	 * 
+	 * Se me ocurre que mientras se ejecuta la partida, estaría bien que escribiendo por consola el nombre de una caracteristica
+	 * se muestre el mapa de calor de esa caracteristica.
+	 * De esta forma en una misma partida se pueden ver todos los mapas de calor sin tener que estar ejecutando cada vez.
+	 * 
+	 */
+	public void runGameHeatMaps(Controller<MOVE> pacManController, GhostController ghostController, int delay) {
+        Game game = setupGame();
+
+        precompute(pacManController, ghostController);
+        
+        GameView gv = (visuals) ? setupGameView(pacManController, game) : null;
+
+        GhostController ghostControllerCopy = ghostController.copy(ghostPO);
+        
+        //System.out.println(Arrays.toString(game.getJunctionIndices()));
+        //System.out.println(game.getJunctionIndices().length);
+
+        while (!game.gameOver()) {
+            if (tickLimit != -1 && tickLimit < game.getTotalTime()) {
+                break;
+            }
+            handlePeek(game);
+            game.advanceGame(
+                    pacManController.getMove(getPacmanCopy(game), System.currentTimeMillis() + timeLimit),
+                    ghostControllerCopy.getMove(getGhostsCopy(game), System.currentTimeMillis() + timeLimit));
+            
+            
+            GameView.addPoints(game, Color.RED, game.getJunctionIndices());
+	        
+
+            try {
+                Thread.sleep(delay);
+            } catch (Exception e) {
+            }
+
+            if (visuals) {
+                gv.repaint();
+            }
+        }
+        System.out.println(game.getScore());
+        
+        postcompute(pacManController, ghostController);
+    }
+	
 	
 
 	private void postcompute(Controller<MOVE> pacManController, GhostController ghostController) {
