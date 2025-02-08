@@ -66,10 +66,6 @@ public class ExecutorModes {
 	private boolean ghostsPOvisual;
 	private static String VERSION = "4.4.0(ICI 24-25 stable version)";
 
-	private Socket socket;
-    private PrintWriter out;
-    private BufferedReader in;
-
 	private static int ERROR_LOG_LEVEL = 2; // 0: no log, 1: error message, 2: error message + stack trace
 
 	public static class Builder {
@@ -253,6 +249,8 @@ public class ExecutorModes {
 	public void runGameGenerateDataSet(Controller<MOVE> pacManController, GhostController ghostController, int iter, String fileName, boolean DEBUG) {
 		
 		int delay = 0;	//El delay entre las ejecuciones es 0, porque queremos que se ejecute lo mas rapido posible
+		int min_score = 3500;;
+		List<Integer> savedScores = new ArrayList<>();
 		
 		long inicio = System.nanoTime();
 		long lineasIniciales = DataSetRecorder.contarLineas(fileName);
@@ -300,16 +298,21 @@ public class ExecutorModes {
 			}
 			
 
-			// Guardo los datos
-			try {
-				dataRecorder.saveDataToCsv(fileName, true);
+			// Solo se guardan los datos si el score ha sido "bueno" --> Supongo 3500
+			if(game.getScore() > min_score) {
 				
-				if(DEBUG) {
-					System.out.println("[DEBUG] " + i + ". Estados correctamente guardados en: " + fileName + ".csv con score: " + game.getScore());
+				try {
+					dataRecorder.saveDataToCsv(fileName, true);
+					savedScores.add(game.getScore());
+					
+					if(DEBUG) {
+						System.out.println("[DEBUG] " + i + ". Estados correctamente guardados en: " + fileName + ".csv con score: " + game.getScore());
+					}
+				} catch (IOException e) {
+					e.printStackTrace();
 				}
-			} catch (IOException e) {
-				e.printStackTrace();
 			}
+			
 
 			postcompute(pacManController, ghostController);
 		}
@@ -321,49 +324,25 @@ public class ExecutorModes {
         long segundosTotales = duracion / 1_000_000_000;
         long horas = segundosTotales / 3600;
         long minutos = (segundosTotales % 3600) / 60;
-        long segundos = segundosTotales % 60;
-        
+        long segundos = segundosTotales % 60;       
         
         
         long lineasFinales = DataSetRecorder.contarLineas(fileName);
         long lineasCreadas = lineasFinales - lineasIniciales;
+        
 
         System.out.println("\n\n[INFO] Información de ejecución:\n");
         System.out.printf("\tTiempo total: %d horas, %d minutos, %d segundos%n", horas, minutos, segundos);
         System.out.println("\tLineas iniciales: " + lineasIniciales + ", Lineas creadas: " + lineasCreadas + ", Lineas finales: " + lineasFinales);
+        
+        //Calcular puntuacion media
+        if (!savedScores.isEmpty()) {
+            double media = savedScores.stream().mapToInt(Integer::intValue).average().orElse(0.0);
+            System.out.println("[INFO] Puntuación media de las partidas guardadas: " + media);
+        } else {
+            System.out.println("[INFO] No se guardaron partidas con puntuaciones mayores a " + min_score);
+        }
 	}
-
-	private int connectToSocket(String host, int port) {
-        try {
-            socket = new Socket(host, port);
-            out = new PrintWriter(socket.getOutputStream(), true);
-            in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            return 0; // Conexión exitosa
-        } catch (Exception e) {
-            System.out.println("Error al conectar con el servidor: " + e.getMessage());
-            return -1;
-        }
-    }
-
-    private void sendGameState(String gameState) {
-        if (out != null) {
-            out.println(gameState);
-        }
-    }
-
-    private String receivePacmanMove() throws Exception {
-        return in != null ? in.readLine() : null;
-    }
-
-    private void closeSocket() {
-        try {
-            if (socket != null && !socket.isClosed()) {
-                socket.close();
-            }
-        } catch (Exception e) {
-            System.out.println("Error al cerrar el socket: " + e.getMessage());
-        }
-    }
 	
 	
 	
@@ -376,12 +355,25 @@ public class ExecutorModes {
 		
 		// Instancia de la clase que maneja el socket
 		
-		if (connectToSocket("localhost", 12345) == -1) {
-            return -1; 
-        }
+		String host = "localhost";
+	    int port = 12345;
+	    Socket socket;
+	    PrintWriter out;
+	    BufferedReader in;
+	    try {
+	        socket = new Socket(host, port);
+	        out = new PrintWriter(socket.getOutputStream(), true);
+	        in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+	    } catch (Exception e) {
+	        System.out.println("Error al conectar con el servidor: " + e.getMessage());
+	        return -1; // Termina si no se puede conectar
+	    }
+		
 		
 		precompute(pacManController, ghostController);
+
 		GameView gv = (visuals) ? setupGameView(pacManController, game) : null;
+
 		GhostController ghostControllerCopy = ghostController.copy(ghostPO);
 
 		while (!game.gameOver()) {
@@ -390,19 +382,23 @@ public class ExecutorModes {
 			}
 			handlePeek(game);		
 			
+			
 			MOVE pacmanMove = MOVE.NEUTRAL;
+			
 			
 			// Solo pide calcular el movimineto de Pacman, cuando pasa por una interseccion
 			if(game.isJunction(game.getPacmanCurrentNodeIndex())) {
+				
 				// Obtener gamaState filtrado
 				String filteredGameState = gameFilter.getActualGameState();				
 				
 				try {
 					// Pasar gameState filtrado por el socket				
-					sendGameState(filteredGameState);
+					out.println(filteredGameState);
 
 					// Obtener respuesta del socket con el movimiento
-					String respuesta = receivePacmanMove();
+					String respuesta = in.readLine();
+					
 					System.out.println(respuesta);
 					
 					pacmanMove = MOVE.valueOf(respuesta);
