@@ -64,7 +64,6 @@ public final class GameView extends JComponent {
     private Color[] redAlphas;
 
     ///////////////////////////////////////////////
-    ////// Visual aids for debugging: start ///////
     ///////////////////////////////////////////////
     private int predictionTicks;
 

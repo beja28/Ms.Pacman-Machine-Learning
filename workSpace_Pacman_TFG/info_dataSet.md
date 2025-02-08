@@ -33,8 +33,6 @@
 
 ##### Columnas que faltan de calcular
 - Añadir 1 columna con la distancia del path mas corto a la pill mas cercana (puede ser util cuando ya no quedan PP y no hay fantasmas cerca)
-- Añadir 1 columna, con el tiempo restante de la PP activa (sería añadir el tiempo edible de cada fantasma)
-
 
 
 <br>
