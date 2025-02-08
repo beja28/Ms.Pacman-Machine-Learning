@@ -249,6 +249,8 @@ public class ExecutorModes {
 	public void runGameGenerateDataSet(Controller<MOVE> pacManController, GhostController ghostController, int iter, String fileName, boolean DEBUG) {
 		
 		int delay = 0;	//El delay entre las ejecuciones es 0, porque queremos que se ejecute lo mas rapido posible
+		int min_score = 3500;;
+		List<Integer> savedScores = new ArrayList<>();
 		
 		long inicio = System.nanoTime();
 		long lineasIniciales = DataSetRecorder.contarLineas(fileName);
@@ -296,16 +298,21 @@ public class ExecutorModes {
 			}
 			
 
-			// Guardo los datos
-			try {
-				dataRecorder.saveDataToCsv(fileName, true);
+			// Solo se guardan los datos si el score ha sido "bueno" --> Supongo 3500
+			if(game.getScore() > min_score) {
 				
-				if(DEBUG) {
-					System.out.println("[DEBUG] " + i + ". Estados correctamente guardados en: " + fileName + ".csv con score: " + game.getScore());
+				try {
+					dataRecorder.saveDataToCsv(fileName, true);
+					savedScores.add(game.getScore());
+					
+					if(DEBUG) {
+						System.out.println("[DEBUG] " + i + ". Estados correctamente guardados en: " + fileName + ".csv con score: " + game.getScore());
+					}
+				} catch (IOException e) {
+					e.printStackTrace();
 				}
-			} catch (IOException e) {
-				e.printStackTrace();
 			}
+			
 
 			postcompute(pacManController, ghostController);
 		}
@@ -317,16 +324,24 @@ public class ExecutorModes {
         long segundosTotales = duracion / 1_000_000_000;
         long horas = segundosTotales / 3600;
         long minutos = (segundosTotales % 3600) / 60;
-        long segundos = segundosTotales % 60;
-        
+        long segundos = segundosTotales % 60;       
         
         
         long lineasFinales = DataSetRecorder.contarLineas(fileName);
         long lineasCreadas = lineasFinales - lineasIniciales;
+        
 
         System.out.println("\n\n[INFO] Información de ejecución:\n");
         System.out.printf("\tTiempo total: %d horas, %d minutos, %d segundos%n", horas, minutos, segundos);
         System.out.println("\tLineas iniciales: " + lineasIniciales + ", Lineas creadas: " + lineasCreadas + ", Lineas finales: " + lineasFinales);
+        
+        //Calcular puntuacion media
+        if (!savedScores.isEmpty()) {
+            double media = savedScores.stream().mapToInt(Integer::intValue).average().orElse(0.0);
+            System.out.println("[INFO] Puntuación media de las partidas guardadas: " + media);
+        } else {
+            System.out.println("[INFO] No se guardaron partidas con puntuaciones mayores a " + min_score);
+        }
 	}
 	
 	

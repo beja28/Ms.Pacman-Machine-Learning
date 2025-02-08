@@ -33,7 +33,7 @@ es.ucm.fdi.ici.c2223.practica2.grupo02.Ghosts (3704)
 
 public class ExecutorTestDataSet {
 	
-	private final static int ITERS = 15000;
+	private final static int ITERS = 10000;
 
     public static void main(String[] args) {
     	ExecutorModes executor = new ExecutorModes.Builder()
