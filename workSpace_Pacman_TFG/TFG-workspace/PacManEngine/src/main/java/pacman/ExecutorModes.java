@@ -487,60 +487,60 @@ public class ExecutorModes {
 	
 	
 	public int runGameSocketConection(Controller<MOVE> pacManController, GhostController ghostController, int delay) {
-    Game game = setupGame();
-    GameStateFilter gameFilter = new GameStateFilter(game);
-    GhostController ghostControllerCopy = ghostController.copy(ghostPO);
+		Game game = setupGame();
+		GameStateFilter gameFilter = new GameStateFilter(game);
+		GhostController ghostControllerCopy = ghostController.copy(ghostPO);
 
-    // Crear instancia de SocketPython
-    SocketPython socketPython;
-    try {
-        socketPython = new SocketPython("localhost", 12345);
-    } catch (Exception e) {
-        System.out.println(e.getMessage());
-        return -1; // Termina si no se puede conectar
-    }
+		// Crear instancia de SocketPython
+		SocketPython socketPython;
+		try {
+			socketPython = new SocketPython("localhost", 12345);
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+			return -1; // Termina si no se puede conectar
+		}
 
-    precompute(pacManController, ghostController);
-    GameView gv = (visuals) ? setupGameView(pacManController, game) : null;
+		precompute(pacManController, ghostController);
+		GameView gv = (visuals) ? setupGameView(pacManController, game) : null;
 
-    while (!game.gameOver()) {
-        if (tickLimit != -1 && tickLimit < game.getTotalTime()) {
-            break;
-        }
-        handlePeek(game);
+		while (!game.gameOver()) {
+			if (tickLimit != -1 && tickLimit < game.getTotalTime()) {
+				break;
+			}
+			handlePeek(game);
 
-        MOVE pacmanMove = MOVE.NEUTRAL;
+			MOVE pacmanMove = MOVE.NEUTRAL;
 
-        if (game.isJunction(game.getPacmanCurrentNodeIndex())) {
-            String filteredGameState = gameFilter.getActualGameState();
-            String response = socketPython.sendGameState(filteredGameState);
+			if (game.isJunction(game.getPacmanCurrentNodeIndex())) {
+				String filteredGameState = gameFilter.getActualGameState();
+				String response = socketPython.sendGameState(filteredGameState);
 
-            try {
-                pacmanMove = MOVE.valueOf(response);
-            } catch (Exception e) {
-                System.out.println("Respuesta inválida del servidor: " + response);
-                break;
-            }
-        }
+				try {
+					pacmanMove = MOVE.valueOf(response);
+				} catch (Exception e) {
+					System.out.println("Respuesta inválida del servidor: " + response);
+					break;
+				}
+			}
 
-        game.advanceGame(pacmanMove,
-                ghostControllerCopy.getMove(getGhostsCopy(game), System.currentTimeMillis() + timeLimit));
+			game.advanceGame(pacmanMove,
+					ghostControllerCopy.getMove(getGhostsCopy(game), System.currentTimeMillis() + timeLimit));
 
-        try {
-            Thread.sleep(delay);
-        } catch (Exception e) {}
+			try {
+				Thread.sleep(delay);
+			} catch (Exception e) {}
 
-        if (visuals) {
-            gv.repaint();
-        }
-    }
+			if (visuals) {
+				gv.repaint();
+			}
+		}
 
-    socketPython.close();
-    System.out.println(game.getScore());
-    postcompute(pacManController, ghostController);
+		socketPython.close();
+		System.out.println(game.getScore());
+		postcompute(pacManController, ghostController);
 
-    return game.getScore();
-}
+		return game.getScore();
+	}
 	
 	
 	/*
