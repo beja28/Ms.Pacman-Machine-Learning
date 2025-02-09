@@ -11,13 +11,20 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.io.File;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumMap;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 import java.util.function.Function;
+
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,6 +46,8 @@ import pacman.game.dataManager.GameStateFilter;
 import pacman.game.internal.Node;
 import pacman.game.internal.POType;
 import pacman.game.util.Stats;
+import pacman.game.heatmap.HeatMap;
+
 
 /**
  * This class may be used to execute the game in timed or un-timed modes, with
@@ -578,43 +587,93 @@ public class ExecutorModes {
 	 * 
 	 */
 	public void runGameHeatMaps(Controller<MOVE> pacManController, GhostController ghostController, int delay) {
-        Game game = setupGame();
+		boolean imageSaved = false;
+		
+		String directorioActual = System.getProperty("user.dir"); // Esto te da el directorio raíz del proyecto
+		
+		// Construir la ruta relativa a 'mapas_explicabilidad' (Ajustar en funcion de si es sklearn o pytorch)
+		Path mapsPath = Paths.get(directorioActual, "mapas_explicabilidad_txt_pytorch"); 
+		
+	    Game game = setupGame();
+	    precompute(pacManController, ghostController);
 
-        precompute(pacManController, ghostController);
-        
-        GameView gv = (visuals) ? setupGameView(pacManController, game) : null;
+	    GameView gv = (visuals) ? setupGameView(pacManController, game) : null;
+	    GhostController ghostControllerCopy = ghostController.copy(ghostPO);
 
-        GhostController ghostControllerCopy = ghostController.copy(ghostPO);
-        
-        //System.out.println(Arrays.toString(game.getJunctionIndices()));
-        //System.out.println(game.getJunctionIndices().length);
+	    // Lista de las 10 características mas importantes segun la explicabilidad en sklearn
+	    String[] selectedFeatures_sklearn = {
+	        "score", "euclideanDistanceToPp", "pathDistanceToPp", "totalTime", "timeOfLastGlobalReversal",
+	        "ghost3NodeIndex", "pacmanLastMoveMade_LEFT", "pacmanLastMoveMade_UP", "pacmanLastMoveMade_DOWN", "ghost1NodeIndex"
+	    };
+	    
+	    // Lista de las 10 características mas importantes segun la explicabilidad en pytorch
+	    String[] selectedFeatures_pytorch = {
+	        "score", "totalTime", "timeOfLastGlobalReversal", "ghost3NodeIndex", "ghost4NodeIndex",
+	        "ghost2NodeIndex", "ghost1NodeIndex", "scoreDiff50", "scoreDiff25", "ghost3EdibleTime"
+	    };
 
-        while (!game.gameOver()) {
-            if (tickLimit != -1 && tickLimit < game.getTotalTime()) {
-                break;
-            }
-            handlePeek(game);
-            game.advanceGame(
-                    pacManController.getMove(getPacmanCopy(game), System.currentTimeMillis() + timeLimit),
-                    ghostControllerCopy.getMove(getGhostsCopy(game), System.currentTimeMillis() + timeLimit));
-            
-            
-            GameView.addPoints(game, Color.RED, game.getJunctionIndices());
+	    // Carpeta donde se guardarán los mapas de calor
+	    Path heatmapFolder = Paths.get(directorioActual, "mapas_pytorch");
+	    new File(heatmapFolder.toString()).mkdirs(); // Crea la carpeta si no existe
+
+	    Map<String, Map<Integer, Double>> heatmapData = new HashMap<>();
+
+	    // Cargar los datos de los 10 archivos seleccionados (elegir entre sklearn / pytorch)
+	    for (String feature : selectedFeatures_pytorch) {
+	        String filePath = mapsPath.toString();
+	        Map<Integer, Double> featureData = HeatMap.loadHeatMapData(filePath, feature);
+	        heatmapData.put(feature, featureData);
+	    }
+	    
+
+	    while (!game.gameOver()) {
+	        if (tickLimit != -1 && tickLimit < game.getTotalTime()) {
+	            break;
+	        }
+
+	        handlePeek(game);
+	        game.advanceGame(
+	            pacManController.getMove(getPacmanCopy(game), System.currentTimeMillis() + timeLimit),
+	            ghostControllerCopy.getMove(getGhostsCopy(game), System.currentTimeMillis() + timeLimit)
+	        );
+
+	        // Para cada característica, dibuja su mapa de calor (cambiar dependiendo de sklearn o pytorch)
+	        for (String feature : selectedFeatures_pytorch) {
+	            Map<Integer, Double> data = heatmapData.get(feature);
+	            if (data != null) {
+	                for (Map.Entry<Integer, Double> entry : data.entrySet()) {
+	                    int intersection = entry.getKey();
+	                    double impact = entry.getValue();
+	                    Color color = HeatMap.getColorFromImpact(impact);
+	                    GameView.addPoints(game, color, intersection);
+	                }
+	            }
+	            
+		        if(!imageSaved && visuals) {
+		        	HeatMap.saveMap(game, heatmapFolder, gv, feature); // Guardar el mapa solo en el primer tick
+		        }
+	            
+	        }
+	        
+        	imageSaved = true;
+	        
 	        
 
-            try {
-                Thread.sleep(delay);
-            } catch (Exception e) {
-            }
+	        try {
+	            Thread.sleep(delay);
+	        } catch (Exception e) {
+	            e.printStackTrace();
+	        }
 
-            if (visuals) {
-                gv.repaint();
-            }
-        }
-        System.out.println(game.getScore());
-        
-        postcompute(pacManController, ghostController);
-    }
+	        if (visuals) {
+	            gv.repaint();
+	        }
+	    }
+
+
+	    postcompute(pacManController, ghostController);
+	}
+
 	
 	
 
