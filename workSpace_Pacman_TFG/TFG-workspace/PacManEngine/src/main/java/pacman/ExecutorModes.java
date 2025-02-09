@@ -486,95 +486,61 @@ public class ExecutorModes {
 	}
 	
 	
-	
-	
 	public int runGameSocketConection(Controller<MOVE> pacManController, GhostController ghostController, int delay) {
-		Game game = setupGame();
-		
-		//Se crea una instancia de la clase que se encarga de procesar el estado actual del juego
-		GameStateFilter gameFilter = new GameStateFilter(game);
-		
-		
-		// Instancia de la clase que maneja el socket
-		
-		String host = "localhost";
-	    int port = 12345;
-	    Socket socket;
-	    PrintWriter out;
-	    BufferedReader in;
-	    try {
-	        socket = new Socket(host, port);
-	        out = new PrintWriter(socket.getOutputStream(), true);
-	        in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-	    } catch (Exception e) {
-	        System.out.println("Error al conectar con el servidor: " + e.getMessage());
-	        return -1; // Termina si no se puede conectar
-	    }
-		
-		
-		precompute(pacManController, ghostController);
+    Game game = setupGame();
+    GameStateFilter gameFilter = new GameStateFilter(game);
+    GhostController ghostControllerCopy = ghostController.copy(ghostPO);
 
-		GameView gv = (visuals) ? setupGameView(pacManController, game) : null;
+    // Crear instancia de SocketPython
+    SocketPython socketPython;
+    try {
+        socketPython = new SocketPython("localhost", 12345);
+    } catch (Exception e) {
+        System.out.println(e.getMessage());
+        return -1; // Termina si no se puede conectar
+    }
 
-		GhostController ghostControllerCopy = ghostController.copy(ghostPO);
+    precompute(pacManController, ghostController);
+    GameView gv = (visuals) ? setupGameView(pacManController, game) : null;
 
-		while (!game.gameOver()) {
-			if (tickLimit != -1 && tickLimit < game.getTotalTime()) {
-				break;
-			}
-			handlePeek(game);		
-			
-			
-			MOVE pacmanMove = MOVE.NEUTRAL;
-			
-			
-			// Solo pide calcular el movimineto de Pacman, cuando pasa por una interseccion
-			if(game.isJunction(game.getPacmanCurrentNodeIndex())) {
-				
-				// Obtener gamaState filtrado
-				String filteredGameState = gameFilter.getActualGameState();				
-				
-				try {
-					// Pasar gameState filtrado por el socket				
-					out.println(filteredGameState);
+    while (!game.gameOver()) {
+        if (tickLimit != -1 && tickLimit < game.getTotalTime()) {
+            break;
+        }
+        handlePeek(game);
 
-					// Obtener respuesta del socket con el movimiento
-					String respuesta = in.readLine();
-					
-					System.out.println(respuesta);
-					
-					pacmanMove = MOVE.valueOf(respuesta);
-					
-				} catch (Exception e) {
-		            System.out.println("Error durante la comunicación con el servidor: " + e.getMessage());
-		            break; // Finaliza el bucle si ocurre un error de comunicación
-		        }
-			}							
-			
-			/*
-			game.advanceGame(pacManController.getMove(getPacmanCopy(game), System.currentTimeMillis() + timeLimit),
-					ghostControllerCopy.getMove(getGhostsCopy(game), System.currentTimeMillis() + timeLimit));
-			*/
-			
-			// Pacman ejecuta ese movimiento
-			game.advanceGame(pacmanMove,
-					ghostControllerCopy.getMove(getGhostsCopy(game), System.currentTimeMillis() + timeLimit));
-			
-			try {
-				Thread.sleep(delay);
-			} catch (Exception e) {
-			}
+        MOVE pacmanMove = MOVE.NEUTRAL;
 
-			if (visuals) {
-				gv.repaint();
-			}
-		}
-		System.out.println(game.getScore());
+        if (game.isJunction(game.getPacmanCurrentNodeIndex())) {
+            String filteredGameState = gameFilter.getActualGameState();
+            String response = socketPython.sendGameState(filteredGameState);
 
-		postcompute(pacManController, ghostController);
+            try {
+                pacmanMove = MOVE.valueOf(response);
+            } catch (Exception e) {
+                System.out.println("Respuesta inválida del servidor: " + response);
+                break;
+            }
+        }
 
-		return game.getScore();
-	}
+        game.advanceGame(pacmanMove,
+                ghostControllerCopy.getMove(getGhostsCopy(game), System.currentTimeMillis() + timeLimit));
+
+        try {
+            Thread.sleep(delay);
+        } catch (Exception e) {}
+
+        if (visuals) {
+            gv.repaint();
+        }
+    }
+
+    socketPython.close();
+    System.out.println(game.getScore());
+    postcompute(pacManController, ghostController);
+
+    return game.getScore();
+}
 	
 	
 	/*
