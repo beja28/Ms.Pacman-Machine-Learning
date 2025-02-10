@@ -10,14 +10,14 @@ import java.net.Socket;
 import pacman.controllers.GhostController;
 import pacman.controllers.PacmanController;
 
-public class socketPython {
+public class SocketPython {
     private String host;
     private int port;
     private Socket socket;
     private PrintWriter out;
     private BufferedReader in;
 
-    public socketPython(String host, int port) throws Exception {
+    public SocketPython(String host, int port) throws Exception {
         this.host = host;
         this.port = port;
         connect();
