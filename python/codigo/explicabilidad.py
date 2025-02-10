@@ -6,6 +6,7 @@ from sklearn.inspection import permutation_importance
 import pandas as pd
 import matplotlib.pyplot as plt
 import os
+import torch.nn.functional as F
 
 
 class Explicabilidad:
@@ -21,6 +22,9 @@ class Explicabilidad:
             self.explicabilidad_feature_importance(model, model_filename, X, Y)
         elif technique == "lime":
             self.explicabilidad_lime(model, model_filename, X)
+            
+    def model_with_softmax(x, model):
+        return F.softmax(model(x), dim=1)
     
     def explicabilidad_shap(self, model, model_filename, X, key):
         """Implementación de SHAP para explicar las predicciones del modelo."""
@@ -40,7 +44,7 @@ class Explicabilidad:
                 
                 print(f"Ejecuta la explicabilidad para el modelo {model_filename}")
                 
-                explainer = shap.DeepExplainer(model, data_tensor)
+                explainer = shap.DeepExplainer(self.model_with_softmax, data_tensor)
                 
                 data_to_explain = X.sample(n=10)
                 data_to_explain_tensor = torch.tensor(data_to_explain.values, dtype=torch.float32).to(device)
@@ -281,10 +285,10 @@ class Explicabilidad:
         """
         
         if model == "pytorch":       
-            path_completo = os.path.join(directorio, "mapas_explicabilidad_pytorch")
+            path_completo = os.path.join(directorio, "mapas_explicabilidad_txt_pytorch")
             os.makedirs(path_completo, exist_ok=True)  # Crea la carpeta si no existe
         elif model == "sklearn":
-            path_completo = os.path.join(directorio, "mapas_explicabilidad_sklearn")
+            path_completo = os.path.join(directorio, "mapas_explicabilidad_txt_sklearn")
             os.makedirs(path_completo, exist_ok=True)  # Crea la carpeta si no existe
         
         impacto_intersecciones = self.calcular_impacto_por_interseccion()
