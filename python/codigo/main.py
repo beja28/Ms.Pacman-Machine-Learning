@@ -13,7 +13,7 @@ import argparse
 
 # --- CREAR PATHS USANDO RUTAS RELATIVAS ---
 directorio_actual = os.path.dirname(os.path.abspath(__file__))
-dataset_path = os.path.join(directorio_actual, '..', '..', 'DataSets', '03_gameStatesData.csv')
+dataset_path = os.path.join(directorio_actual, '..', '..', 'DataSets', '05_gameStatesData.csv')
 dataset_path = os.path.normpath(dataset_path)
 path_trained = os.path.join(directorio_actual, 'Redes_Entrenadas')
 path_trained = os.path.normpath(path_trained)

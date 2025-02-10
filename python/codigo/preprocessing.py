@@ -15,7 +15,22 @@ categories = {
 
 # Función de preprocesamiento del CSV con mapeo de 'PacmanMove' a números
 def preprocess_csv(path):
+    
+    line_count = 0
+
+    # Leemos el archivo en bloques (chunks)
+    chunk_size = 1000000 
+
+    for chunk in pd.read_csv(path, chunksize=chunk_size):
+        line_count += len(chunk)
+        
     df = pd.read_csv(path)
+    
+    # Compruebo que se hayan leido todas las lineas del csv
+    if len(df) == line_count:
+        print("Se han leído todas las líneas del CSV.")
+    else:
+        print("No se han leído todas las líneas del CSV.")
     
     # Mapeo de la columna 'PacmanMove' a números
     move_mapping = {
