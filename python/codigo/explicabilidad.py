@@ -25,22 +25,29 @@ class explicabilidad:
     def explicabilidad_shap(self, model, X):
         try:
             """Implementación de SHAP para explicar las predicciones del modelo."""
-            if isinstance(model, torch.nn.Module): # Comprueba que tipo de modelo es
+            if isinstance(model, torch.nn.Module):  # Comprueba que es un modelo de PyTorch
+                torch.set_grad_enabled(True)
                 background_data = X.sample(n=500)
-                data_tensor = torch.tensor(background_data.values, dtype=torch.float32)
-                
+                data_tensor = torch.from_numpy(background_data.to_numpy()).float()
+
                 # Configurar dispositivo
                 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
                 model.to(device)
+                #model.eval()  # Poner el modelo en modo evaluación
                 data_tensor = data_tensor.to(device)
-                
+
                 explainer = shap.DeepExplainer(model, data_tensor)
-                
+
                 data_to_explain = X.sample(n=50)
-                data_to_explain_tensor = torch.tensor(data_to_explain.values, dtype=torch.float32).to(device)
-                
+                data_to_explain_tensor = torch.from_numpy(data_to_explain.to_numpy()).float().to(device)
+
                 shap_values = explainer.shap_values(data_to_explain_tensor)
-                shap.summary_plot(shap_values, data_to_explain, plot_type="bar")
+
+                # Manejar múltiples salidas si es necesario
+                if isinstance(shap_values, list):
+                    shap.summary_plot(shap_values[4], data_to_explain)  # Explica la primera salida
+                else:
+                    shap.summary_plot(shap_values, data_to_explain,)
             else:
                 background_data = shap.sample(X, 500)
                 explainer = shap.KernelExplainer(model.predict, background_data)
