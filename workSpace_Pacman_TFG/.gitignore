@@ -1,3 +1,9 @@
+.settings
+/target/
+.project
+.classpath
+/lib/
+
 # Archivos compilados de Java
 *.class
 
