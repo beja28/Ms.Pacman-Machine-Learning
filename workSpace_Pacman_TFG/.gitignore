@@ -1,0 +1,46 @@
+# Archivos compilados de Java
+*.class
+
+# Archivos generados por el compilador
+*.log
+*.jar
+*.war
+*.ear
+
+# Directorios de compilación
+/target/
+/bin/
+/out/
+
+/*.iml
+/.idea/
+/*.ipr
+/.vscode/
+
+# Archivos de configuración de IDEs
+/.project
+/.classpath
+/.settings/
+*.launch
+*.swp
+*~.nfs
+
+# Dependencias de Maven
+/.m2/
+/target/
+
+# Archivos generados por el sistema operativo
+.DS_Store
+Thumbs.db
+
+# Archivos de registros
+*.log
+*.sql
+
+# Archivos temporales del editor
+*~
+*.bak
+*.swp
+
+# Archivos generados por el sistema de control de versiones
+.git
