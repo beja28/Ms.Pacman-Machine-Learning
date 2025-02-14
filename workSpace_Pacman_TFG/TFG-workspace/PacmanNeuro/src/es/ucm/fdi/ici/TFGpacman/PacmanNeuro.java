@@ -28,7 +28,7 @@ public class PacmanNeuro extends PacmanController{
     @Override
     public MOVE getMove(Game game, long timeDue) {
      
-    	//HAY QUE RECOLECTAR EL ESTADO DEL JUEGO EN TODAS LAS LLAMADAS
+    	//HAY QUE RECOLECTAR EL ESTADO DEL JUEGO EN TODAS LAS LLAMADAS, porque sino se calcula mal el score
     	
     	if (game.isJunction(game.getPacmanCurrentNodeIndex())) {
 			String filteredGameState = gameFilter.getActualGameState();
@@ -49,7 +49,7 @@ public class PacmanNeuro extends PacmanController{
 
 	
 	public String getName() {
-		return "Pacman Neuroanl";
+		return "Pacman Neuronal";
 	}
 
 }
