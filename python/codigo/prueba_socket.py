@@ -31,16 +31,16 @@ def model_for_prediction(model_type, n_features, n_classes, intersection_id=None
     """
 
     if model_type == 'sklearn':
-        model_filename = f'mlp_trained_model_2024-12-13_({intersection_id},).pkl'
-        full_model_path = os.path.join(path_trained, 'models_2024-12-13', model_filename)
+        model_filename = f'mlp_trained_model_2025-02-12_({intersection_id},).pkl'
+        full_model_path = os.path.join(path_trained, 'models_2025-02-12', model_filename)
                 
         mlp_model = joblib.load(full_model_path)
         return mlp_model, None
     
     elif model_type == 'pytorch':
        
-        model_filename = f'pytorch_model_2024-12-14_({intersection_id},).pth'
-        full_model_path = os.path.join(path_trained, 'models_2024-12-14', model_filename)
+        model_filename = f'pytorch_model_2025-02-14_({intersection_id},).pth'
+        full_model_path = os.path.join(path_trained, 'models_2025-02-14', model_filename)
         
         modelPytorch = MyModelPyTorch(n_features, n_classes)
         modelPytorch.load_state_dict(torch.load(full_model_path, weights_only=True))
