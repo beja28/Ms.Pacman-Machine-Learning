@@ -48,12 +48,17 @@ public class DataSetRecorder {
         	filteredState.add(0, pacmanMove.toString());
         	
         	//Se calculan las nuevas variables que queremos, y se añaden
-        	String finalState = gameStateFilter.addNewVariablesToFilteredState(filteredState);    		
+        	String finalState = gameStateFilter.addNewVariablesToFilteredState(filteredState);
+        	
+        	
+        	
+        	//HAY QUE GUARDAR LOS ESTADOS EN UN BUFFER PORQUE ESTAN INCOMPLETOS, HAY QUE ESPERAR X TIEMPO PARA CALCULAR
+        	
+        	
+        	
     		
     		validGameStates.add(finalState);
     	}
-    	
-    	gameStateFilter.addPreviousScore(Integer.valueOf(game.getScore()));
     }
 
     

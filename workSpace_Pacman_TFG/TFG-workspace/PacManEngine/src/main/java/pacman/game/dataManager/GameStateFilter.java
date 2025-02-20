@@ -66,15 +66,8 @@ public class GameStateFilter {
     
     
         
-    // Añade nuevas variables al estado del juego
+    // Añade nuevas variables al estado del juego, en ese instante de tiempo
     public String addNewVariablesToFilteredState(List<String> gameState) {
-    	//3 variables adicionales con las puntuaciones obtenidas en los 10, 25 y 50 anteriores ticks de ejecucion
-    	int scoreDiff10 = calculateScoreDifference(game.getScore(), 10);
-        int scoreDiff25 = calculateScoreDifference(game.getScore(), 25);
-        int scoreDiff50 = calculateScoreDifference(game.getScore(), 50);
-        gameState.add(scoreDiff10 + "");
-    	gameState.add(scoreDiff25 + "");
-    	gameState.add(scoreDiff50 + "");    	
 
     	//Distancia del path a los fantasmas
     	for (GHOST ghost : GHOST.values()) {
@@ -93,19 +86,6 @@ public class GameStateFilter {
         gameState.add(remainingPPills + "");
 
         return String.join(",", gameState);
-    }
-    
-    
-       
-    // Calcula la diferencia de puntuacion en estados anteriores
-    public int calculateScoreDifference(int currentScore, int ticks) {
-    	
-        if (previousScores.size() >= ticks) {
-            return currentScore - previousScores.get(previousScores.size() - ticks);
-        }
-                
-        //En caso de que no se pueda calcular
-        return -1;
     }
 
         
