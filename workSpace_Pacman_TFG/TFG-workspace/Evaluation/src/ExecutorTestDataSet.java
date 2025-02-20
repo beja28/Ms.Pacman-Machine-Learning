@@ -48,7 +48,27 @@ public class ExecutorTestDataSet {
         GhostController ghosts = new es.ucm.fdi.ici.c2324.practica1.grupo08.Ghosts();
         
         
-        executor.runGameGenerateDataSet(pacMan, ghosts, ITERS, "03_gameStatesData", true);          
+        
+        /**
+         * Ejecuta una serie de simulaciones del juego y genera un dataset en un archivo .csv
+         * 
+         * @param pacManController  Controlador de Pacman
+         * @param ghostController   Controlador de los fantasmas
+         * @param iter              Num de iteraciones o partidas a jugar
+         * @param fileName          Nombre del archivo .csv donde se guardan los datos (si no existe se crea)
+         * @param DEBUG             Indica si se quiere activar o desactivar el modo de depuracion
+         * @param min_score         Puntos minimos requeridos para guardar los datos de una partida (-1 para desactivar el filtro)
+         * 
+         * La funcion realiza las siguientes acciones:
+         * - Configura el entorno del juego.
+         * - Ejecuta iteraciones del juego con los controladores proporcionados
+         * - Almacena los estados del juego en un archivo .csv si se cumplen las condiciones
+         * - Muestra informacion sobre el proceso de ejecucion, incluyendo el tiempo total de ejecucion 
+         *   y el numero de líneas creadas en el dataset
+         * - Si se activa el modo de DEBUG, imprime informacion detallada sobre cada iteracion
+         */
+
+        executor.runGameGenerateDataSet(pacMan, ghosts, ITERS, "04_gameStatesData", true, 3500);          
     }
 	
 }
