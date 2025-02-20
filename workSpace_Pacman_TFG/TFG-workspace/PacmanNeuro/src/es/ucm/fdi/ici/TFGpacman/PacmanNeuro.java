@@ -30,7 +30,7 @@ public class PacmanNeuro extends PacmanController{
      
     	//HAY QUE RECOLECTAR EL ESTADO DEL JUEGO EN TODAS LAS LLAMADAS, porque sino se calcula mal el score
     	
-    	if (game.isJunction(game.getPacmanCurrentNodeIndex())) {
+    	/*if (game.isJunction(game.getPacmanCurrentNodeIndex())) {
 			String filteredGameState = gameFilter.getActualGameState();
 			String response = socketPython.sendGameState(filteredGameState);
 
@@ -40,9 +40,9 @@ public class PacmanNeuro extends PacmanController{
 				System.out.println("Respuesta inválida del servidor: " + response);
 				break;
 			}
-		}
+		}*/
 
-		return move;
+		return MOVE.NEUTRAL;
 
 	}    
     
