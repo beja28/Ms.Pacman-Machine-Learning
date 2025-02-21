@@ -9,32 +9,11 @@ import pacman.game.Constants.GHOST;
 public class GameStateFilter {
 
 	private Game game;
-	private List<Integer> previousScores;
 	
 	
 	public GameStateFilter(Game game) {
 		this.game = game;
-		this.previousScores = new ArrayList<>();
 	}
-		
-	
-	public void addPreviousScore(Integer score) {
-		this.previousScores.add(score);
-	}
-	
-	
-	//Obtiene el estado actual del juego filtrado
-    public String getActualGameState() {
-    	
-    	//Se recoge el estado del juego y se eliminan las caracteristicas que no queremos
-    	List<String> filteredState = filterGameState(game.getGameState());
-    	
-      	//Se calculan las nuevas variables que queremos, y se añaden
-    	String finalState = addNewVariablesToFilteredState(filteredState);
-    	
-    	return finalState;
-    }
-    
 
     
     //Filtra un string con el estado del juego, quita las variables que no queremos y devuelve una lista con las restantes
@@ -67,7 +46,7 @@ public class GameStateFilter {
     
         
     // Añade nuevas variables al estado del juego, en ese instante de tiempo
-    public String addNewVariablesToFilteredState(List<String> gameState) {
+    public List<String> addNewVariablesToFilteredState(List<String> gameState) {
 
     	//Distancia del path a los fantasmas
     	for (GHOST ghost : GHOST.values()) {
@@ -85,9 +64,15 @@ public class GameStateFilter {
         int remainingPPills = getRemainingPowerPills();
         gameState.add(remainingPPills + "");
 
-        return String.join(",", gameState);
+        return gameState;
     }
 
+    
+    public String calculatePendingState(List<String> state) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+    
         
     // Calcula la distancia del "path" mas corto entre dos nodos
     public int calculateShortestPathDistance(int pacmanNode, int targetNode) {
@@ -159,5 +144,6 @@ public class GameStateFilter {
     	//Retorna la longitud del array de PP activas
         return game.getActivePowerPillsIndices().length;
     }
+
 
 }
