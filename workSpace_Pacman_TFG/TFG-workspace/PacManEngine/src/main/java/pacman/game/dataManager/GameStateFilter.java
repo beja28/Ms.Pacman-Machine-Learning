@@ -4,15 +4,21 @@ import java.util.ArrayList;
 import java.util.List;
 
 import pacman.game.Game;
+import pacman.game.Constants.DM;
 import pacman.game.Constants.GHOST;
 
 public class GameStateFilter {
 
 	private Game game;
+	private List<Integer> previousScores;
+	private int lastJuctionIndex;
 	
+	public static final int MAX_TIME = 25;
 	
 	public GameStateFilter(Game game) {
 		this.game = game;
+		this.previousScores = new ArrayList<>();
+		this.lastJuctionIndex = 1;
 	}
 
     
@@ -68,10 +74,95 @@ public class GameStateFilter {
     }
 
     
-    public String calculatePendingState(List<String> state) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    //Guarda en cada tick el score correspondiente
+    public void addPreviousScore(int score) {
+        
+    	previousScores.add(score);       
+    }
+    
+    
+    //Actualiza la posicion de la ultima interseccion
+    public void updateLastJuctionIndex(int idx) {
+    	
+    	this.lastJuctionIndex = idx;
+    }
+    
+    
+    //Si en un estado a muerto pacman, calcular cuantos ticks anteriores han pasado hasta la ultima decision tomada
+    public void updatePacmanDead() {
+    	
+    	if(game.wasPacManEaten()) {
+    		int actIdx = game.getPacmanCurrentNodeIndex();
+    		double dist = game.getDistance(lastJuctionIndex, actIdx, DM.PATH);
+    		//Se resta la puntuacion a esos estados anteriores
+        	decrementScoreIfEaten(dist, 100);
+    	}    	
+    }
+    
+
+    
+    public void decrementScoreIfEaten(double dist, int decrement) {
+    	
+        int size = previousScores.size();
+        int elementsToDecrement = Math.min((int) dist, size);
+
+        for (int i = size - elementsToDecrement; i < size; i++) {
+            previousScores.set(i, previousScores.get(i) - decrement);
+        }
+    }
+
+    
+    
+    //Comprueba si un estado lleva suficiente tiempo guardado en la cola
+    public boolean isDiffTime(List<String> state) {    	
+    	boolean diffTime = false;
+    	
+    	String strTime = state.get(1); //Representa la columna TotalTime
+    	int time = Integer.parseInt(strTime);
+    	
+    	if(game.getTotalTime() - time >= MAX_TIME) {
+    		diffTime = true;
+    	}
+    	
+		
+		return diffTime;
+    }
+    
+    
+    //Funcion que devuelve si un estado es "Entrenable"    
+    public boolean isValidGameState(List<String> state) {    	
+        boolean valid = false;
+        
+        int initialScore = previousScores.get(previousScores.size() - MAX_TIME); //Score inicial
+        
+        //Diferencia de score en distintos momentos
+        int scoreDiff10 = calculateScoreDifference(initialScore, 15);
+        int scoreDiff25 = calculateScoreDifference(initialScore, 0);
+
+        
+        int pillsRestantes = game.getNumberOfActivePills(); //Numero de pills restantes
+
+        //Normalizamos los valores dividiéndolos por las pills restantes ya que el score no es lineal con el tiempo
+        double scoreRate10 = (double) scoreDiff10 / (pillsRestantes + 1);
+        double scoreRate25 = (double) scoreDiff25 / (pillsRestantes + 1);
+
+        //Pesos crecientes
+        double weightedScore = (0.35 * scoreRate10) + (0.65 * scoreRate25);
+
+        double umbral = initialScore * 1.5; //Veo cual seria su mejora del 50%
+
+        //Umbral para considerar el estado "Entrenable"
+        valid = weightedScore >= umbral; 
+
+        return valid;
+    }
+
+    
+    
+    // Muestra la diferencia de score que hay desde que se realizo el movimiento hasta el tick (100 - ticks)
+    public int calculateScoreDifference(int initialScore, int ticks) {    	
+        return initialScore - previousScores.get(previousScores.size() - ticks);
+    }
     
         
     // Calcula la distancia del "path" mas corto entre dos nodos

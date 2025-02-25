@@ -24,7 +24,7 @@ public class DataSetVariables {
 	public static final List<String> VARIABLES_BORRAR_GAME_STATE = Arrays.asList(
 	        "currentLevelTime", "levelCount", "pillsState", "pillWasEaten", 
 	        "powerPillWasEaten", "powerPillsState", "pacmanLivesRemaining", 
-	        "pacmanReceivedExtraLife", "mazeIndex"
+	        "pacmanReceivedExtraLife", "mazeIndex", "pacmanLastMoveMade"
 	);
 
 	
