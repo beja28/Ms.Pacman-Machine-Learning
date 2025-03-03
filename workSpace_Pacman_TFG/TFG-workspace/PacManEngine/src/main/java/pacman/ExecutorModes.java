@@ -47,7 +47,6 @@ import pacman.game.internal.Node;
 import pacman.game.internal.POType;
 import pacman.game.util.Stats;
 import pacman.game.heatmap.HeatMap;
-import pacman.game.socket.SocketPython;
 
 
 /**

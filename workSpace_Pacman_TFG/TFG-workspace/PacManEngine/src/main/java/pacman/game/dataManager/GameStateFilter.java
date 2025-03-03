@@ -129,39 +129,46 @@ public class GameStateFilter {
     }
     
     
-    //Funcion que devuelve si un estado es "Entrenable"    
-    public boolean isValidGameState(List<String> state) {    	
+    public boolean isValidGameState(List<String> state) {
         boolean valid = false;
-        
-        int initialScore = previousScores.get(previousScores.size() - MAX_TIME); //Score inicial
-        
-        //Diferencia de score en distintos momentos
+
+        // Score inicial
+        int initialScore = previousScores.get(previousScores.size() - MAX_TIME);
+
+        // Diferencia de score en distintos momentos
         int scoreDiff10 = calculateScoreDifference(initialScore, 15);
         int scoreDiff25 = calculateScoreDifference(initialScore, 0);
 
+        // Métricas de tiempo
+        int timeElapsed = game.getTotalTime();
+        double progressFactorInitial = (double) (timeElapsed - 25) / 4000.0;
+        double progressFactor10 = (double) (timeElapsed - 15) / 4000.0;
+        double progressFactor25 = (double) timeElapsed / 4000.0;
+
         
-        int pillsRestantes = game.getNumberOfActivePills(); //Numero de pills restantes
 
-        //Normalizamos los valores dividiéndolos por las pills restantes ya que el score no es lineal con el tiempo
-        double scoreRate10 = (double) scoreDiff10 / (pillsRestantes + 1);
-        double scoreRate25 = (double) scoreDiff25 / (pillsRestantes + 1);
+        // Normalización basada en tiempo restante
+        double normalizedScore10 = (scoreDiff10 * (1 - progressFactor10));
+        double normalizedScore25 = (scoreDiff25 * (1 - progressFactor25));
+        double normalizedInitialScore = (initialScore * (1 - progressFactorInitial));
+        
+        // Pesos ajustados en función del progreso de la partida
+        double weightedScore = (normalizedScore10) + (normalizedScore25);
 
-        //Pesos crecientes
-        double weightedScore = (0.35 * scoreRate10) + (0.65 * scoreRate25);
+        // Umbral dinámico ajustado en función del tiempo transcurrido
+        double umbral = normalizedInitialScore * (1.2-(0.5*progressFactorInitial));
 
-        double umbral = initialScore * 1.5; //Veo cual seria su mejora del 50%
-
-        //Umbral para considerar el estado "Entrenable"
-        valid = weightedScore >= umbral; 
-
+        valid = weightedScore >= umbral;
+        System.out.println("Se han jugado" + (game.getTotalTime()));
         return valid;
     }
 
     
     
     // Muestra la diferencia de score que hay desde que se realizo el movimiento hasta el tick (100 - ticks)
-    public int calculateScoreDifference(int initialScore, int ticks) {    	
-        return initialScore - previousScores.get(previousScores.size() - ticks);
+    public int calculateScoreDifference(int initialScore, int ticks) {  
+    	if((previousScores.size() - ticks) < 0) System.out.println("Mi polla con corbata");
+        return previousScores.get(previousScores.size() - ticks -1) - initialScore;
     }
     
         
