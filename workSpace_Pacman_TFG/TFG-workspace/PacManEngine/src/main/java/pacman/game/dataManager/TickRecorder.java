@@ -13,9 +13,9 @@ public class TickRecorder {
 	public TickRecorder(Game game) {
 		this.game = game;
 		this.gameStateFilter = new GameStateFilter(game);
-	}	
+	}
 	
-
+	
 	public String collectTick() {
 
 		// Se recoge el estado del juego y se eliminan las caracteristicas que no queremos

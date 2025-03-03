@@ -5,7 +5,6 @@ import java.util.Arrays;
 
 import pacman.controllers.PacmanController;
 import pacman.game.Constants.MOVE;
-import pacman.game.socket.SocketPython;
 import pacman.game.Game;
 import pacman.game.dataManager.TickRecorder;
 
