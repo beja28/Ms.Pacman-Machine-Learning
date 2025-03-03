@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="lib" path="lib/ici-c2021-practica2.jar"/>
+	<classpathentry kind="lib" path="lib/ici-c2122-practica1.jar"/>
+	<classpathentry kind="lib" path="lib/ici-c2122-practica2.jar"/>
+	<classpathentry kind="lib" path="lib/ici-c2223-practica1.jar"/>
+	<classpathentry kind="lib" path="lib/ici-c2223-practica2.jar"/>
+	<classpathentry kind="lib" path="lib/ici-c2324-practica1.jar"/>
+	<classpathentry kind="lib" path="lib/ici-c2324-practica2.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER">
+		<attributes>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry combineaccessrules="false" kind="src" path="/PacManEngine"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
