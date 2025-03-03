@@ -57,7 +57,7 @@ public class ExecutorTestMultiDataSet {
         ghostControllers.add(new es.ucm.fdi.ici.c2324.practica2.grupo04.Ghosts());
         
         
-        int ITERS = 100;
+        int ITERS = 1;
         String fileName = "pruebas_multi01";
         boolean DEBUG = true;
         int min_score = -1;
