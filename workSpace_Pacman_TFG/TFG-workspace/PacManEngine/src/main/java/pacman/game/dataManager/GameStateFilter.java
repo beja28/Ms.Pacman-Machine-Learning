@@ -95,7 +95,8 @@ public class GameStateFilter {
     		int actIdx = game.getPacmanCurrentNodeIndex();
     		double dist = game.getDistance(lastJuctionIndex, actIdx, DM.PATH);
     		//Se resta la puntuacion a esos estados anteriores
-        	decrementScoreIfEaten(dist, 100);
+        	//decrementScoreIfEaten(dist, 1000);
+        	game.decreaseTotalScore(100);
     	}    	
     }
     
@@ -138,36 +139,19 @@ public class GameStateFilter {
         // Diferencia de score en distintos momentos
         int scoreDiff10 = calculateScoreDifference(initialScore, 15);
         int scoreDiff25 = calculateScoreDifference(initialScore, 0);
-
-        // Métricas de tiempo
-        int timeElapsed = game.getTotalTime();
-        double progressFactorInitial = (double) (timeElapsed - 25) / 4000.0;
-        double progressFactor10 = (double) (timeElapsed - 15) / 4000.0;
-        double progressFactor25 = (double) timeElapsed / 4000.0;
-
         
-
-        // Normalización basada en tiempo restante
-        double normalizedScore10 = (scoreDiff10 * (1 - progressFactor10));
-        double normalizedScore25 = (scoreDiff25 * (1 - progressFactor25));
-        double normalizedInitialScore = (initialScore * (1 - progressFactorInitial));
+        if(scoreDiff10 < 0 || scoreDiff25 < 0) {
+        	System.out.println("Se han jugado" + (game.getTotalTime()));
+        	System.out.println("Aqui le han comio");
+        }
         
-        // Pesos ajustados en función del progreso de la partida
-        double weightedScore = (normalizedScore10) + (normalizedScore25);
+        valid = (0.35*scoreDiff10 + 0.65*scoreDiff25) >= 0;
 
-        // Umbral dinámico ajustado en función del tiempo transcurrido
-        double umbral = normalizedInitialScore * (1.2-(0.5*progressFactorInitial));
-
-        valid = weightedScore >= umbral;
-        System.out.println("Se han jugado" + (game.getTotalTime()));
         return valid;
     }
-
-    
     
     // Muestra la diferencia de score que hay desde que se realizo el movimiento hasta el tick (100 - ticks)
     public int calculateScoreDifference(int initialScore, int ticks) {  
-    	if((previousScores.size() - ticks) < 0) System.out.println("Mi polla con corbata");
         return previousScores.get(previousScores.size() - ticks -1) - initialScore;
     }
     
