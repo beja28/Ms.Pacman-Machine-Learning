@@ -2278,4 +2278,10 @@ public final class Game {
     String getGhostsControllerName() {
     	return this.GhostsControllerName;
     }
+    
+    
+    //FUNCION HECHA POR NOSOTROS DENTRO DEL MOTOR DEL JUEGO, solo se usa cuando se genera el dataset
+    public void decreaseTotalScore(int sc) {
+    	this.score -= sc;
+    }
 }

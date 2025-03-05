@@ -4,37 +4,22 @@ import java.util.ArrayList;
 import java.util.List;
 
 import pacman.game.Game;
+import pacman.game.Constants.DM;
 import pacman.game.Constants.GHOST;
 
 public class GameStateFilter {
 
 	private Game game;
 	private List<Integer> previousScores;
+	private int lastJuctionIndex;
 	
+	public static final int MAX_TIME = 25;
 	
 	public GameStateFilter(Game game) {
 		this.game = game;
 		this.previousScores = new ArrayList<>();
+		this.lastJuctionIndex = 1;
 	}
-		
-	
-	public void addPreviousScore(Integer score) {
-		this.previousScores.add(score);
-	}
-	
-	
-	//Obtiene el estado actual del juego filtrado
-    public String getActualGameState() {
-    	
-    	//Se recoge el estado del juego y se eliminan las caracteristicas que no queremos
-    	List<String> filteredState = filterGameState(game.getGameState());
-    	
-      	//Se calculan las nuevas variables que queremos, y se añaden
-    	String finalState = addNewVariablesToFilteredState(filteredState);
-    	
-    	return finalState;
-    }
-    
 
     
     //Filtra un string con el estado del juego, quita las variables que no queremos y devuelve una lista con las restantes
@@ -66,15 +51,8 @@ public class GameStateFilter {
     
     
         
-    // Añade nuevas variables al estado del juego
-    public String addNewVariablesToFilteredState(List<String> gameState) {
-    	//3 variables adicionales con las puntuaciones obtenidas en los 10, 25 y 50 anteriores ticks de ejecucion
-    	int scoreDiff10 = calculateScoreDifference(game.getScore(), 10);
-        int scoreDiff25 = calculateScoreDifference(game.getScore(), 25);
-        int scoreDiff50 = calculateScoreDifference(game.getScore(), 50);
-        gameState.add(scoreDiff10 + "");
-    	gameState.add(scoreDiff25 + "");
-    	gameState.add(scoreDiff50 + "");    	
+    // Añade nuevas variables al estado del juego, en ese instante de tiempo
+    public List<String> addNewVariablesToFilteredState(List<String> gameState) {
 
     	//Distancia del path a los fantasmas
     	for (GHOST ghost : GHOST.values()) {
@@ -92,22 +70,93 @@ public class GameStateFilter {
         int remainingPPills = getRemainingPowerPills();
         gameState.add(remainingPPills + "");
 
-        return String.join(",", gameState);
-    }
-    
-    
-       
-    // Calcula la diferencia de puntuacion en estados anteriores
-    public int calculateScoreDifference(int currentScore, int ticks) {
-    	
-        if (previousScores.size() >= ticks) {
-            return currentScore - previousScores.get(previousScores.size() - ticks);
-        }
-                
-        //En caso de que no se pueda calcular
-        return -1;
+        return gameState;
     }
 
+    
+    //Guarda en cada tick el score correspondiente
+    public void addPreviousScore(int score) {
+        
+    	previousScores.add(score);       
+    }
+    
+    
+    //Actualiza la posicion de la ultima interseccion
+    public void updateLastJuctionIndex(int idx) {
+    	
+    	this.lastJuctionIndex = idx;
+    }
+    
+    
+    //Si en un estado a muerto pacman, calcular cuantos ticks anteriores han pasado hasta la ultima decision tomada
+    public void updatePacmanDead() {
+    	
+    	if(game.wasPacManEaten()) {
+    		int actIdx = game.getPacmanCurrentNodeIndex();
+    		double dist = game.getDistance(lastJuctionIndex, actIdx, DM.PATH);
+    		//Se resta la puntuacion a esos estados anteriores
+        	//decrementScoreIfEaten(dist, 1000);
+        	game.decreaseTotalScore(100);
+    	}    	
+    }
+    
+
+    
+    public void decrementScoreIfEaten(double dist, int decrement) {
+    	
+        int size = previousScores.size();
+        int elementsToDecrement = Math.min((int) dist, size);
+
+        for (int i = size - elementsToDecrement; i < size; i++) {
+            previousScores.set(i, previousScores.get(i) - decrement);
+        }
+    }
+
+    
+    
+    //Comprueba si un estado lleva suficiente tiempo guardado en la cola
+    public boolean isDiffTime(List<String> state) {    	
+    	boolean diffTime = false;
+    	
+    	String strTime = state.get(1); //Representa la columna TotalTime
+    	int time = Integer.parseInt(strTime);
+    	
+    	if(game.getTotalTime() - time >= MAX_TIME) {
+    		diffTime = true;
+    	}
+    	
+		
+		return diffTime;
+    }
+    
+    
+    public boolean isValidGameState(List<String> state) {
+        boolean valid = false;
+
+        // Score inicial
+        int initialScore = previousScores.get(previousScores.size() - MAX_TIME);
+
+        // Diferencia de score en distintos momentos
+        int scoreDiff10 = calculateScoreDifference(initialScore, 15);
+        int scoreDiff25 = calculateScoreDifference(initialScore, 0);
+        
+        /*
+        if(scoreDiff10 < 0 || scoreDiff25 < 0) {
+        	System.out.println("Se han jugado" + (game.getTotalTime()));
+        	System.out.println("Aqui le han comio");
+        }
+        */
+        
+        valid = (0.35*scoreDiff10 + 0.65*scoreDiff25) >= 0;
+
+        return valid;
+    }
+    
+    // Muestra la diferencia de score que hay desde que se realizo el movimiento hasta el tick (100 - ticks)
+    public int calculateScoreDifference(int initialScore, int ticks) {  
+        return previousScores.get(previousScores.size() - ticks -1) - initialScore;
+    }
+    
         
     // Calcula la distancia del "path" mas corto entre dos nodos
     public int calculateShortestPathDistance(int pacmanNode, int targetNode) {
@@ -179,5 +228,6 @@ public class GameStateFilter {
     	//Retorna la longitud del array de PP activas
         return game.getActivePowerPillsIndices().length;
     }
+
 
 }

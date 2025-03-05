@@ -11,7 +11,9 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 import java.util.Set;
 
 import pacman.game.Constants.GHOST;
@@ -22,6 +24,7 @@ import pacman.game.Game;
 public class DataSetRecorder {
     
     private List<String> validGameStates;
+    private Queue<List<String>> bufferGameStates;
     private GameStateFilter gameStateFilter;
     private Set<Integer> junctionNodes;
     
@@ -29,6 +32,7 @@ public class DataSetRecorder {
 
     public DataSetRecorder(Game game) {
         this.validGameStates = new ArrayList<>();
+        this.bufferGameStates = new LinkedList<>();
         this.gameStateFilter = new GameStateFilter(game);
         this.game = game;
         this.junctionNodes = new HashSet<>();
@@ -38,22 +42,48 @@ public class DataSetRecorder {
     
     public void collectGameState(MOVE pacmanMove) {
     	
+    	//Procesar estados pendientes
+    	processBufferStates();
+    	gameStateFilter.addPreviousScore(game.getScore());
+    	gameStateFilter.updatePacmanDead();
+    	
+    	
     	//Si Pacman se encuentra en una INTERSECCION...
     	if(junctionNodes.contains(game.getPacmanCurrentNodeIndex())) {
+    		gameStateFilter.updateLastJuctionIndex(game.getPacmanCurrentNodeIndex());
     		
     		//Se recoge el estado del juego y se eliminan las caracteristicas que no queremos
         	List<String> filteredState = gameStateFilter.filterGameState(game.getGameState());
         	
         	//Se añade la etiqueta (la posicion de Pacman) 
-        	filteredState.add(0, pacmanMove.toString());
+        	filteredState.add(0, pacmanMove.toString());	//El resto de posiciones se desplaza a la derecha
         	
-        	//Se calculan las nuevas variables que queremos, y se añaden
-        	String finalState = gameStateFilter.addNewVariablesToFilteredState(filteredState);    		
-    		
-    		validGameStates.add(finalState);
-    	}
-    	
-    	gameStateFilter.addPreviousScore(Integer.valueOf(game.getScore()));
+        	//Se calculan las nuevas variables que queremos en ese instante, y se añaden
+        	List<String> pendingState = gameStateFilter.addNewVariablesToFilteredState(filteredState);
+        	
+        	//Se guarda el estado en la cola, para procesarlo cuando pasa X tiempo
+        	bufferGameStates.add(pendingState);      	
+		}
+	}
+	
+	
+    private void processBufferStates() {
+    	//Como mucho solo se puede procesar un estado en un instante
+        if (!bufferGameStates.isEmpty()) {
+        	
+        	//Se obtiene el primer elemento de la cola sin eliminarlo
+            List<String> state = bufferGameStates.peek();
+            
+            //Se comprueba si el estado ha pasado sufiente tiempo
+            if (gameStateFilter.isDiffTime(state)) {
+            	
+            	//Se comprueba si es valido
+            	if(gameStateFilter.isValidGameState(state)) {	//Se guarda
+            		validGameStates.add(String.join(",", state));
+            	}
+                bufferGameStates.poll();	//Se elimina de la cola
+            }
+        }
     }
 
     
