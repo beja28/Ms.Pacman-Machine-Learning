@@ -140,10 +140,12 @@ public class GameStateFilter {
         int scoreDiff10 = calculateScoreDifference(initialScore, 15);
         int scoreDiff25 = calculateScoreDifference(initialScore, 0);
         
+        /*
         if(scoreDiff10 < 0 || scoreDiff25 < 0) {
         	System.out.println("Se han jugado" + (game.getTotalTime()));
         	System.out.println("Aqui le han comio");
         }
+        */
         
         valid = (0.35*scoreDiff10 + 0.65*scoreDiff25) >= 0;
 

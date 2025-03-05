@@ -35,8 +35,6 @@ es.ucm.fdi.ici.c2223.practica2.grupo02.Ghosts (3704)
 
 
 public class ExecutorTestMultiDataSet {
-	
-	private final static int ITERS = 10000;
 
     public static void main(String[] args) {
     	ExecutorModes executor = new ExecutorModes.Builder()
@@ -47,7 +45,7 @@ public class ExecutorTestMultiDataSet {
 
     	
     	List<PacmanController> pacManControllers = new ArrayList<>();
-        pacManControllers.add(new es.ucm.fdi.ici.c2223.practica2.grupo06.MsPacMan());
+        pacManControllers.add(new es.ucm.fdi.ici.c2223.practica1.grupo06.MsPacMan());
         pacManControllers.add(new es.ucm.fdi.ici.c2223.practica1.grupo10.MsPacMan());
         pacManControllers.add(new es.ucm.fdi.ici.c2223.practica1.grupo07.MsPacMan());
         pacManControllers.add(new es.ucm.fdi.ici.c2223.practica2.grupo02.MsPacMan());
@@ -58,9 +56,9 @@ public class ExecutorTestMultiDataSet {
         ghostControllers.add(new es.ucm.fdi.ici.c2324.practica2.grupo01.Ghosts());
         
         
-        int ITERS = 1000;
-        String fileName = "06_gameStatesData";
-        boolean DEBUG = true;
+        int ITERS = 10;
+        String fileName = "pruebas_multi01";
+        boolean DEBUG = false;
         int min_score = -1;
         
         
