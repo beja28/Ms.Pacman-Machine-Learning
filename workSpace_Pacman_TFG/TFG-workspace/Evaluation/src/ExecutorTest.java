@@ -40,11 +40,11 @@ public class ExecutorTest {
                 .setScaleFactor(2.5)
                 .build();
 
-        //PacmanController pacMan = new HumanController(new KeyBoardInput());
-        PacmanController pacMan = new es.ucm.fdi.ici.c2223.practica1.grupo06.MsPacMan();
+        PacmanController pacMan = new HumanController(new KeyBoardInput());
+        //PacmanController pacMan = new es.ucm.fdi.ici.c2223.practica1.grupo06.MsPacMan();
         GhostController ghosts = new es.ucm.fdi.ici.c2324.practica1.grupo08.Ghosts();
         
-        executor.runGame(pacMan, ghosts, 30, true); //last parameter defines speed     
+        executor.runGame(pacMan, ghosts, 100, true); //last parameter defines speed     
     }
 	
 }

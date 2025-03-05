@@ -24,15 +24,14 @@ public class DataSetVariables {
 	public static final List<String> VARIABLES_BORRAR_GAME_STATE = Arrays.asList(
 	        "currentLevelTime", "levelCount", "pillsState", "pillWasEaten", 
 	        "powerPillWasEaten", "powerPillsState", "pacmanLivesRemaining", 
-	        "pacmanReceivedExtraLife", "mazeIndex"
+	        "pacmanReceivedExtraLife", "mazeIndex", "pacmanLastMoveMade"
 	);
 
 	
 	// Variables que quiero añadir al estado del juego
 	public static final List<String> VARIABLES_AGREGAR_GAME_STATE = Arrays.asList(
-	        "scoreDiff10", "scoreDiff25", "scoreDiff50", "ghost1Distance", "ghost2Distance",
-	        "ghost3Distance", "ghost4Distance", "euclideanDistanceToPp", "pathDistanceToPp",
-	        "remainingPp"
+	        "ghost1Distance", "ghost2Distance", "ghost3Distance", "ghost4Distance", "euclideanDistanceToPp",
+	        "pathDistanceToPp", "remainingPp"
 	);
 	
 	
