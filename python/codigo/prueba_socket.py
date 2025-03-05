@@ -12,7 +12,7 @@ import numpy as np
 directorio_actual = os.path.dirname(os.path.abspath(__file__))
 
 # Construir la ruta que sube dos niveles desde 'codigo' y entra en 'DataSets'
-dataset_path = os.path.join(directorio_actual, '..', '..', 'DataSets', '03_gameStatesData.csv')
+dataset_path = os.path.join(directorio_actual, '..', '..', 'DataSets', '06_gameStatesData.csv')
 
 # Normalizar la ruta para evitar problemas con distintos sistemas operativos
 dataset_path = os.path.normpath(dataset_path)
@@ -39,8 +39,8 @@ def model_for_prediction(model_type, n_features, n_classes, intersection_id=None
     
     elif model_type == 'pytorch':
        
-        model_filename = f'pytorch_model_2025-02-14_({intersection_id},).pth'
-        full_model_path = os.path.join(path_trained, 'models_2025-02-14', model_filename)
+        model_filename = f'pytorch_model_2025-03-05_({intersection_id},).pth'
+        full_model_path = os.path.join(path_trained, 'models_2025-03-05', model_filename)
         
         modelPytorch = MyModelPyTorch(n_features, n_classes)
         modelPytorch.load_state_dict(torch.load(full_model_path, weights_only=True))
