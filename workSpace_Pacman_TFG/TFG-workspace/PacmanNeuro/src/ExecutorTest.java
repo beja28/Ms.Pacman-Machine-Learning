@@ -1,5 +1,5 @@
 import es.ucm.fdi.ici.TFGpacman.GhostsRandom;
-import es.ucm.fdi.ici.TFGpacman.PacmanNeuro;
+import es.ucm.fdi.ici.TFGpacman.PacManNeuro;
 import pacman.Executor;
 import pacman.controllers.GhostController;
 import pacman.controllers.PacmanController;
@@ -10,12 +10,12 @@ public class ExecutorTest {
     	
     	Executor executor = new Executor.Builder()
                 .setTickLimit(4000)
-                .setVisual(false)
+                .setVisual(true)
                 .setScaleFactor(2.5)
                 .build();
 
     	
-    	PacmanController pacMan = new PacmanNeuro();
+    	PacmanController pacMan = new PacManNeuro();
         GhostController ghosts = new GhostsRandom();
         
         executor.runGame(pacMan, ghosts, 40);

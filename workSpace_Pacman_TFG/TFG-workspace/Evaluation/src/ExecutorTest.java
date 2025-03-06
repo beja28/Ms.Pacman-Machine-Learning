@@ -3,6 +3,8 @@ import pacman.controllers.GhostController;
 import pacman.controllers.HumanController;
 import pacman.controllers.KeyBoardInput;
 import pacman.controllers.PacmanController;
+import es.ucm.fdi.ici.TFGpacman.PacManNeuro;
+
 
 /*	ICI HALL-OF-FAME
 
@@ -40,8 +42,8 @@ public class ExecutorTest {
                 .setScaleFactor(2.5)
                 .build();
 
-        PacmanController pacMan = new HumanController(new KeyBoardInput());
-        //PacmanController pacMan = new es.ucm.fdi.ici.c2223.practica1.grupo06.MsPacMan();
+        //PacmanController pacMan = new HumanController(new KeyBoardInput());
+        PacmanController pacMan = new PacManNeuro();
         GhostController ghosts = new es.ucm.fdi.ici.c2324.practica1.grupo08.Ghosts();
         
         executor.runGame(pacMan, ghosts, 100, true); //last parameter defines speed     
