@@ -7,16 +7,14 @@ import pacman.game.Game;
 
 public class TickRecorder {
 	
-	private GameStateFilter gameStateFilter;
-	private Game game;
-	
-	public TickRecorder(Game game) {
-		this.game = game;
-		this.gameStateFilter = new GameStateFilter(game);
+	public TickRecorder() {
 	}
 	
 	
-	public String collectTick() {
+	public String collectTick(Game game) {
+		
+		GameStateFilter gameStateFilter = new GameStateFilter(game);
+		
 
 		// Se recoge el estado del juego y se eliminan las caracteristicas que no queremos
 		List<String> filteredState = gameStateFilter.filterGameState(game.getGameState());
