@@ -31,8 +31,8 @@ def model_for_prediction(model_type, n_features, n_classes, intersection_id=None
     """
 
     if model_type == 'sklearn':
-        model_filename = f'mlp_trained_model_2025-02-12_({intersection_id},).pkl'
-        full_model_path = os.path.join(path_trained, 'models_2025-02-12', model_filename)
+        model_filename = f'mlp_trained_model_2025-03-05_({intersection_id},).pkl'
+        full_model_path = os.path.join(path_trained, 'models_2025-03-06', model_filename)
                 
         mlp_model = joblib.load(full_model_path)
         return mlp_model, None
@@ -68,11 +68,12 @@ def get_prediction(model_type, mensaje, n_features, n_classes):
         # Seleccionar el índice con el valor máximo para obtener el movimiento predicho
         predicted_index = torch.argmax(prediccion)      
     elif model_type == 'sklearn':
-        prediccion = mlp_model.predict(preprocessed_state) 
-        predicted_index = np.argmax(prediccion) # Como prediccion no es un tensor si no una lista en este caso, usamos np en vez de torch
+        probabilidades = mlp_model.predict_proba(preprocessed_state)  # Obtiene las probabilidades de cada clase
+        predicted_index = np.argmax(probabilidades)  # Índice de la clase con mayor probabilidad
+        prediccion = np.max(probabilidades)  # Obtiene el valor máximo de probabilidad
     
 
-    moves = ['RIGHT', 'LEFT', 'UP', 'DOWN', 'NEUTRAL']
+    moves = ['UP', 'DOWN', 'LEFT', 'RIGHT', 'NEUTRAL']
     predicted_move = moves[predicted_index]
     
     return predicted_move
@@ -120,6 +121,7 @@ def start_socket(model_type, n_features, n_classes):
         predicted_move = get_prediction(model_type, mensaje, n_features, n_classes)
         
         respuesta = f"{predicted_move}\n" 
+        print(respuesta)
         conn.sendall(respuesta.encode('utf-8'))  # Enviar respuesta codificada en UTF-8
 
     conn.close()
