@@ -5,6 +5,10 @@ import java.util.List;
 public class MessagePrinter {
     private boolean debugMode;
 
+    public MessagePrinter() {
+        this.debugMode = true;
+    }    
+    
     public MessagePrinter(boolean debugMode) {
         this.debugMode = debugMode;
     }
