@@ -44,7 +44,7 @@ public class ExecutorTest {
 
         //PacmanController pacMan = new HumanController(new KeyBoardInput());
         PacmanController pacMan = new PacManNeuro();
-        GhostController ghosts = new es.ucm.fdi.ici.c2324.practica1.grupo08.Ghosts();
+        GhostController ghosts = new es.ucm.fdi.ici.c2324.practica2.grupo02.Ghosts();
         
         executor.runGame(pacMan, ghosts, 100, true); //last parameter defines speed     
     }
