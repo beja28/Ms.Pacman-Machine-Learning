@@ -414,7 +414,7 @@ public class ExecutorModes {
 	                        handlePeek(game);
 	                        
 	                        MOVE pacmanMove = pacManController.getMove(getPacmanCopy(game), System.currentTimeMillis() + timeLimit);
-	                        dataRecorder.collectGameState(pacmanMove);
+	                        dataRecorder.collectGameState(pacmanMove, game);
 	                        
 	                        game.advanceGame(pacmanMove,
 	                            ghostControllerCopy.getMove(getGhostsCopy(game), System.currentTimeMillis() + timeLimit));
@@ -424,7 +424,7 @@ public class ExecutorModes {
 	                        }
 	                    }
 	                } catch (Exception e) {
-	                    printer.mostrarError("[ERROR] Se produjo un error durante la ejecucion del juego entre: " + pacManController.getName() + " vs "
+	                    printer.mostrarError("Se produjo un error durante la ejecucion del juego entre: " + pacManController.getName() + " vs "
                                 + ghostController.getName());
 	                    gameSuccess = false;
 	                }
