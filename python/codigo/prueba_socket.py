@@ -2,6 +2,9 @@ import os
 import socket
 import joblib
 import torch
+import signal
+import sys
+import select
 from preprocessing import preprocess_game_state
 from model_pytorch import MyModelPyTorch
 import numpy as np
@@ -96,12 +99,50 @@ def start_socket(model_type, n_features, n_classes):
     #Crear socket
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_socket.bind((HOST, PORT))
-
-    #Escuchar conexiones entrantes
-    server_socket.listen()
-
+    server_socket.listen() #Escuchar conexiones entrantes
     print(f"Servidor escuchando en {HOST}:{PORT}")
 
+    # Manejar señales de cierre (CTRL+C o SIGTERM)
+    def close_server(sig, frame):
+        print("\nRecibida señal de cierre. Cerrando socket...")
+        server_socket.close()
+        sys.exit(0)
+
+    signal.signal(signal.SIGINT, close_server)  
+    signal.signal(signal.SIGTERM, close_server)  
+
+    while True:
+        try:
+            readable, _, _ = select.select([server_socket], [], [], 1.0)
+            if server_socket in readable:
+                conn, addr = server_socket.accept()
+                print(f"Conectado con {addr}")
+
+                while True:
+                    data = conn.recv(1024)
+                    if not data:
+                        print("El cliente cerró la conexión.")
+                        break
+
+                    mensaje = data.decode('utf-8')
+                    predicted_move = get_prediction(model_type, mensaje, n_features, n_classes)
+                    
+
+                    print(f"Datos recibidos: {mensaje}", end="")
+                    print(f"Enviando respuesta: {predicted_move}")
+                    print()
+
+                    respuesta = f"{predicted_move}\n"
+                    conn.sendall(respuesta.encode('utf-8'))
+
+                conn.close()
+                print("Esperando nueva conexión...")
+
+        except ConnectionResetError:
+            print("Error: El cliente cerró la conexión de manera abrupta.")
+
+
+    """
     #Aceptar conexión
     conn, addr = server_socket.accept()
     print(f"Conectado con {addr}")
@@ -125,3 +166,4 @@ def start_socket(model_type, n_features, n_classes):
         conn.sendall(respuesta.encode('utf-8'))  # Enviar respuesta codificada en UTF-8
 
     conn.close()
+    """
