@@ -87,10 +87,6 @@ def identify_intersection(preprocessed_state):
     
     return intersection.iloc[0]
     
-    
-
-    
-    
 def start_socket(model_type, n_features, n_classes):
     #Configuración
     HOST = 'localhost'  # Podemos poner una IP o localhost
@@ -140,30 +136,3 @@ def start_socket(model_type, n_features, n_classes):
 
         except ConnectionResetError:
             print("Error: El cliente cerró la conexión de manera abrupta.")
-
-
-    """
-    #Aceptar conexión
-    conn, addr = server_socket.accept()
-    print(f"Conectado con {addr}")
-
-    
-
-    #Recibir datos
-    while True:
-        data = conn.recv(1024)  # El 1024 es el número máximo de bytes que se intenta recibir
-        if not data:
-            break
-
-        mensaje = data.decode('utf-8')
-        print(f"Datos recibidos: {mensaje}")
-        
-        # Obtener la predicción usando el modelo seleccionado
-        predicted_move = get_prediction(model_type, mensaje, n_features, n_classes)
-        
-        respuesta = f"{predicted_move}\n" 
-        print(respuesta)
-        conn.sendall(respuesta.encode('utf-8'))  # Enviar respuesta codificada en UTF-8
-
-    conn.close()
-    """
