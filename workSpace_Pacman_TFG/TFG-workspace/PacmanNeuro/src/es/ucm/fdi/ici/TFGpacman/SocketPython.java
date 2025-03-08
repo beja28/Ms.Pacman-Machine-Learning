@@ -9,6 +9,7 @@ import java.net.Socket;
 
 import pacman.controllers.GhostController;
 import pacman.controllers.PacmanController;
+import pacman.game.consolePrinter.MessagePrinter;
 
 public class SocketPython {
     private String host;
@@ -16,40 +17,70 @@ public class SocketPython {
     private Socket socket;
     private PrintWriter out;
     private BufferedReader in;
+    private MessagePrinter printer;
 
-    public SocketPython(String host, int port) throws Exception {
+    public SocketPython(String host, int portprivate, MessagePrinter ptr) throws Exception {
         this.host = host;
-        this.port = port;
+        this.port = portprivate;
+        this.printer = ptr;
         connect();
     }
 
     private void connect() throws Exception {
         try {
-            socket = new Socket(host, port);
+        	if (socket != null && !socket.isClosed()) {
+                close();  // Cerrar conexión previa si existe
+            }
+        	
+            socket = new Socket(this.host, this.port);
             out = new PrintWriter(socket.getOutputStream(), true);
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            
+            printer.mostrarInfo("Conectado a Python en " + host + ":" + port);
         } catch (Exception e) {
-            throw new Exception("Error al conectar con el servidor: " + e.getMessage());
+        	printer.mostrarError("Al conectar con el servidor");
+        	throw new Exception(e.getMessage());
         }
     }
+    
 
-    public String sendGameState(String gameState) {
+    public String sendAndReceivePrediction(String gameState) {
         try {
-            out.println(gameState);
-            return in.readLine(); // Recibir respuesta del modelo
+        	
+        	if (socket == null || socket.isClosed()) {
+        		printer.mostrarAdvertencia("Conexión perdida. Intentando reconectar...");
+                connect();
+            }
+        	
+            out.println(gameState);	//Enviar
+            out.flush();	//Se asegura que el mensaje se envia de forma inmediata
+            
+            String response =  in.readLine(); // Recibir respuesta del modelo
+            
+            if (response == null) {
+            	printer.mostrarError("En la comunicación con el servidor ==> Siguiente movimiento <NEUTRAL>'");
+                return "NEUTRAL"; // Valor por defecto si no hay respuesta
+            }
+            
+            return response;
+            
         } catch (Exception e) {
-            System.out.println("Error en la comunicación con el servidor: " + e.getMessage());
+        	printer.mostrarError("En la comunicación con el servidor ==> Siguiente movimiento <NEUTRAL>'");
+            System.out.println(e.getMessage());
             return "NEUTRAL"; // Valor por defecto en caso de error
         }
     }
+    
 
     public void close() {
         try {
             if (socket != null) socket.close();
             if (out != null) out.close();
             if (in != null) in.close();
+            printer.mostrarInfo("Conexión cerrada");
         } catch (Exception e) {
-            System.out.println("Error al cerrar el socket: " + e.getMessage());
+        	printer.mostrarError("Al cerrar el socket");
+            System.out.println(e.getMessage());
         }
     }
 }

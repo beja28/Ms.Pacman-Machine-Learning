@@ -20,13 +20,13 @@ public class PacManNeuro extends PacmanController{
 	public PacManNeuro() {
 		
 		this.gameStateFilter = new GameStateFilter();
-		this.printer = new MessagePrinter();
+		this.printer = new MessagePrinter(true);
 		
 		try {
-			socketPython = new SocketPython("localhost", 12345);
+			socketPython = new SocketPython("localhost", 12345, printer);
 		} catch (Exception e) {
-			System.out.println(e.getMessage());
 			printer.mostrarError("Al inicializar el socket");
+			System.out.println(e.getMessage());
 		}
 	}
 	
@@ -42,18 +42,17 @@ public class PacManNeuro extends PacmanController{
     		List<String> finalState = gameStateFilter.addNewVariablesToFilteredState(game, filteredState);
 					
     		//Respuesta de la red neuronal
-			String response = socketPython.sendGameState(String.join(",", finalState));
+			String response = socketPython.sendAndReceivePrediction(String.join(",", finalState));
 			
 			MOVE[] possibleMoves = game.getPossibleMoves(game.getPacmanCurrentNodeIndex());
 
 			try {
-				System.out.println(response);
 				MOVE predictedMove = MOVE.valueOf(response);				
 				
 				//Se comprueba que sea valido
 			    boolean esMovimientoValido = Arrays.asList(possibleMoves).contains(predictedMove);
 			    if (!esMovimientoValido) {
-			    	printer.mostrarError("Movimiento recibido por el modelo de Red Neuronal es invalido");
+			    	printer.mostrarError("Movimiento recibido por el modelo de Red Neuronal es invalido (no hay camino fisicamente posible)");
 			    }else {
 			    	pacmanMove = predictedMove;
 			    }
@@ -61,13 +60,21 @@ public class PacManNeuro extends PacmanController{
 				printer.mostrarError("Respuesta inválida del servidor");
 			}
 			
-			printer.mostrarInfo("El movimiento a realizar es: " + pacmanMove.toString());
+			printer.printMessage("El movimiento a realizar es: " + pacmanMove.toString(), "info", 1);
 		}
 
 		return pacmanMove;
 	}    
     
 	
+    
+    @Override
+    public  void postCompute() {
+    	socketPython.close();
+    }    
+    
+    
+    
 	public String getName() {
 		return "Paquita";
 	}
