@@ -14,6 +14,9 @@ public class MessagePrinter {
     }
 
     public void printMessage(String mensaje, String tipo, int nivelTabulacion) {
+    	
+    	if (!debugMode) return;
+    	
         String tabulaciones = "\t".repeat(Math.max(0, nivelTabulacion));
 
         String prefix;
