@@ -18,7 +18,7 @@ public class ExecutorTest {
     	PacmanController pacMan = new PacManNeuro();
         GhostController ghosts = new GhostsRandom();
         
-        executor.runGame(pacMan, ghosts, 100);
+        executor.runGame(pacMan, ghosts, 50);
         
     }
 	

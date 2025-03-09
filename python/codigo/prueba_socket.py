@@ -56,7 +56,15 @@ def model_for_prediction(model_type, n_features, n_classes, intersection_id=None
 
 def get_prediction(model_type, mensaje, n_features, n_classes):
     
-    preprocessed_state = preprocess_game_state(mensaje, dataset_path)
+    # Separar el mensaje en el estado del juego y la lista de movimientos vslidos
+    lines = mensaje.split('\n')
+    game_state = lines[0]  # Estado del juego
+    valid_moves_str = lines[1]  # Movimientos validos
+
+    # Convertir la lista de movimientos válidos en una lista
+    valid_moves = [x.strip("] \r\n") for x in valid_moves_str.strip("[]").split(",")]
+
+    preprocessed_state = preprocess_game_state(game_state, dataset_path)
     
     intersection_id = identify_intersection(preprocessed_state) # envio el estado del juego como un diccionario
     # Cargar el modelo para la predicción
@@ -78,6 +86,15 @@ def get_prediction(model_type, mensaje, n_features, n_classes):
 
     moves = ['UP', 'DOWN', 'LEFT', 'RIGHT', 'NEUTRAL']
     predicted_move = moves[predicted_index]
+    
+    # Si el movimiento predicho esta en la lista de movimientos válidos
+    if predicted_move not in valid_moves:
+        # Si no está en la lista de movimientos válidos, devolver el movimiento con la mayor probabilidad de la lista
+        valid_probabilities = [(moves.index(move), probabilidades[0][moves.index(move)]) for move in valid_moves]
+        valid_probabilities.sort(key=lambda x: x[1], reverse=True)  # Ordenar por probabilidad en orden descendente
+        print(valid_probabilities[0][0])
+        # Seleccionar el movimiento válido con mayor probabilidad
+        predicted_move = moves[valid_probabilities[0][0]]
     
     return predicted_move
 
