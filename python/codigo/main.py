@@ -110,7 +110,7 @@ def main():
         Importante seleccionar la carpeta de los modelos sklearn o pytorch para que funcione correctamente
         --------------------------------------------------------------------------------------------------
         """
-        model_directory = os.path.join(path_trained, "models_2024-12-14")
+        model_directory = os.path.join(path_trained, "models_2025-03-05")
         
         # Obtener los archivos de modelo del directorio
         model_files = [f for f in os.listdir(model_directory) if f.endswith(('.pkl', '.pth'))]

@@ -3,6 +3,7 @@ package es.ucm.fdi.ici.TFGpacman;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.ArrayList;
 
 import pacman.controllers.PacmanController;
 import pacman.game.Constants.MOVE;
@@ -41,11 +42,25 @@ public class PacManNeuro extends PacmanController{
     		List<String> filteredState = gameStateFilter.filterGameState(game.getGameState());
     		List<String> finalState = gameStateFilter.addNewVariablesToFilteredState(game, filteredState);
 					
-    		//Respuesta de la red neuronal
-			String response = socketPython.sendGameState(String.join(",", finalState));
-			
-			MOVE[] possibleMoves = game.getPossibleMoves(game.getPacmanCurrentNodeIndex());
+            // Obtener movimientos posibles sin colisiones
+            MOVE[] possibleMoves = game.getPossibleMoves(game.getPacmanCurrentNodeIndex());
+            List<MOVE> validMoves = new ArrayList<>(Arrays.asList(possibleMoves));
 
+            // Restringir la vuelta atrás
+            MOVE lastMove = game.getPacmanLastMoveMade();
+            MOVE oppositeMove = lastMove.opposite();
+            validMoves.remove(oppositeMove);
+            
+            String stateAndMoves = String.join(",", finalState) + "\n" + validMoves;
+
+            // Enviar estado del juego y movimientos válidos al servidor
+            String response = socketPython.sendGameState(stateAndMoves);
+			
+			MOVE predictedMove = MOVE.valueOf(response);
+			
+	    	pacmanMove = predictedMove;
+
+			/*
 			try {
 				System.out.println(response);
 				MOVE predictedMove = MOVE.valueOf(response);				
@@ -60,7 +75,7 @@ public class PacManNeuro extends PacmanController{
 			} catch (Exception e) {
 				printer.mostrarError("Respuesta inválida del servidor");
 			}
-			
+			*/
 			printer.mostrarInfo("El movimiento a realizar es: " + pacmanMove.toString());
 		}
 
