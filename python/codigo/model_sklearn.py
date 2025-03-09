@@ -6,7 +6,8 @@ from datetime import datetime
 import os
 
 class MLPModel:
-    def __init__(self, hidden_layer_sizes=(100,), activation='relu', solver='adam', batch_size=100, learning_rate_init=0.001, max_iter=500, random_state=333):
+    def __init__(self, hidden_layer_sizes=(128, 64), activation='relu', solver='adam', batch_size=5000, learning_rate_init=0.001, max_iter=300, 
+                    random_state=333, early_stopping=True, validation_fraction=0.1, alpha=0.00001):
         self.mlp = MLPClassifier(
             hidden_layer_sizes=hidden_layer_sizes,
             activation=activation,
@@ -14,18 +15,25 @@ class MLPModel:
             batch_size=batch_size,
             learning_rate_init=learning_rate_init,
             max_iter=max_iter,
-            random_state=random_state
+            random_state=random_state,
+            early_stopping=early_stopping,
+            validation_fraction=validation_fraction,
+            alpha=alpha
         )
 
     def train_and_cross_validate(self, X, Y, cv=5):
 
         print("Empiezo a entrenar MLP con validación cruzada.")
-        scoring = {'accuracy': make_scorer(accuracy_score)}
+        scoring = {
+            'accuracy': make_scorer(accuracy_score),
+            'f1_weighted': 'f1_weighted'
+        }
         cv_results = cross_validate(self.mlp, X, Y, cv=cv, scoring=scoring, return_train_score=True)
 
         # Mostrar resultados de validación cruzada
         print(f"Train Accuracy (mean): {cv_results['train_accuracy'].mean():.4f}")
         print(f"Test Accuracy (mean): {cv_results['test_accuracy'].mean():.4f}")
+        print(f"Test F1 Score (mean): {cv_results['test_f1_weighted'].mean():.4f}")
         
         # Entrenar el modelo en el conjunto completo de datos para guardarlo
         self.mlp.fit(X, Y)

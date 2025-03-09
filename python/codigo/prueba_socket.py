@@ -34,16 +34,16 @@ def model_for_prediction(model_type, n_features, n_classes, intersection_id=None
     """
 
     if model_type == 'sklearn':
-        model_filename = f'mlp_trained_model_2025-03-05_({intersection_id},).pkl'
-        full_model_path = os.path.join(path_trained, 'models_2025-03-06', model_filename)
-                
+        model_filename = f'mlp_trained_model_2025-03-09_({intersection_id},).pkl'
+        full_model_path = os.path.join(path_trained, 'models_2025-03-10', model_filename)
+        print(full_model_path)
         mlp_model = joblib.load(full_model_path)
         return mlp_model, None
     
     elif model_type == 'pytorch':
        
-        model_filename = f'pytorch_model_2025-03-05_({intersection_id},).pth'
-        full_model_path = os.path.join(path_trained, 'models_2025-03-05', model_filename)
+        model_filename = f'pytorch_model_2025-03-09_({intersection_id},).pth'
+        full_model_path = os.path.join(path_trained, 'models_2025-03-09', model_filename)
         
         modelPytorch = MyModelPyTorch(n_features, n_classes)
         modelPytorch.load_state_dict(torch.load(full_model_path, weights_only=True))
@@ -72,8 +72,8 @@ def get_prediction(model_type, mensaje, n_features, n_classes):
     # Convertir el estado preprocesado a tensor o array, segun el modelo
     
     if model_type == 'pytorch':
-        input_tensor = torch.tensor(preprocessed_state.values, dtype=torch.float32).unsqueeze(0)  # Agregar dimensión para batch (modelo espera recibir un batch de un solo ejemplo)
-        # Realizar la predicción
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        input_tensor = torch.tensor(preprocessed_state.values, dtype=torch.float32).unsqueeze(0).to(device)     
         with torch.no_grad():  # No calcular gradientes
             prediccion = modelPytorch(input_tensor)
             

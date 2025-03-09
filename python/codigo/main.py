@@ -81,15 +81,18 @@ def main():
             X_train, X_, y_train, y_ = train_test_split(X, Y, test_size=0.50, random_state=1)
             X_cv, X_test, y_cv, y_test = train_test_split(X_, y_, test_size=0.20, random_state=1)
 
+            device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
             # Convertir a tensores
-            X_train_tensor = torch.tensor(X_train.values, dtype=torch.float32)
-            X_cv_tensor = torch.tensor(X_cv.values, dtype=torch.float32)
-            Y_train_tensor = torch.tensor(y_train.values, dtype=torch.long)
-            Y_cv_tensor = torch.tensor(y_cv.values, dtype=torch.float32)
+            X_train_tensor = torch.tensor(X_train.values, dtype=torch.float32).to(device)
+            X_cv_tensor = torch.tensor(X_cv.values, dtype=torch.float32).to(device)
+            Y_train_tensor = torch.tensor(y_train.values, dtype=torch.long).to(device)
+            Y_cv_tensor = torch.tensor(y_cv.values, dtype=torch.long).to(device)
 
             # Crear DataLoader
             train_dataset = TensorDataset(X_train_tensor, Y_train_tensor)
-            train_loader = DataLoader(train_dataset, batch_size=100, shuffle=True)
+            batch_size = min(100, len(X_train_tensor))
+            train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+            
             if args.train_model == "pytorch":
                 """ Entrenar el modelo con PyTorch """
                 pytorch_model = train_pytorch_nn(X_cv_tensor, Y_cv_tensor, train_loader, n_features, n_classes)
