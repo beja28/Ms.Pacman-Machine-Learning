@@ -21,13 +21,13 @@ public class PacManNeuro extends PacmanController{
 	public PacManNeuro() {
 		
 		this.gameStateFilter = new GameStateFilter();
-		this.printer = new MessagePrinter();
+		this.printer = new MessagePrinter(true);
 		
 		try {
-			socketPython = new SocketPython("localhost", 12345);
+			socketPython = new SocketPython("localhost", 12345, printer);
 		} catch (Exception e) {
-			System.out.println(e.getMessage());
 			printer.mostrarError("Al inicializar el socket");
+			System.out.println(e.getMessage());
 		}
 	}
 	
@@ -41,11 +41,11 @@ public class PacManNeuro extends PacmanController{
     		//Obtener estado del juego procesado
     		List<String> filteredState = gameStateFilter.filterGameState(game.getGameState());
     		List<String> finalState = gameStateFilter.addNewVariablesToFilteredState(game, filteredState);
-					
+    		
             // Obtener movimientos posibles sin colisiones
             MOVE[] possibleMoves = game.getPossibleMoves(game.getPacmanCurrentNodeIndex());
             List<MOVE> validMoves = new ArrayList<>(Arrays.asList(possibleMoves));
-
+					
             // Restringir la vuelta atrás
             MOVE lastMove = game.getPacmanLastMoveMade();
             MOVE oppositeMove = lastMove.opposite();
@@ -54,28 +54,12 @@ public class PacManNeuro extends PacmanController{
             String stateAndMoves = String.join(",", finalState) + "\n" + validMoves;
 
             // Enviar estado del juego y movimientos válidos al servidor
-            String response = socketPython.sendGameState(stateAndMoves);
+            String response = socketPython.sendAndReceivePrediction(stateAndMoves);
 			
 			MOVE predictedMove = MOVE.valueOf(response);
 			
 	    	pacmanMove = predictedMove;
 
-			/*
-			try {
-				System.out.println(response);
-				MOVE predictedMove = MOVE.valueOf(response);				
-				
-				//Se comprueba que sea valido
-			    boolean esMovimientoValido = Arrays.asList(possibleMoves).contains(predictedMove);
-			    if (!esMovimientoValido) {
-			    	printer.mostrarError("Movimiento recibido por el modelo de Red Neuronal es invalido");
-			    }else {
-			    	pacmanMove = predictedMove;
-			    }
-			} catch (Exception e) {
-				printer.mostrarError("Respuesta inválida del servidor");
-			}
-			*/
 			printer.mostrarInfo("El movimiento a realizar es: " + pacmanMove.toString());
 		}
 
@@ -83,6 +67,14 @@ public class PacManNeuro extends PacmanController{
 	}    
     
 	
+    
+    @Override
+    public  void postCompute() {
+    	socketPython.close();
+    }    
+    
+    
+    
 	public String getName() {
 		return "Paquita";
 	}

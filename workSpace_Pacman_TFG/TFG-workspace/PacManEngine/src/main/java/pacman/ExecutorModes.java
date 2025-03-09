@@ -258,123 +258,57 @@ public class ExecutorModes {
 	
 	
 	
-	/*
-	public void runGameGenerateMultiDataSet(List<PacmanController> pacManControllers, List<GhostController> ghostControllers, int iter, String fileName, boolean DEBUG, int min_score) {
-	    
-	    System.out.println("\n\n[INFO] Comenzando a generar DataSet en archivo: '" + fileName + "'\n");
-	    System.out.printf("\tNumero de iteraciones por combinación: " + iter + "\n");
-	    if(min_score==-1) {
-	        System.out.printf("\tScore Minimo Desactivado \n");
-	    } else {
-	        System.out.printf("\tScore Minimo establecido en: " + min_score + "\n");
-	    }
-	    if(DEBUG) {
-	        System.out.printf("\tModo de depuración activado \n\n");
-	    } else {
-	        System.out.printf("\tModo de depuración desactivado \n\n");
-	    }
-	    
-	    int combinaciones = pacManControllers.size() * ghostControllers.size();
-	    int juegosTotales = combinaciones * iter;
-	    System.out.printf("\tNumero de combinaciones posibles: %d\n", combinaciones);
-	    System.out.printf("\tNumero total de partidas a jugar: %d\n\n", juegosTotales);
-	    
-	    
-	    if (!UserPrompt.confirmar("¿Deseas continuar con la ejecución?\n")) {
-	        System.out.println("[INFO] Ejecución cancelada por el usuario");
-	        return;
-	    }
-	    
-	    List<Integer> savedScores = new ArrayList<>();
-	    long inicio = System.nanoTime();
-	    long lineasIniciales = DataSetRecorder.contarLineas(fileName);
-	    int partidasJugadas = 0;
-	    int porcentajeMostrado = 0;
-	    
-	    
-	    //Se generan todas las combinaciones posibles
-	    for (Controller<MOVE> pacManController : pacManControllers) {
-	        for (GhostController ghostController : ghostControllers) {
-	            for (int i = 0; i < iter; i++) {
-	                
-	            	Game game = setupGame();
-	                DataSetRecorder dataRecorder = new DataSetRecorder(game);
-	                precompute(pacManController, ghostController);
-	                GameView gv = (visuals) ? setupGameView(pacManController, game) : null;
-	                GhostController ghostControllerCopy = ghostController.copy(ghostPO);
-	                boolean gameSuccess = true;
-	                
-	                try {
-	                    while (!game.gameOver()) {
-	                        if (tickLimit != -1 && tickLimit < game.getTotalTime()) {
-	                            break;
-	                        }
-	                        handlePeek(game);
-	                        
-	                        MOVE pacmanMove = pacManController.getMove(getPacmanCopy(game), System.currentTimeMillis() + timeLimit);
-	                        dataRecorder.collectGameState(pacmanMove);
-	                        
-	                        game.advanceGame(pacmanMove,
-	                            ghostControllerCopy.getMove(getGhostsCopy(game), System.currentTimeMillis() + timeLimit));
-	                       
-	                        if (visuals) {
-	                            gv.repaint();
-	                        }
-	                    }
-	                } catch (Exception e) {
-	                    System.out.println("[ERROR] Se produjo un error durante la ejecucion del juego entre: " + pacManController.getName() + " vs "
-                                + ghostController.getName());
-	                    gameSuccess = false;
-	                }
-	                
-	                if (gameSuccess && (min_score == -1 || game.getScore() > min_score)) {
-	                    try {
-	                        dataRecorder.saveDataToCsv(fileName, true);
-	                        savedScores.add(game.getScore());
-	                        if (DEBUG) {
-	                            System.out.println("[DEBUG] " + i + ". " + pacManController.getName() + " vs "
-	                                    + ghostController.getName() + " - Estados guardados en: " + fileName
-	                                    + ".csv con score: " + game.getScore());
-	                        }
-	                    } catch (IOException e) {
-	                        e.printStackTrace();
-	                    }
-	                }
-	                
-	                postcompute(pacManController, ghostController);
-	                
-	                partidasJugadas++;
-	                int nuevoPorcentaje = (partidasJugadas * 100) / juegosTotales;
-	                if (nuevoPorcentaje >= porcentajeMostrado + 1) {
-	                    porcentajeMostrado = nuevoPorcentaje;
-	                    System.out.printf("[INFO] Progreso: %d%% completado (%d/%d ejecuciones)\n", porcentajeMostrado, partidasJugadas, juegosTotales);
-	                }
-	            }
-	        }
-	    }
-	    
-	    long fin = System.nanoTime();
-	    long duracion = fin - inicio;
-	    long segundosTotales = duracion / 1_000_000_000;
-	    long horas = segundosTotales / 3600;
-	    long minutos = (segundosTotales % 3600) / 60;
-	    long segundos = segundosTotales % 60;   
-	    long lineasFinales = DataSetRecorder.contarLineas(fileName);
-	    long lineasCreadas = lineasFinales - lineasIniciales;
-	    
-	    System.out.println("\n\n[INFO] Información de ejecución:\n");
-	    System.out.printf("\tTiempo total: %d horas, %d minutos, %d segundos%n", horas, minutos, segundos);
-	    System.out.println("\tLineas iniciales: " + lineasIniciales + ", Lineas creadas: " + lineasCreadas + ", Lineas finales: " + lineasFinales);
-	    
-	    if (!savedScores.isEmpty()) {
-	        double media = savedScores.stream().mapToInt(Integer::intValue).average().orElse(0.0);
-	        System.out.println("\tPuntuación media de las partidas guardadas: " + media);
-	    } else {
-	        System.out.println("\tNo se guardaron partidas con puntuaciones mayores a " + min_score);
-	    }
+	public void runGameCalculateAverageScore(PacmanController pacManController, List<GhostController> ghostControllers,
+			int iter, int delay) {
+
+		MessagePrinter printer = new MessagePrinter();
+		List<Integer> scores = new ArrayList<>();
+
+		for (GhostController ghostController : ghostControllers) {
+			for (int i = 0; i < iter; i++) {
+
+				Game game = setupGame();
+				precompute(pacManController, ghostController);
+				GhostController ghostControllerCopy = ghostController.copy(ghostPO);
+
+				printer.mostrarInfo("Comenzando partida entre " + pacManController.getName() + " vs "
+						+ ghostController.getName());
+				
+				
+				try {
+					while (!game.gameOver()) {
+						if (tickLimit != -1 && tickLimit < game.getTotalTime()) {
+							break;
+						}
+
+						game.advanceGame(
+								pacManController.getMove(getPacmanCopy(game), System.currentTimeMillis() + timeLimit),
+								ghostControllerCopy.getMove(getGhostsCopy(game),
+										System.currentTimeMillis() + timeLimit));
+					}
+
+					scores.add(game.getScore());
+
+				} catch (Exception e) {
+					printer.mostrarError("Se produjo un error durante la ejecucion del juego entre: "
+							+ pacManController.getName() + " vs " + ghostController.getName() + "\n");
+				} finally {
+					postcompute(pacManController, ghostController);
+
+					try {
+						printer.mostrarInfo("Partida entre " + pacManController.getName() + " vs "
+								+ ghostController.getName() + " finalizada con éxito y score: " + game.getScore() + "\n");
+						Thread.sleep(delay);
+					} catch (Exception e) {}
+				}
+			}
+		}
+
+		if (!scores.isEmpty()) {
+			double averageScore = scores.stream().mapToInt(Integer::intValue).average().orElse(0);
+			printer.mostrarInfo("Score medio despueés de " + iter*ghostControllers.size() + " iteraciones es de: " + averageScore);
+		}
 	}
-	*/
-	
 	
 	public void runGameGenerateMultiDataSet(List<PacmanController> pacManControllers, List<GhostController> ghostControllers, int iter, String fileName, boolean DEBUG, int min_score) {
 	    
