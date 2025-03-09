@@ -3,6 +3,7 @@ package es.ucm.fdi.ici.TFGpacman;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.ArrayList;
 
 import pacman.controllers.PacmanController;
 import pacman.game.Constants.MOVE;
@@ -40,27 +41,26 @@ public class PacManNeuro extends PacmanController{
     		//Obtener estado del juego procesado
     		List<String> filteredState = gameStateFilter.filterGameState(game.getGameState());
     		List<String> finalState = gameStateFilter.addNewVariablesToFilteredState(game, filteredState);
+    		
+            // Obtener movimientos posibles sin colisiones
+            MOVE[] possibleMoves = game.getPossibleMoves(game.getPacmanCurrentNodeIndex());
+            List<MOVE> validMoves = new ArrayList<>(Arrays.asList(possibleMoves));
 					
-    		//Respuesta de la red neuronal
-			String response = socketPython.sendAndReceivePrediction(String.join(",", finalState));
-			
-			MOVE[] possibleMoves = game.getPossibleMoves(game.getPacmanCurrentNodeIndex());
+            // Restringir la vuelta atrás
+            MOVE lastMove = game.getPacmanLastMoveMade();
+            MOVE oppositeMove = lastMove.opposite();
+            validMoves.remove(oppositeMove);
+            
+            String stateAndMoves = String.join(",", finalState) + "\n" + validMoves;
 
-			try {
-				MOVE predictedMove = MOVE.valueOf(response);				
-				
-				//Se comprueba que sea valido
-			    boolean esMovimientoValido = Arrays.asList(possibleMoves).contains(predictedMove);
-			    if (!esMovimientoValido) {
-			    	printer.mostrarError("Movimiento recibido por el modelo de Red Neuronal es invalido (no hay camino fisicamente posible)");
-			    }else {
-			    	pacmanMove = predictedMove;
-			    }
-			} catch (Exception e) {
-				printer.mostrarError("Respuesta inválida del servidor");
-			}
+            // Enviar estado del juego y movimientos válidos al servidor
+            String response = socketPython.sendAndReceivePrediction(stateAndMoves);
 			
-			printer.printMessage("El movimiento a realizar es: " + pacmanMove.toString(), "info", 1);
+			MOVE predictedMove = MOVE.valueOf(response);
+			
+	    	pacmanMove = predictedMove;
+
+			printer.mostrarInfo("El movimiento a realizar es: " + pacmanMove.toString());
 		}
 
 		return pacmanMove;
