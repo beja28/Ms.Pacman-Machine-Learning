@@ -75,11 +75,15 @@ def get_prediction(model_type, mensaje, n_features, n_classes):
         input_tensor = torch.tensor(preprocessed_state.values, dtype=torch.float32).unsqueeze(0)  # Agregar dimensión para batch (modelo espera recibir un batch de un solo ejemplo)
         # Realizar la predicción
         with torch.no_grad():  # No calcular gradientes
-            prediccion = modelPytorch(input_tensor)               
-        # Seleccionar el índice con el valor máximo para obtener el movimiento predicho
-        predicted_index = torch.argmax(prediccion)      
+            prediccion = modelPytorch(input_tensor)
+            
+        prediccion = prediccion.squeeze()
+        probabilidades = torch.softmax(prediccion, dim=0).cpu().numpy()
+        
+        predicted_index = np.argmax(probabilidades)  # Índice de la clase con mayor probabilidad
     elif model_type == 'sklearn':
         probabilidades = mlp_model.predict_proba(preprocessed_state)  # Obtiene las probabilidades de cada clase
+        probabilidades = probabilidades.flatten()  # Asegurarse de que sea un array 1D
         predicted_index = np.argmax(probabilidades)  # Índice de la clase con mayor probabilidad
         prediccion = np.max(probabilidades)  # Obtiene el valor máximo de probabilidad
     
@@ -90,7 +94,7 @@ def get_prediction(model_type, mensaje, n_features, n_classes):
     # Si el movimiento predicho esta en la lista de movimientos válidos
     if predicted_move not in valid_moves:
         # Si no está en la lista de movimientos válidos, devolver el movimiento con la mayor probabilidad de la lista
-        valid_probabilities = [(moves.index(move), probabilidades[0][moves.index(move)]) for move in valid_moves]
+        valid_probabilities = [(moves.index(move), probabilidades[moves.index(move)]) for move in valid_moves]
         valid_probabilities.sort(key=lambda x: x[1], reverse=True)  # Ordenar por probabilidad en orden descendente
         print(valid_probabilities[0][0])
         # Seleccionar el movimiento válido con mayor probabilidad
