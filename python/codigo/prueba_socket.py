@@ -28,7 +28,7 @@ path_trained = os.path.normpath(path_trained)
 
 
 
-def model_for_prediction(model_type, n_features, n_classes, intersection_id=None):
+def model_for_prediction(model_type, n_features, n_classes, intersection_id=None, device='cpu'):
     """
     Cargar el modelo deseado basándose en la intersección.
     """
@@ -47,6 +47,7 @@ def model_for_prediction(model_type, n_features, n_classes, intersection_id=None
         
         modelPytorch = MyModelPyTorch(n_features, n_classes)
         modelPytorch.load_state_dict(torch.load(full_model_path, weights_only=True))
+        modelPytorch.to(device)
         modelPytorch.eval()
         return None, modelPytorch
     
@@ -68,12 +69,13 @@ def get_prediction(model_type, mensaje, n_features, n_classes):
     
     intersection_id = identify_intersection(preprocessed_state) # envio el estado del juego como un diccionario
     # Cargar el modelo para la predicción
-    mlp_model, modelPytorch = model_for_prediction(model_type, n_features, n_classes, intersection_id)
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    mlp_model, modelPytorch = model_for_prediction(model_type, n_features, n_classes, intersection_id, device)
     # Convertir el estado preprocesado a tensor o array, segun el modelo
     
     if model_type == 'pytorch':
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        input_tensor = torch.tensor(preprocessed_state.values, dtype=torch.float32).unsqueeze(0).to(device)     
+        
+        input_tensor = torch.tensor(preprocessed_state.values, dtype=torch.float32).to(device)     
         with torch.no_grad():  # No calcular gradientes
             prediccion = modelPytorch(input_tensor)
             
