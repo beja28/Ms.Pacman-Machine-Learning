@@ -40,9 +40,7 @@ path_trained = os.path.normpath(path_trained)
 grouped_df  = preprocess_csv(dataset_path)
 # Configuramos los parámetros de la red
 #acceder al primer grupo por ej
-print(grouped_df)
 n_features = grouped_df.first().shape[1]
-print(n_features)
 n_classes = 5  # 5 posibles movimientos de Pac-Man
 
 def main():
