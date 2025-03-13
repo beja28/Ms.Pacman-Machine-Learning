@@ -34,8 +34,8 @@ def model_for_prediction(model_type, n_features, n_classes, intersection_id=None
     """
 
     if model_type == 'sklearn':
-        model_filename = f'mlp_trained_model_2025-03-09_({intersection_id},).pkl'
-        full_model_path = os.path.join(path_trained, 'models_2025-03-10', model_filename)
+        model_filename = f'mlp_trained_model_2025-03-12_({intersection_id},).pkl'
+        full_model_path = os.path.join(path_trained, 'models_2025-03-12', model_filename)
         print(full_model_path)
         mlp_model = joblib.load(full_model_path)
         return mlp_model, None
