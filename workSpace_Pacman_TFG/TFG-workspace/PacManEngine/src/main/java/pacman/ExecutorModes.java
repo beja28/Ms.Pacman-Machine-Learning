@@ -45,6 +45,7 @@ import pacman.game.consolePrinter.MessagePrinter;
 import pacman.game.consolePrinter.UserPrompt;
 import pacman.game.dataManager.DataSetRecorder;
 import pacman.game.dataManager.GameStateFilter;
+import pacman.game.dataStatistics.ScoreStatistics;
 import pacman.game.internal.Node;
 import pacman.game.internal.POType;
 import pacman.game.util.Stats;
@@ -259,7 +260,7 @@ public class ExecutorModes {
 	
 	
 	public void runGameCalculateAverageScore(PacmanController pacManController, List<GhostController> ghostControllers,
-			int iter, int delay) {
+			int iter, int delay, String fileName) {
 
 		MessagePrinter printer = new MessagePrinter();
 		List<Integer> scores = new ArrayList<>();
@@ -303,10 +304,13 @@ public class ExecutorModes {
 				}
 			}
 		}
-
-		if (!scores.isEmpty()) {
-			double averageScore = scores.stream().mapToInt(Integer::intValue).average().orElse(0);
-			printer.mostrarInfo("Score medio despueés de " + iter*ghostControllers.size() + " iteraciones es de: " + averageScore);
+		
+		// Mostrar estadisticas
+		ScoreStatistics scoreStats = new ScoreStatistics(printer);
+		scoreStats.calcularEstadisticas(scores);
+		
+		if(fileName != "") {
+			scoreStats.guardarEstadisticasEnArchivo(scores, fileName);
 		}
 	}
 	

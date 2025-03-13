@@ -26,9 +26,9 @@
 	<classpathentry exported="true" kind="lib" path="lib/jFuzzyLogic.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jess.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jsr94.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER">
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8">
 		<attributes>
-			<attribute name="module" value="true"/>
+			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="output" path="target/classes"/>

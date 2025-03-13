@@ -50,10 +50,28 @@ public class ExecutorTestAverageScore {
         List<GhostController> ghostControllers = new ArrayList<>();
         ghostControllers.add(new es.ucm.fdi.ici.c2324.practica1.grupo06.Ghosts());
         ghostControllers.add(new es.ucm.fdi.ici.c2324.practica1.grupo01.Ghosts());
+        ghostControllers.add(new es.ucm.fdi.ici.c2324.practica1.grupo08.Ghosts());
         ghostControllers.add(new es.ucm.fdi.ici.c2324.practica2.grupo04.Ghosts());
         ghostControllers.add(new es.ucm.fdi.ici.c2324.practica2.grupo01.Ghosts());
+        ghostControllers.add(new es.ucm.fdi.ici.c2324.practica2.grupo02.Ghosts());
         
-        executor.runGameCalculateAverageScore(pacMan, ghostControllers, 10, 1000); //last parameter defines speed     
+        
+        /**
+         * Ejecuta una serie de partidas entre un controlador de Pac-Man y una lista de controladores de fantasmas,
+         * y calcula estadísticas sobre las puntuaciones obtenidas.
+         * 
+         * @param pacManController  Controlador de Pac-Man
+         * @param ghostControllers  Lista de Controladores de los fantasmas
+         * @param iter              Número de partidas a jugar por cada combinación de controladores
+         * @param delay             Tiempo de espera (ms) entre cada partida
+         * @param fileName          Nombre del archivo .txt donde se guardan las estadísticas (si es vacío "", no se guarda)
+         * 
+         * La función realiza las siguientes acciones:
+         * - Almacena la puntuación final de cada partida
+         * - Calcula estadísticas descriptivas (media, mediana, desviación típica, percentiles, skewness, curtosis, etc.)
+         * - Muestra las estadísticas por consola
+         * - Guarda las estadísticas en un archivo .txt en la carpeta 'statistics', si se ha especificado un nombre de archivo
+         */
+        executor.runGameCalculateAverageScore(pacMan, ghostControllers, 1, 1000, "pruebas");
     }
-	
 }
