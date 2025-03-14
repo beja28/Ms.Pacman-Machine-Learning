@@ -53,7 +53,7 @@ public class ExecutorTestAverageScore {
         ghostControllers.add(new es.ucm.fdi.ici.c2324.practica2.grupo04.Ghosts());
         ghostControllers.add(new es.ucm.fdi.ici.c2324.practica2.grupo01.Ghosts());
         
-        executor.runGameCalculateAverageScore(pacMan, ghostControllers, 10, 1000, "pruebas"); //last parameter defines speed     
+        executor.runGameCalculateAverageScore(pacMan, ghostControllers, 10, 1000); //last parameter defines speed     
     }
 	
 }
