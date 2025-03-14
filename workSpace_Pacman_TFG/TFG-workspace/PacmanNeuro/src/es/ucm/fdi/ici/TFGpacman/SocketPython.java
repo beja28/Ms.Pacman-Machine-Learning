@@ -1,14 +1,10 @@
 package es.ucm.fdi.ici.TFGpacman;
 
 import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 
-import pacman.controllers.GhostController;
-import pacman.controllers.PacmanController;
 import pacman.game.consolePrinter.MessagePrinter;
 
 public class SocketPython {
@@ -58,7 +54,7 @@ public class SocketPython {
             String response =  in.readLine(); // Recibir respuesta del modelo
             
             if (response == null) {
-            	printer.mostrarError("En la comunicación con el servidor ==> Siguiente movimiento <NEUTRAL>'");
+            	printer.mostrarError("En la comunicación con el servidor (respuesta del servidor nula) ==> Siguiente movimiento <NEUTRAL>'");
                 return "NEUTRAL"; // Valor por defecto si no hay respuesta
             }
             
