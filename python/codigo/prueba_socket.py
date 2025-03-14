@@ -42,8 +42,8 @@ def model_for_prediction(model_type, n_features, n_classes, intersection_id=None
     
     elif model_type == 'pytorch':
        
-        model_filename = f'pytorch_model_2025-03-09_({intersection_id},).pth'
-        full_model_path = os.path.join(path_trained, 'models_2025-03-09', model_filename)
+        model_filename = f'pytorch_model_2025-03-05_({intersection_id},).pth'
+        full_model_path = os.path.join(path_trained, 'models_2025-03-05', model_filename)
         
         modelPytorch = MyModelPyTorch(n_features, n_classes)
         modelPytorch.load_state_dict(torch.load(full_model_path, weights_only=True))
