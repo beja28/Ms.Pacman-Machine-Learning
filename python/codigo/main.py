@@ -7,6 +7,7 @@ from Pytorch_Predictor import PyTorchPredictor
 from model_pytorch import MyModelPyTorch
 import torch
 import os
+import re
 from sklearn.model_selection import train_test_split
 from torch.utils.data import TensorDataset, DataLoader
 import argparse
@@ -124,15 +125,26 @@ def main():
         """
         model_directory = os.path.join(path_trained, "models_2025-03-05")
         
-        # Obtener los archivos de modelo del directorio
+        # Obtener todos los archivos con extensión .pkl o .pth
         model_files = [f for f in os.listdir(model_directory) if f.endswith(('.pkl', '.pth'))]
+
+        # Expresión regular para extraer el número dentro de los paréntesis
+        def extract_number(filename):
+            match = re.search(r'\((\d+),\)', filename)  # Busca un número entre paréntesis
+            return int(match.group(1)) if match else float('inf')  # Si no hay número, poner infinito para ir al final
+
+        # Ordenar por el número extraído
+        sorted_model_files = sorted(model_files, key=extract_number)
+
          
         if len(model_files) != len(grouped_df):
             print("Error: El número de modelos no coincide con el número de grupos.")
             return
 
+        
+        
         # Iterar sobre los archivos de modelo y los grupos del DataFrame al mismo tiempo
-        for (key, group), model_filename in zip(grouped_df, model_files):
+        for (key, group), model_filename in zip(grouped_df, sorted_model_files):
             print(f"Explicabilidad para el grupo: {key}, usando el modelo: {model_filename}")
 
             # Variables independientes (X) y dependientes (Y)

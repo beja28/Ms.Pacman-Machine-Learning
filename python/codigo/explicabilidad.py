@@ -44,7 +44,7 @@ class Explicabilidad:
                 
                 print(f"Ejecuta la explicabilidad para el modelo {model_filename}")
                 
-                explainer = shap.DeepExplainer(self.model_with_softmax, data_tensor)
+                explainer = shap.DeepExplainer(model, data_tensor)
                 
                 data_to_explain = X.sample(n=10)
                 data_to_explain_tensor = torch.tensor(data_to_explain.values, dtype=torch.float32).to(device)
