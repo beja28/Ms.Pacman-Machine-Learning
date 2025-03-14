@@ -60,7 +60,7 @@ public class PacManNeuro extends PacmanController{
 			
 	    	pacmanMove = predictedMove;
 
-			printer.mostrarInfo("El movimiento a realizar es: " + pacmanMove.toString());
+			printer.printMessage("El movimiento a realizar es: " + pacmanMove.toString(), "info", 1);
 		}
 
 		return pacmanMove;
