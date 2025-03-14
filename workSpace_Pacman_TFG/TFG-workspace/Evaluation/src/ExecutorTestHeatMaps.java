@@ -3,7 +3,6 @@ import pacman.controllers.GhostController;
 import pacman.controllers.HumanController;
 import pacman.controllers.KeyBoardInput;
 import pacman.controllers.PacmanController;
-import es.ucm.fdi.ici.TFGpacman.PacManNeuro;
 
 /*	ICI HALL-OF-FAME
 
@@ -43,7 +42,7 @@ public class ExecutorTestHeatMaps {
 
     	
     	//PacmanController pacMan = new HumanController(new KeyBoardInput());
-        PacmanController pacMan = new PacManNeuro();
+        PacmanController pacMan = new es.ucm.fdi.ici.c2223.practica1.grupo06.MsPacMan();
         GhostController ghosts = new es.ucm.fdi.ici.c2324.practica1.grupo08.Ghosts();
         
         executor.runGameHeatMaps(pacMan, ghosts, 40); //last parameter defines speed           
