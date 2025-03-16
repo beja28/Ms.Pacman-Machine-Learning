@@ -52,7 +52,7 @@ def main():
 
     # Comando para seleccionar el modelo para las predicciones
     parser_select_model = subparsers.add_parser("model", help="Selecciona el modelo a elegir para sacar la predicción (pytorch | sklearn)")
-    parser_select_model.add_argument("model", choices=["pytorch", "sklearn"], help="Para usar el modelo Pytorch escriba -> model pytorch | Para usar el modelo MLP de scikit-learn escriba -> model sklearn")
+    parser_select_model.add_argument("model", choices=["pytorch", "sklearn", "tabnet"], help="Para usar el modelo Pytorch escriba -> model pytorch | Para usar el modelo MLP de scikit-learn escriba -> model sklearn")
 
     # Comando para entrenar el modelo
     parser_train_model = subparsers.add_parser("train_model", help="Elige el modelo a entrenar")
@@ -123,7 +123,7 @@ def main():
         Importante seleccionar la carpeta de los modelos sklearn o pytorch para que funcione correctamente
         --------------------------------------------------------------------------------------------------
         """
-        model_directory = os.path.join(path_trained, "models_2025-03-05")
+        model_directory = os.path.join(path_trained, "models_2025-03-12")
         
         # Obtener todos los archivos con extensión .pkl o .pth
         model_files = [f for f in os.listdir(model_directory) if f.endswith(('.pkl', '.pth'))]
@@ -176,7 +176,7 @@ def main():
                 else:
                     predictor = model  # Los modelos de Scikit-Learn ya tienen predict_proba
                 explicador.ejecutar_explicabilidad(predictor, model_filename, args.technique, X_cv, key)
-            else:
+            else: # SHAP
                 explicador.ejecutar_explicabilidad(model, model_filename, args.technique, X_cv, key)
         
         explicador.generar_grafico_explicabilidad_global(args.model)
