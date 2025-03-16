@@ -22,9 +22,7 @@ class Explicabilidad:
             self.explicabilidad_feature_importance(model, model_filename, X, Y)
         elif technique == "lime":
             self.explicabilidad_lime(model, model_filename, X)
-            
-    def model_with_softmax(x, model):
-        return F.softmax(model(x), dim=1)
+
     
     def explicabilidad_shap(self, model, model_filename, X, key):
         """Implementación de SHAP para explicar las predicciones del modelo."""
@@ -266,6 +264,7 @@ class Explicabilidad:
         Retorna un diccionario con el impacto promedio por intersección y característica.
         """
         impacto_intersecciones = {}
+        print("El diccionario es: {self.dic_map}")
 
         for interseccion, caracteristicas in self.dic_map.items():
             impacto_intersecciones[interseccion] = {
@@ -286,24 +285,30 @@ class Explicabilidad:
         
         if model == "pytorch":       
             path_completo = os.path.join(directorio, "mapas_explicabilidad_txt_pytorch")
-            os.makedirs(path_completo, exist_ok=True)  # Crea la carpeta si no existe
+            os.makedirs(path_completo, exist_ok=True)  
         elif model == "sklearn":
             path_completo = os.path.join(directorio, "mapas_explicabilidad_txt_sklearn")
-            os.makedirs(path_completo, exist_ok=True)  # Crea la carpeta si no existe
+            os.makedirs(path_completo, exist_ok=True) 
         
         impacto_intersecciones = self.calcular_impacto_por_interseccion()
+        
+        print("El impacto de intersecciones es: {impacto_intersecciones}" )
 
         # Transponer el diccionario para agrupar por característica en lugar de intersección
         caracteristicas = set()
         for impactos in impacto_intersecciones.values():
             caracteristicas.update(impactos.keys())
+            
+        print("Las caracteristicas son: {caracteristicas}")
 
         # Escribir un archivo para cada característica
         for feature in caracteristicas:
             file_path = os.path.join(path_completo, f"{feature}.txt")
+            print("Pase el primer for")
             with open(file_path, "w") as f:
                 for interseccion, impactos in impacto_intersecciones.items():
                     if feature in impactos:
+                        print("Entre al if")
                         f.write(f"Intersección {interseccion}: {impactos[feature]:.6f}\n")
 
         print(f"Archivos guardados en: {path_completo}")

@@ -7,6 +7,7 @@ import sys
 import select
 from preprocessing import preprocess_game_state
 from model_pytorch import MyModelPyTorch
+from pytorch_tabnet.tab_model import TabNetClassifier
 import numpy as np
 
 """ --- CREAR PATHS USANDO RUTAS RELATIVAS --- """
@@ -42,8 +43,8 @@ def model_for_prediction(model_type, n_features, n_classes, intersection_id=None
     
     elif model_type == 'pytorch':
        
-        model_filename = f'pytorch_model_2025-03-09_({intersection_id},).pth'
-        full_model_path = os.path.join(path_trained, 'models_2025-03-09', model_filename)
+        model_filename = f'pytorch_model_2025-03-05_({intersection_id},).pth'
+        full_model_path = os.path.join(path_trained, 'models_2025-03-05', model_filename)
         
         modelPytorch = MyModelPyTorch(n_features, n_classes)
         modelPytorch.load_state_dict(torch.load(full_model_path, weights_only=True))
@@ -51,8 +52,17 @@ def model_for_prediction(model_type, n_features, n_classes, intersection_id=None
         modelPytorch.eval()
         return None, modelPytorch
     
+    elif model_type == 'tabnet':
+        model_filename = f'tabnet_model_({intersection_id},).zip'
+        full_model_path = os.path.join(path_trained, 'models_2025-03-16', model_filename)
+
+        modelTabNet = TabNetClassifier(device_name=device)
+        modelTabNet.load_model(full_model_path)
+        modelTabNet.network.eval()  # Asegurar que está en modo evaluación
+        return None, None, modelTabNet
+
     else:
-        raise ValueError("Modelo no reconocido. Elige 'pytorch' o 'sklearn'.")
+        raise ValueError("Modelo no reconocido. Elige 'pytorch', 'sklearn' o 'tabnet'.")
 
 
 def get_prediction(model_type, mensaje, n_features, n_classes):
@@ -70,7 +80,7 @@ def get_prediction(model_type, mensaje, n_features, n_classes):
     intersection_id = identify_intersection(preprocessed_state) # envio el estado del juego como un diccionario
     # Cargar el modelo para la predicción
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    mlp_model, modelPytorch = model_for_prediction(model_type, n_features, n_classes, intersection_id, device)
+    mlp_model, modelPytorch, modelTabNet  = model_for_prediction(model_type, n_features, n_classes, intersection_id, device)
     # Convertir el estado preprocesado a tensor o array, segun el modelo
     
     if model_type == 'pytorch':
@@ -89,6 +99,10 @@ def get_prediction(model_type, mensaje, n_features, n_classes):
         predicted_index = np.argmax(probabilidades)  # Índice de la clase con mayor probabilidad
         prediccion = np.max(probabilidades)  # Obtiene el valor máximo de probabilidad
     
+    elif model_type == 'tabnet':
+        input_array = preprocessed_state.values.astype(np.float32)
+        probabilidades = modelTabNet.predict_proba(input_array)[0]
+        predicted_index = np.argmax(probabilidades)
 
     moves = ['UP', 'DOWN', 'LEFT', 'RIGHT', 'NEUTRAL']
     predicted_move = moves[predicted_index]
