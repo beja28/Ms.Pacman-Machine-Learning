@@ -46,7 +46,7 @@ public class ExecutorTestHeatMaps {
         PacmanController pacMan = new PacManNeuro();
         GhostController ghosts = new es.ucm.fdi.ici.c2324.practica1.grupo08.Ghosts();
         
-        executor.runGameHeatMaps(pacMan, ghosts, 40); //last parameter defines speed           
+        executor.runGameHeatMaps(pacMan, ghosts, 40, "sklearn"); //last parameter defines speed           
     }
 	
 }

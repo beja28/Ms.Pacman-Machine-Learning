@@ -39,7 +39,7 @@ def model_for_prediction(model_type, n_features, n_classes, intersection_id=None
         full_model_path = os.path.join(path_trained, 'models_2025-03-12', model_filename)
         print(full_model_path)
         mlp_model = joblib.load(full_model_path)
-        return mlp_model, None
+        return mlp_model, None, None
     
     elif model_type == 'pytorch':
        
@@ -50,7 +50,7 @@ def model_for_prediction(model_type, n_features, n_classes, intersection_id=None
         modelPytorch.load_state_dict(torch.load(full_model_path, weights_only=True))
         modelPytorch.to(device)
         modelPytorch.eval()
-        return None, modelPytorch
+        return None, modelPytorch, None
     
     elif model_type == 'tabnet':
         model_filename = f'tabnet_model_({intersection_id},).zip'
