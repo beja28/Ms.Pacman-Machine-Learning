@@ -292,23 +292,19 @@ class Explicabilidad:
         
         impacto_intersecciones = self.calcular_impacto_por_interseccion()
         
-        print("El impacto de intersecciones es: {impacto_intersecciones}" )
 
         # Transponer el diccionario para agrupar por característica en lugar de intersección
         caracteristicas = set()
         for impactos in impacto_intersecciones.values():
             caracteristicas.update(impactos.keys())
             
-        print("Las caracteristicas son: {caracteristicas}")
 
         # Escribir un archivo para cada característica
         for feature in caracteristicas:
             file_path = os.path.join(path_completo, f"{feature}.txt")
-            print("Pase el primer for")
             with open(file_path, "w") as f:
                 for interseccion, impactos in impacto_intersecciones.items():
                     if feature in impactos:
-                        print("Entre al if")
                         f.write(f"Intersección {interseccion}: {impactos[feature]:.6f}\n")
 
         print(f"Archivos guardados en: {path_completo}")
