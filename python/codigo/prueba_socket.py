@@ -54,7 +54,7 @@ def model_for_prediction(model_type, n_features, n_classes, intersection_id=None
     
     elif model_type == 'tabnet':
         model_filename = f'tabnet_model_({intersection_id},).zip'
-        full_model_path = os.path.join(path_trained, 'models_2025-03-16', model_filename)
+        full_model_path = os.path.join(path_trained, 'models_2025-03-17', model_filename)
 
         modelTabNet = TabNetClassifier(device_name=device)
         modelTabNet.load_model(full_model_path)
