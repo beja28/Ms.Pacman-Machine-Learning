@@ -16,7 +16,7 @@ import numpy as np
 directorio_actual = os.path.dirname(os.path.abspath(__file__))
 
 # Construir la ruta que sube dos niveles desde 'codigo' y entra en 'DataSets'
-dataset_path = os.path.join(directorio_actual, '..', '..', 'DataSets', '06_gameStatesData.csv')
+dataset_path = os.path.join(directorio_actual, '..', '..', 'DataSets', '07_gameStatesData.csv')
 
 # Normalizar la ruta para evitar problemas con distintos sistemas operativos
 dataset_path = os.path.normpath(dataset_path)
@@ -54,7 +54,7 @@ def model_for_prediction(model_type, n_features, n_classes, intersection_id=None
     
     elif model_type == 'tabnet':
         model_filename = f'tabnet_model_({intersection_id},).zip'
-        full_model_path = os.path.join(path_trained, 'models_2025-03-17', model_filename)
+        full_model_path = os.path.join(path_trained, 'models_2025-03-16', model_filename)
 
         modelTabNet = TabNetClassifier(device_name=device)
         modelTabNet.load_model(full_model_path)
@@ -106,13 +106,13 @@ def get_prediction(model_type, mensaje, n_features, n_classes):
 
     moves = ['UP', 'DOWN', 'LEFT', 'RIGHT', 'NEUTRAL']
     predicted_move = moves[predicted_index]
-    
+
     # Si el movimiento predicho esta en la lista de movimientos válidos
     if predicted_move not in valid_moves:
         # Si no está en la lista de movimientos válidos, devolver el movimiento con la mayor probabilidad de la lista
         valid_probabilities = [(moves.index(move), probabilidades[moves.index(move)]) for move in valid_moves]
         valid_probabilities.sort(key=lambda x: x[1], reverse=True)  # Ordenar por probabilidad en orden descendente
-        print(valid_probabilities[0][0])
+        print(valid_moves)
         # Seleccionar el movimiento válido con mayor probabilidad
         predicted_move = moves[valid_probabilities[0][0]]
     
