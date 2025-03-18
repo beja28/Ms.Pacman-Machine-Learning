@@ -12,7 +12,7 @@ import numpy as np
 directorio_actual = os.path.dirname(os.path.abspath(__file__))
 
 # Construir la ruta que sube dos niveles desde 'codigo' y entra en 'DataSets'
-dataset_path = os.path.join(directorio_actual, '..', '..', 'DataSets', '03_gameStatesData.csv')
+dataset_path = os.path.join(directorio_actual, '..', '..', 'DataSets', '06_gameStatesData.csv')
 
 # Normalizar la ruta para evitar problemas con distintos sistemas operativos
 dataset_path = os.path.normpath(dataset_path)
@@ -31,12 +31,12 @@ def model_for_prediction(model_type,n_features, n_classes):
     Cargar el modelo deseado
     """
     if model_type == 'sklearn':
-        model_filename= 'mlp_trained_model_2024-11-07.pkl' 
+        model_filename= 'mlp_trained_model_2025-03-18.pkl' 
         full_model_path = os.path.join(path_trained, model_filename)
         mlp_model = joblib.load(full_model_path)  
         return mlp_model, None
     elif model_type == 'pytorch':
-        model_filename = 'pytorch_model_2024-10-31.pth'
+        model_filename = 'pytorch_model_2025-03-18.pth'
         full_model_path = os.path.join(path_trained, model_filename)
         modelPytorch = MyModelPyTorch(n_features, n_classes)
         modelPytorch.load_state_dict(torch.load(full_model_path, weights_only=True))
@@ -64,7 +64,7 @@ def get_prediction(model_type, mensaje, mlp_model=None, modelPytorch=None):
         predicted_index = np.argmax(prediccion) # Como prediccion no es un tensor si no una lista en este caso, usamos np en vez de torch
     
 
-    moves = ['RIGHT', 'LEFT', 'UP', 'DOWN', 'NEUTRAL']
+    moves = ['UP', 'DOWN', 'LEFT', 'RIGHT', 'NEUTRAL']
     predicted_move = moves[predicted_index]
     
     return predicted_move

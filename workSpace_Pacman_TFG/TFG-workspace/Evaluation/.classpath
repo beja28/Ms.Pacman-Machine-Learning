@@ -14,5 +14,6 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry combineaccessrules="false" kind="src" path="/PacManEngine"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/PacmanNeuro"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

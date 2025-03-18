@@ -4,37 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import pacman.game.Game;
+import pacman.game.Constants.DM;
 import pacman.game.Constants.GHOST;
 
 public class GameStateFilter {
 
-	private Game game;
-	private List<Integer> previousScores;
 	
-	
-	public GameStateFilter(Game game) {
-		this.game = game;
-		this.previousScores = new ArrayList<>();
-	}
-		
-	
-	public void addPreviousScore(Integer score) {
-		this.previousScores.add(score);
-	}
-	
-	
-	//Obtiene el estado actual del juego filtrado
-    public String getActualGameState() {
-    	
-    	//Se recoge el estado del juego y se eliminan las caracteristicas que no queremos
-    	List<String> filteredState = filterGameState(game.getGameState());
-    	
-      	//Se calculan las nuevas variables que queremos, y se añaden
-    	String finalState = addNewVariablesToFilteredState(filteredState);
-    	
-    	return finalState;
-    }
-    
+	public GameStateFilter() {}
 
     
     //Filtra un string con el estado del juego, quita las variables que no queremos y devuelve una lista con las restantes
@@ -66,51 +42,31 @@ public class GameStateFilter {
     
     
         
-    // Añade nuevas variables al estado del juego
-    public String addNewVariablesToFilteredState(List<String> gameState) {
-    	//3 variables adicionales con las puntuaciones obtenidas en los 10, 25 y 50 anteriores ticks de ejecucion
-    	int scoreDiff10 = calculateScoreDifference(game.getScore(), 10);
-        int scoreDiff25 = calculateScoreDifference(game.getScore(), 25);
-        int scoreDiff50 = calculateScoreDifference(game.getScore(), 50);
-        gameState.add(scoreDiff10 + "");
-    	gameState.add(scoreDiff25 + "");
-    	gameState.add(scoreDiff50 + "");    	
+    // Añade nuevas variables al estado del juego, en ese instante de tiempo
+    public List<String> addNewVariablesToFilteredState(Game game, List<String> gameState) {
 
     	//Distancia del path a los fantasmas
     	for (GHOST ghost : GHOST.values()) {
-    		int distanceToGhost = calculateShortestPathDistance(game.getPacmanCurrentNodeIndex(), game.getGhostCurrentNodeIndex(ghost));
+    		int distanceToGhost = calculateShortestPathDistance(game, game.getPacmanCurrentNodeIndex(), game.getGhostCurrentNodeIndex(ghost));
     		gameState.add(distanceToGhost + "");
     	}
     	
         //Ditancia euclidea y del path a la PP activa mas cercana
-        int euclideanToPpDistancia = calculateEuclideanDistanceToNearestPP(game.getPacmanCurrentNodeIndex());
-        int pathToPpDistancia = calculateEuclideanDistanceToNearestPP(game.getPacmanCurrentNodeIndex());
+        int euclideanToPpDistancia = calculateEuclideanDistanceToNearestPP(game, game.getPacmanCurrentNodeIndex());
+        int pathToPpDistancia = calculateEuclideanDistanceToNearestPP(game, game.getPacmanCurrentNodeIndex());
         gameState.add(euclideanToPpDistancia + "");
         gameState.add(pathToPpDistancia + "");
         
         //Numero de PP restantes
-        int remainingPPills = getRemainingPowerPills();
+        int remainingPPills = getRemainingPowerPills(game);
         gameState.add(remainingPPills + "");
 
-        return String.join(",", gameState);
-    }
+        return gameState;
+    }    
     
-    
-       
-    // Calcula la diferencia de puntuacion en estados anteriores
-    public int calculateScoreDifference(int currentScore, int ticks) {
-    	
-        if (previousScores.size() >= ticks) {
-            return currentScore - previousScores.get(previousScores.size() - ticks);
-        }
-                
-        //En caso de que no se pueda calcular
-        return -1;
-    }
-
         
     // Calcula la distancia del "path" mas corto entre dos nodos
-    public int calculateShortestPathDistance(int pacmanNode, int targetNode) {
+    public int calculateShortestPathDistance(Game game, int pacmanNode, int targetNode) {
    
         if (targetNode == -1) {
             return -1;
@@ -148,7 +104,7 @@ public class GameStateFilter {
     
     
     // Calcula la distancia del camino mas corto a la PP activa más cercana
-    public int calculatePathDistanceToNearestPP(int pacmanNode) {
+    public int calculatePathDistanceToNearestPP(Game game, int pacmanNode) {
         int nearestPP = findNearestActivePP(game, pacmanNode); // Encontrar la PP más cercana
 
         if (nearestPP == -1) {
@@ -161,7 +117,7 @@ public class GameStateFilter {
 
     
     // Calcula la distancia euclidea a la PP activa mas cercana
-    public int calculateEuclideanDistanceToNearestPP(int pacmanNode) {
+    public int calculateEuclideanDistanceToNearestPP(Game game, int pacmanNode) {
         int nearestPP = findNearestActivePP(game, pacmanNode); // Encontrar la PP mas cercana
 
         if (nearestPP == -1) {
@@ -174,10 +130,11 @@ public class GameStateFilter {
     
     
     //Calcula el numero de PowerPills restantes
-    public int getRemainingPowerPills() {
+    public int getRemainingPowerPills(Game game) {
     	
     	//Retorna la longitud del array de PP activas
         return game.getActivePowerPillsIndices().length;
     }
+
 
 }

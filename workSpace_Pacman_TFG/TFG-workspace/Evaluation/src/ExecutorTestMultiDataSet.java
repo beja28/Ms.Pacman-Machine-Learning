@@ -35,8 +35,6 @@ es.ucm.fdi.ici.c2223.practica2.grupo02.Ghosts (3704)
 
 
 public class ExecutorTestMultiDataSet {
-	
-	private final static int ITERS = 10000;
 
     public static void main(String[] args) {
     	ExecutorModes executor = new ExecutorModes.Builder()
@@ -55,11 +53,12 @@ public class ExecutorTestMultiDataSet {
         ghostControllers.add(new es.ucm.fdi.ici.c2324.practica1.grupo06.Ghosts());
         ghostControllers.add(new es.ucm.fdi.ici.c2324.practica1.grupo01.Ghosts());
         ghostControllers.add(new es.ucm.fdi.ici.c2324.practica2.grupo04.Ghosts());
+        ghostControllers.add(new es.ucm.fdi.ici.c2324.practica2.grupo01.Ghosts());
         
         
         int ITERS = 100;
         String fileName = "pruebas_multi01";
-        boolean DEBUG = true;
+        boolean DEBUG = false;
         int min_score = -1;
         
         

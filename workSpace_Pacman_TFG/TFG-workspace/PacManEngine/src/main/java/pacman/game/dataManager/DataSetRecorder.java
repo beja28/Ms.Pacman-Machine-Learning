@@ -11,7 +11,9 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 import java.util.Set;
 
 import pacman.game.Constants.GHOST;
@@ -22,21 +24,30 @@ import pacman.game.Game;
 public class DataSetRecorder {
     
     private List<String> validGameStates;
-    private GameStateFilter gameStateFilter;
     private Set<Integer> junctionNodes;
     
-    private final Game game;
+    private GameStateFilter gameStateFilter;
+    private BaseGameStateTracker gameStateTracker;
+    
 
     public DataSetRecorder(Game game) {
         this.validGameStates = new ArrayList<>();
-        this.gameStateFilter = new GameStateFilter(game);
-        this.game = game;
+        this.gameStateFilter = new GameStateFilter();
+        this.gameStateTracker = new GameStateTrackerShortTerm();
         this.junctionNodes = new HashSet<>();
-        loadJunctionIndices();
+        loadJunctionIndices(game);
     }
     
     
-    public void collectGameState(MOVE pacmanMove) {
+    public void collectGameState(MOVE pacmanMove, Game game) {
+    	
+    	//Procesar estados pendientes
+    	String st = gameStateTracker.processBufferStates(game);
+    	if(st != null) {
+    		validGameStates.add(st);
+    	}
+    	
+    	gameStateTracker.updateGameStateTracker(game);
     	
     	//Si Pacman se encuentra en una INTERSECCION...
     	if(junctionNodes.contains(game.getPacmanCurrentNodeIndex())) {
@@ -45,18 +56,16 @@ public class DataSetRecorder {
         	List<String> filteredState = gameStateFilter.filterGameState(game.getGameState());
         	
         	//Se añade la etiqueta (la posicion de Pacman) 
-        	filteredState.add(0, pacmanMove.toString());
+        	filteredState.add(0, pacmanMove.toString());	//El resto de posiciones se desplaza a la derecha
         	
-        	//Se calculan las nuevas variables que queremos, y se añaden
-        	String finalState = gameStateFilter.addNewVariablesToFilteredState(filteredState);    		
-    		
-    		validGameStates.add(finalState);
-    	}
-    	
-    	gameStateFilter.addPreviousScore(Integer.valueOf(game.getScore()));
-    }
-
-    
+        	//Se calculan las nuevas variables que queremos en ese instante, y se añaden
+        	List<String> pendingState = gameStateFilter.addNewVariablesToFilteredState(game, filteredState);
+        	
+        	//Se guarda el estado temporalmente
+        	gameStateTracker.storeJunctionState(game, pendingState);
+		}
+	}
+	
     
     /*
      * Funcion que añade los datos de los estados del juego calculados a un archivo .csv
@@ -102,7 +111,7 @@ public class DataSetRecorder {
     
     
     
-    public void loadJunctionIndices() {
+    public void loadJunctionIndices(Game game) {
         int[] nodos = game.getJunctionIndices();
         for (int node : nodos) {
         	junctionNodes.add(node);
