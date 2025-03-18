@@ -2,11 +2,10 @@ import pandas as pd
 from sklearn.preprocessing import OneHotEncoder
 
 
-columns_to_encode = ['pacmanLastMoveMade', 'ghost1LastMove', 'ghost2LastMove', 'ghost3LastMove', 'ghost4LastMove']
+columns_to_encode = ['ghost1LastMove', 'ghost2LastMove', 'ghost3LastMove', 'ghost4LastMove']
 boolean_col = ['pacmanWasEaten', 'ghost1Eaten', 'ghost2Eaten', 'ghost3Eaten', 'ghost4Eaten']
 
 categories = {
-        "pacmanLastMoveMade": ["DOWN", "LEFT", "NEUTRAL", "RIGHT", "UP"],
         "ghost1LastMove": ["DOWN", "LEFT", "NEUTRAL", "RIGHT", "UP"],
         "ghost2LastMove": ["DOWN", "LEFT", "NEUTRAL", "RIGHT", "UP"],
         "ghost3LastMove": ["DOWN", "LEFT", "NEUTRAL", "RIGHT", "UP"],

@@ -13,7 +13,7 @@ import argparse
 
 # --- CREAR PATHS USANDO RUTAS RELATIVAS ---
 directorio_actual = os.path.dirname(os.path.abspath(__file__))
-dataset_path = os.path.join(directorio_actual, '..', '..', 'DataSets', '05_gameStatesData.csv')
+dataset_path = os.path.join(directorio_actual, '..', '..', 'DataSets', '06_gameStatesData.csv')
 dataset_path = os.path.normpath(dataset_path)
 path_trained = os.path.join(directorio_actual, 'Redes_Entrenadas')
 path_trained = os.path.normpath(path_trained)
@@ -80,7 +80,7 @@ def main():
             # Crea una instancia del modelo
             model = MyModelPyTorch(n_features, n_classes)
             # Carga los pesos
-            model.load_state_dict(torch.load(os.path.join(path_trained, "pytorch_model_2024-10-31.pth")))
+            model.load_state_dict(torch.load(os.path.join(path_trained, "pytorch_model_2025-03-18.pth")))
             # Cambia el modelo a modo evaluación
             model.eval()
             # Pasa el modelo correctamente al predictor
