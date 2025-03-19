@@ -72,6 +72,6 @@ public class ExecutorTestAverageScore {
          * - Muestra las estadísticas por consola
          * - Guarda las estadísticas en un archivo .txt en la carpeta 'statistics', si se ha especificado un nombre de archivo
          */
-        executor.runGameCalculateAverageScore(pacMan, ghostControllers, 1, 1000, "pruebas");
+        executor.runGameCalculateAverageScore(pacMan, ghostControllers, 1000, 1000, "pruebas");
     }
 }

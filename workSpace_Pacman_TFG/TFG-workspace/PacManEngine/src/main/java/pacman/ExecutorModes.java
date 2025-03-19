@@ -317,7 +317,8 @@ public class ExecutorModes {
 	public void runGameGenerateMultiDataSet(List<PacmanController> pacManControllers, List<GhostController> ghostControllers, int iter, String fileName, boolean DEBUG, int min_score) {
 	    
 		//Mensajes de informacion
-	    MessagePrinter printer = new MessagePrinter(DEBUG);
+	    MessagePrinter printer = new MessagePrinter(true);
+	    MessagePrinter debug_printer= new MessagePrinter(DEBUG);
 	    printer.mostrarResumenEjecucion(fileName, iter, min_score, pacManControllers.size(), ghostControllers.size());
 	    
 	    //Confirmacion para comenzar ejecucion
@@ -372,7 +373,7 @@ public class ExecutorModes {
 	                        dataRecorder.saveDataToCsv(fileName, true);
 	                        savedScores.add(game.getScore());
 	                        if (DEBUG) {
-	                            printer.mostrarDebug((partidasJugadas+1) + ". " + pacManController.getName() + " vs " + ghostController.getName() + " - Estados guardados en: " + fileName + ".csv con score: " + game.getScore());
+	                            debug_printer.mostrarDebug((partidasJugadas+1) + ". " + pacManController.getName() + " vs " + ghostController.getName() + " - Estados guardados en: " + fileName + ".csv con score: " + game.getScore());
 	                        }
 	                    } catch (IOException e) {
 	                        e.printStackTrace();
@@ -393,6 +394,17 @@ public class ExecutorModes {
 	    
 	    //Mostrar resumen final de ejecucion
 	    printer.mostrarResumenFinal(inicio, fileName, lineasIniciales, DataSetRecorder.contarLineas(fileName), savedScores, min_score);
+	    
+	    // Mostrar estadisticas
+	 	ScoreStatistics scoreStats = new ScoreStatistics(printer);
+	 	scoreStats.calcularEstadisticas(savedScores);
+	 		
+	 	if(fileName != "") {
+	 		scoreStats.guardarEstadisticasEnArchivo(savedScores, fileName + "_statistics");
+	 	}
+	 	
+	 	//Mostrar el numero de movimientos invalidos
+	 	printer.mostrarInfo("Movimientos inválidos en intersecciones " + DataSetRecorder.getInvalidMoveRatio());
 	}
 
 	
