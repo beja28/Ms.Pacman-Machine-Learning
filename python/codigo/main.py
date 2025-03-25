@@ -52,7 +52,7 @@ def main():
 
     # Comando para seleccionar el modelo para las predicciones
     parser_select_model = subparsers.add_parser("model", help="Selecciona el modelo a elegir para sacar la predicción (pytorch | sklearn)")
-    parser_select_model.add_argument("model", choices=["pytorch", "sklearn", "tabnet"], help="Para usar el modelo Pytorch escriba -> model pytorch | Para usar el modelo MLP de scikit-learn escriba -> model sklearn")
+    parser_select_model.add_argument("model", choices=["pytorch", "sklearn"], help="Para usar el modelo Pytorch escriba -> model pytorch | Para usar el modelo MLP de scikit-learn escriba -> model sklearn")
 
     # Comando para entrenar el modelo
     parser_train_model = subparsers.add_parser("train_model", help="Elige el modelo a entrenar")

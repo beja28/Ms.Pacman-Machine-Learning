@@ -7,7 +7,6 @@ import sys
 import select
 from preprocessing import preprocess_game_state
 from model_pytorch import MyModelPyTorch
-from pytorch_tabnet.tab_model import TabNetClassifier
 import numpy as np
 
 """ --- CREAR PATHS USANDO RUTAS RELATIVAS --- """
@@ -39,7 +38,7 @@ def model_for_prediction(model_type, n_features, n_classes, intersection_id=None
         full_model_path = os.path.join(path_trained, 'models_2025-03-12', model_filename)
         print(full_model_path)
         mlp_model = joblib.load(full_model_path)
-        return mlp_model, None, None
+        return mlp_model, None
     
     elif model_type == 'pytorch':
        
@@ -50,16 +49,7 @@ def model_for_prediction(model_type, n_features, n_classes, intersection_id=None
         modelPytorch.load_state_dict(torch.load(full_model_path, weights_only=True))
         modelPytorch.to(device)
         modelPytorch.eval()
-        return None, modelPytorch, None
-    
-    elif model_type == 'tabnet':
-        model_filename = f'tabnet_model_({intersection_id},).zip'
-        full_model_path = os.path.join(path_trained, 'models_2025-03-16', model_filename)
-
-        modelTabNet = TabNetClassifier(device_name=device)
-        modelTabNet.load_model(full_model_path)
-        modelTabNet.network.eval()  # Asegurar que está en modo evaluación
-        return None, None, modelTabNet
+        return None, modelPytorch
 
     else:
         raise ValueError("Modelo no reconocido. Elige 'pytorch', 'sklearn' o 'tabnet'.")
@@ -98,11 +88,6 @@ def get_prediction(model_type, mensaje, n_features, n_classes):
         probabilidades = probabilidades.flatten()  # Asegurarse de que sea un array 1D
         predicted_index = np.argmax(probabilidades)  # Índice de la clase con mayor probabilidad
         prediccion = np.max(probabilidades)  # Obtiene el valor máximo de probabilidad
-    
-    elif model_type == 'tabnet':
-        input_array = preprocessed_state.values.astype(np.float32)
-        probabilidades = modelTabNet.predict_proba(input_array)[0]
-        predicted_index = np.argmax(probabilidades)
 
     moves = ['UP', 'DOWN', 'LEFT', 'RIGHT', 'NEUTRAL']
     predicted_move = moves[predicted_index]
