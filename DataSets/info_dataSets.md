@@ -61,6 +61,22 @@
 ![Resultado](06_gameStatesDataFin.png)
 
 
+	Estadísticas de las partidas jugadas para obtener el dataset
+	- Media: 3745,18
+	- Mediana: 2900,00
+	- Desviación típica: 2986,08
+	- Varianza: 8916694,39
+	- Máximo: 17970,00
+	- Mínimo: 0,00
+	- Rango: 18080,00
+	- Percentil 25: 1220,00
+	- Percentil 75: 5540,00
+	- Percentil 90: 8370,00
+	- Asimetría (Skewness): 0,95
+	- Curtosis (Kurtosis): 0,13
+
+
+
 ##### 07_gameStatesData 14/03/25 --> (5.4M lineas) Generado con 75.000 ejecuciones del juego, score mínimo desactivado y estas implementaciones de años anteriores que consiguen muy buen score
 	Pacmans:
 	- es.ucm.fdi.ici.c2223.practica1.grupo06.MsPacMan (9958)
