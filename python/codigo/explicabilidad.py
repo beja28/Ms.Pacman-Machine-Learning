@@ -127,6 +127,9 @@ class Explicabilidad:
             # Selecciona una fila aleatoria de X para explicarla
             i = np.random.randint(0, len(X))
             instance = X.iloc[i]  # Obtén una fila (instancia) del DataFrame
+
+            print("\n🕹 **Estado seleccionado para explicación con LIME:**")
+            print(instance.to_frame().T)  # Transponer para mejor lectura
             
             # Si el modelo es de Scikit-Learn, usa predict_proba. Si es de PyTorch, crea un predict_proba personalizado
             if hasattr(model, "predict_proba"):
