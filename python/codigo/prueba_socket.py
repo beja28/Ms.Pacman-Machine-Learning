@@ -9,8 +9,8 @@ import select
 from preprocessing import preprocess_game_state
 from preprocessing_aux import preprocess_game_state_aux
 from model_pytorch import MyModelPyTorch
-from pytorch_tabnet.tab_model import TabNetClassifier
 import numpy as np
+from pytorch_tabnet.tab_model import TabNetClassifier
 
 """ --- CREAR PATHS USANDO RUTAS RELATIVAS --- """
 
@@ -40,7 +40,7 @@ def model_for_prediction(model_type, n_features, n_classes, intersection_id=None
         full_model_path = os.path.join(path_trained, 'models_2025-03-12', model_filename)
         print(full_model_path)
         mlp_model = joblib.load(full_model_path)
-        return mlp_model, None, None
+        return mlp_model, None
     
     elif model_type == 'pytorch':
        
