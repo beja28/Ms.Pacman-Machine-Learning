@@ -70,7 +70,7 @@ def get_prediction(model_type, mensaje, n_features, n_classes):
     intersection_id = identify_intersection(preprocessed_state) # envio el estado del juego como un diccionario
     # Cargar el modelo para la predicción
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    mlp_model, modelPytorch, modelTabNet  = model_for_prediction(model_type, n_features, n_classes, intersection_id, device)
+    mlp_model, modelPytorch  = model_for_prediction(model_type, n_features, n_classes, intersection_id, device)
     # Convertir el estado preprocesado a tensor o array, segun el modelo
     
     if model_type == 'pytorch':

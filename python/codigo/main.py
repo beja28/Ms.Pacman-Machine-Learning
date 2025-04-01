@@ -123,7 +123,7 @@ def main():
         Importante seleccionar la carpeta de los modelos sklearn o pytorch para que funcione correctamente
         --------------------------------------------------------------------------------------------------
         """
-        model_directory = os.path.join(path_trained, "models_2025-03-12")
+        model_directory = os.path.join(path_trained, "models_2025-03-05")
         
         # Obtener todos los archivos con extensión .pkl o .pth
         model_files = [f for f in os.listdir(model_directory) if f.endswith(('.pkl', '.pth'))]
@@ -179,8 +179,9 @@ def main():
             else: # SHAP
                 explicador.ejecutar_explicabilidad(model, model_filename, args.technique, X_cv, key)
         
-        explicador.generar_grafico_explicabilidad_global(args.model)
-        explicador.guardar_explicabilidad_txt(directorio_actual, args.model)
+        if(args.technique != "lime"):
+            explicador.generar_grafico_explicabilidad_global(args.model)
+            explicador.guardar_explicabilidad_txt(directorio_actual, args.model)
 
 
 if __name__ == "__main__":
