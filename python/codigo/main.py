@@ -6,11 +6,11 @@ from explicabilidad import Explicabilidad
 from Pytorch_Predictor import PyTorchPredictor
 from model_pytorch import MyModelPyTorch
 import torch
-import os
 import re
 from sklearn.model_selection import train_test_split
 from torch.utils.data import TensorDataset, DataLoader
 import argparse
+import os
 
 # Ruta de datos y de la carpeta para guardar modelos --> RUTA ABSOLUTA --> PROBLEMA
 # path = 'D:/Documentos/diego/universidad/4 Curso/TFG/Ms.Pacman-Machine-Learning/DataSets/01_gameStatesData.csv'
@@ -24,7 +24,7 @@ import argparse
 directorio_actual = os.path.dirname(os.path.abspath(__file__))
 
 # Construir la ruta que sube dos niveles desde 'codigo' y entra en 'DataSets'
-dataset_path = os.path.join(directorio_actual, '..', '..', 'DataSets', '06_gameStatesData.csv')
+dataset_path = os.path.join(directorio_actual, '..', '..', 'DataSets', '18_gameStatesData_enriched.csv')
 
 # Normalizar la ruta para evitar problemas con distintos sistemas operativos
 dataset_path = os.path.normpath(dataset_path)
@@ -37,12 +37,9 @@ path_trained = os.path.normpath(path_trained)
 
 
 
-# --- PREPROCESAMIENTO ---
-grouped_df  = preprocess_csv(dataset_path)
-# Configuramos los parámetros de la red
-#acceder al primer grupo por ej
-n_features = grouped_df.first().shape[1]
-n_classes = 5  # 5 posibles movimientos de Pac-Man
+# # --- PREPROCESAMIENTO ---
+
+
 
 def main():
     parser = argparse.ArgumentParser(description="Selecciona si quieres entrenar un modelo o utilizar uno para enviar la predicción o realizar la explicabilidad")
@@ -64,6 +61,17 @@ def main():
     parser_explain.add_argument("technique", choices=["shap", "feature_importance", "lime"], help="Selecciona la técnica de explicabilidad (SHAP, Feature Importance, LIME)")
 
     args = parser.parse_args()
+
+    grouped_df = None
+    n_features = 0
+    n_classes = 0
+
+    if not (args.command == "model" and args.model == "tabnet"):
+        grouped_df  = preprocess_csv(dataset_path)
+        # Configuramos los parámetros de la red
+        # acceder al primer grupo por ej
+        n_features = grouped_df.first().shape[1]
+        n_classes = 5  # 5 posibles movimientos de Pac-Man
 
 
     if args.command == "model":
