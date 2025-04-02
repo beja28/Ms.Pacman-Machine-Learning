@@ -45,6 +45,8 @@ import pacman.game.consolePrinter.MessagePrinter;
 import pacman.game.consolePrinter.UserPrompt;
 import pacman.game.dataManager.DataSetRecorder;
 import pacman.game.dataManager.GameStateFilter;
+import pacman.game.dataStatistics.BoxPlot;
+import pacman.game.dataStatistics.Histogram;
 import pacman.game.dataStatistics.ScoreStatistics;
 import pacman.game.internal.Node;
 import pacman.game.internal.POType;
@@ -234,6 +236,16 @@ public class ExecutorModes {
             if (tickLimit != -1 && tickLimit < game.getTotalTime()) {
                 break;
             }
+            
+            /* Por si se quiere saber el numero de interseccion por el cual esta pasando en ese instante
+            int[] intersecciones = game.getJunctionIndices();
+            for(int i: intersecciones) {
+            	if(i == game.getPacmanCurrentNodeIndex()) {
+                	System.out.println(game.getPacmanCurrentNodeIndex());
+                }
+            }
+            */
+            
             handlePeek(game);
             game.advanceGame(
                     pacManController.getMove(getPacmanCopy(game), System.currentTimeMillis() + timeLimit),
@@ -309,8 +321,16 @@ public class ExecutorModes {
 		ScoreStatistics scoreStats = new ScoreStatistics(printer);
 		scoreStats.calcularEstadisticas(scores);
 		
+		// Mostrar histograma
+		Histogram.createHistogram(scores);
+		
+		// Mostrar BoxPlot
+		BoxPlot.createBoxPlot(scores);
+		
 		if(fileName != "") {
 			scoreStats.guardarEstadisticasEnArchivo(scores, fileName);
+			Histogram.guardarGraficaEnArchivo(scores, fileName);
+			BoxPlot.guardarGraficaEnArchivo(scores, fileName);
 		}
 	}
 	
@@ -398,9 +418,17 @@ public class ExecutorModes {
 	    // Mostrar estadisticas
 	 	ScoreStatistics scoreStats = new ScoreStatistics(printer);
 	 	scoreStats.calcularEstadisticas(savedScores);
+	 	
+	 	// Mostrar histograma
+	 	Histogram.createHistogram(savedScores);
+	 		
+	 	// Mostrar BoxPlot
+	 	BoxPlot.createBoxPlot(savedScores);
 	 		
 	 	if(fileName != "") {
 	 		scoreStats.guardarEstadisticasEnArchivo(savedScores, fileName + "_statistics");
+	 		Histogram.guardarGraficaEnArchivo(savedScores, fileName);
+			BoxPlot.guardarGraficaEnArchivo(savedScores, fileName);
 	 	}
 	 	
 	 	//Mostrar el numero de movimientos invalidos
