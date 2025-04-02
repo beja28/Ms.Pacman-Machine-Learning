@@ -75,10 +75,12 @@ def get_prediction(model_type, mensaje, n_features, n_classes):
     # Convertir la lista de movimientos válidos en una lista
     valid_moves = [x.strip("] \r\n") for x in valid_moves_str.strip("[]").split(",")]
     if model_type == 'tabnet':
-        preprocessed_state = preprocess_game_state_aux(game_state, dataset_path)
+        preprocessed_state, intersection_id = preprocess_game_state_aux(game_state, dataset_path)
     else:
         preprocessed_state = preprocess_game_state(game_state, dataset_path)
-    intersection_id = identify_intersection(preprocessed_state)
+    
+    if model_type != 'tabnet':
+        intersection_id = identify_intersection(preprocessed_state)
 
     # Cargar el modelo para la predicción
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -128,13 +130,12 @@ def get_prediction(model_type, mensaje, n_features, n_classes):
         print(f'Movimientos válidos: {valid_moves}')
         # Validación frente a movimientos válidos
         if predicted_move not in valid_moves:
-            # 🔍 DEPURACIÓN DETALLADA
             print('=' * 50)
-            print("📌 Depuración de movimientos válidos")
-            print(f"🎯 Clase predicha inicialmente: {predicted_move}")
-            print(f"✅ Movimientos válidos recibidos: {valid_moves}")
-            print(f"🔢 Clases del modelo: {class_list}")
-            print(f"📈 Probabilidades: {probabilidades}")
+            print("Depuración de movimientos válidos")
+            print(f"Clase predicha inicialmente: {predicted_move}")
+            print(f"Movimientos válidos recibidos: {valid_moves}")
+            print(f"Clases del modelo: {class_list}")
+            print(f"Probabilidades: {probabilidades}")
             valid_probabilities = [
                 (i, prob) for i, (label, prob) in enumerate(zip(class_list, probabilidades)) if label in valid_moves
             ]

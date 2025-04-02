@@ -25,6 +25,26 @@ categories = {
     for col in columns_to_encode
 }
 
+def preprocess_csv_aux(path):
+    df = pd.read_csv(path, low_memory=False)
+    move_mapping = {'UP': 0, 'DOWN': 1, 'LEFT': 2, 'RIGHT': 3}
+    df['PacmanMove'] = df['PacmanMove'].map(move_mapping)
+    for col in columns_to_encode:
+        print(f"Valores únicos en {col}: {df[col].unique()}")
+
+    for col in boolean_col:
+        df[col] = df[col].astype(str).str.lower().map({'true': 1, 'false': 0, '1': 1, '0': 0})
+        df[col] = df[col].fillna(0).astype(int)
+
+    encoder = OneHotEncoder(categories=[categories[col] for col in columns_to_encode], sparse_output=False)
+    one_hot_encoded = encoder.fit_transform(df[columns_to_encode])
+    encoded_df = pd.DataFrame(one_hot_encoded, columns=encoder.get_feature_names_out(columns_to_encode))
+    df[boolean_col] = df[boolean_col].astype(int)
+    df_final_encoded = pd.concat([df.drop(columns=columns_to_encode), encoded_df], axis=1)
+    grouped_df = df_final_encoded.groupby(['pacmanCurrentNodeIndex'])
+        
+    return grouped_df
+
 def preprocess_game_state_aux(game_state, path):
     # Leer columnas del CSV (sin columnas derivadas)
     all_cols = pd.read_csv(path, nrows=0).columns.tolist()
@@ -99,7 +119,6 @@ def preprocess_game_state_aux(game_state, path):
     one_hot_cols = [col for col in df.columns if any(prefix in col for prefix in columns_to_encode)]
     columns_no_scale = boolean_col + one_hot_cols
 
-    original_node_index = df['pacmanCurrentNodeIndex'].iloc[0]
     X_num = df.drop(columns=columns_no_scale)
     X_rest = df[columns_no_scale]
 
@@ -114,12 +133,10 @@ def preprocess_game_state_aux(game_state, path):
     X_processed = np.hstack([X_num_scaled, X_rest.values])
     df_final = pd.DataFrame(X_processed, columns=columns_scaled + list(X_rest.columns))
 
-    df_final['pacmanCurrentNodeIndex'] = original_node_index
-
     file_exists = os.path.isfile("df_final.csv")
     df_final.to_csv("df_final.csv", index=False, mode='a', header=not file_exists)
 
-    return df_final
+    return df_final, intersection_id
 
 
 def convert_types(data_dict):
@@ -138,3 +155,31 @@ def convert_types(data_dict):
             data_dict[key] = int(data_dict[key])
 
     return data_dict
+
+def load_and_scale_tabnet(group, key, path_trained):
+    
+    # Separar X e Y
+    X = group.drop(columns=['PacmanMove']) 
+    Y = group['PacmanMove'].values
+
+    # Detectar columnas a escalar
+    one_hot_cols = [col for col in X.columns if any(prefix in col for prefix in columns_to_encode)]
+    columns_no_scale = boolean_col + one_hot_cols
+
+    X_num = X.drop(columns=columns_no_scale)
+    X_rest = X[columns_no_scale]
+
+    # Cargar scaler específico para esta intersección
+    scaler_path = os.path.join(path_trained, "models_2025-03-29", f"scaler_({key},).pkl")
+    scaler_bundle = joblib.load(scaler_path)
+    scaler = scaler_bundle['scaler']
+    columns_scaled = scaler_bundle['columns']
+
+    X_num = X_num[columns_scaled]
+    X_num_scaled = scaler.transform(X_num)
+
+    # Concatenar arrays como ndarray final
+    X_final = np.hstack([X_num_scaled, X_rest.values])
+
+    return X_final, Y
+

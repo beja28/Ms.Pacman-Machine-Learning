@@ -3,6 +3,7 @@ from lime.lime_tabular import LimeTabularExplainer
 import numpy as np
 import torch
 from sklearn.inspection import permutation_importance
+from pytorch_tabnet.tab_model import TabNetClassifier
 import pandas as pd
 import matplotlib.pyplot as plt
 import os
@@ -77,39 +78,52 @@ class Explicabilidad:
 
     def explicabilidad_feature_importance(self, model, model_filename, X, Y):
         """Implementación de Feature Importance utilizando Permutation Importance."""
-        try:
-            if hasattr(model, 'predict'):  # Comprobar que tiene método predict
-                X_sampled = X.sample(n=500, random_state=42)  # Muestra de 500 instancias
-                Y_sampled = Y[X_sampled.index]  # Etiquetas correspondientes a las muestras
+        
+        feature_names = X.columns
+      
+        # TabNet
+        if isinstance(model, TabNetClassifier):
+            print(f"Ejecuta la explicabilidad para el modelo {model_filename}")
 
-                print(f"Ejecuta la explicabilidad para el modelo {model_filename}")
+            masks, _ = model.explain(X.values) # Devuelve una tupla
+            importances = masks.mean(axis=0)
 
-                results = permutation_importance(
-                    model, 
-                    X_sampled, 
-                    Y_sampled, 
-                    n_repeats=5,  # Reducir repeticiones para mejorar rendimiento
-                    random_state=1
-                )
-                importances = results.importances_mean 
+            feature_importances = pd.DataFrame({
+                'Feature': feature_names,
+                'Importance': importances
+            })
+            
+        # Scikit-learn
+        elif hasattr(model, 'predict'):
+            print(f"Ejecuta la explicabilidad para el modelo {model_filename}")
+          
+            X_sampled = X.sample(n=500, random_state=42)  # Muestra de 500 instancias
+            Y_sampled = Y[X_sampled.index]  # Etiquetas correspondientes a las muestras
+   
+            results = permutation_importance(
+                model, 
+                X_sampled, 
+                Y_sampled, 
+                n_repeats=5,
+                random_state=1
+            )
+            importances = results.importances_mean 
 
-                feature_names = X.columns
-                feature_importances = pd.DataFrame({
-                    'Feature': feature_names,
-                    'Importance': importances
-                })
-
-                feature_importances = feature_importances.sort_values(by="Importance", ascending=False)
-
-                # Guardar los resultados de Feature Importance
-                self.explicaciones.append({
-                    "technique": "feature_importance", 
-                    "importances": feature_importances,
-                    "feature_names": feature_names
-                })
-
-        except Exception as e:
-            print(f"Error durante la explicabilidad Feature Importance: {e}")
+            feature_importances = pd.DataFrame({
+                'Feature': feature_names,
+                'Importance': importances
+            })         
+        else:
+            raise ValueError("Modelo no compatible con feature importance")
+        
+        feature_importances = feature_importances.sort_values(by="Importance", ascending=False)
+        
+        # Guardar los resultados de Feature Importance
+        self.explicaciones.append({
+            "technique": "feature_importance", 
+            "importances": feature_importances,
+            "feature_names": feature_names
+        })
     
 
     def explicabilidad_lime(self, model, model_filename, X, node_index=165):
@@ -120,7 +134,7 @@ class Explicabilidad:
             modelo_node_index = int(match.group(1)) if match else None
 
             if modelo_node_index != node_index:
-                print(f"⏩ Saltando modelo {model_filename}, no corresponde al nodo {node_index}")
+                print(f"Saltando modelo {model_filename}, no corresponde al nodo {node_index}")
                 return
 
             # Si X no es un DataFrame, se convierte en uno para manejar las características adecuadamente
@@ -137,7 +151,7 @@ class Explicabilidad:
             i = np.random.randint(0, len(estados_filtrados))
             instance = estados_filtrados.iloc[i]
 
-            print("\n🕹 **Estado seleccionado para explicación con LIME:**")
+            print("\n**Estado seleccionado para explicación con LIME:**")
             print(instance.to_frame().T)  # Transponer para mejor lectura
 
             # Crea el explicador de LIME

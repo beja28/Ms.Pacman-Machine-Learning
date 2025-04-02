@@ -1,6 +1,8 @@
 from preprocessing import preprocess_csv
+from preprocessing_aux import preprocess_csv_aux, load_and_scale_tabnet
 from model_pytorch import train_pytorch_nn, save_model_pth
 from model_sklearn import MLPModel
+from pytorch_tabnet.tab_model import TabNetClassifier
 from prueba_socket import start_socket 
 from explicabilidad import Explicabilidad
 from Pytorch_Predictor import PyTorchPredictor
@@ -9,8 +11,12 @@ import torch
 import re
 from sklearn.model_selection import train_test_split
 from torch.utils.data import TensorDataset, DataLoader
+from collections import Counter
 import argparse
 import os
+import numpy as np
+import joblib
+                
 
 # Ruta de datos y de la carpeta para guardar modelos --> RUTA ABSOLUTA --> PROBLEMA
 # path = 'D:/Documentos/diego/universidad/4 Curso/TFG/Ms.Pacman-Machine-Learning/DataSets/01_gameStatesData.csv'
@@ -57,21 +63,28 @@ def main():
     
     # Comando para realizar la explicabilidad
     parser_explain = subparsers.add_parser("explain", help="Explica el modelo seleccionado usando una técnica específica (SHAP, Feature Importance, LIME)")
-    parser_explain.add_argument("model", choices=["pytorch", "sklearn"], help="Selecciona el modelo a explicar (pytorch o sklearn)")
+    parser_explain.add_argument("model", choices=["pytorch", "sklearn", "tabnet"], help="Selecciona el modelo a explicar (pytorch o sklearn)")
     parser_explain.add_argument("technique", choices=["shap", "feature_importance", "lime"], help="Selecciona la técnica de explicabilidad (SHAP, Feature Importance, LIME)")
 
     args = parser.parse_args()
+    
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
 
     grouped_df = None
     n_features = 0
     n_classes = 0
 
-    if not (args.command == "model" and args.model == "tabnet"):
-        grouped_df  = preprocess_csv(dataset_path)
-        # Configuramos los parámetros de la red
-        # acceder al primer grupo por ej
-        n_features = grouped_df.first().shape[1]
-        n_classes = 5  # 5 posibles movimientos de Pac-Man
+    if not (args.command == "model" and (args.model == "tabnet" or args.model == "sklearn")):
+        if args.model == "tabnet":
+            grouped_df = preprocess_csv_aux(dataset_path)
+
+            n_features = grouped_df.first().shape[1]
+            n_classes = 4
+        else:          
+            grouped_df  = preprocess_csv(dataset_path)
+            n_features = grouped_df.first().shape[1]
+            n_classes = 5
 
 
     if args.command == "model":
@@ -88,7 +101,6 @@ def main():
             X_train, X_, y_train, y_ = train_test_split(X, Y, test_size=0.50, random_state=1)
             X_cv, X_test, y_cv, y_test = train_test_split(X_, y_, test_size=0.20, random_state=1)
 
-            device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
             print(torch.cuda.is_available())
             print(torch.cuda.get_device_name(0))
             print(device)
@@ -131,10 +143,19 @@ def main():
         Importante seleccionar la carpeta de los modelos sklearn o pytorch para que funcione correctamente
         --------------------------------------------------------------------------------------------------
         """
-        model_directory = os.path.join(path_trained, "models_2025-03-05")
         
-        # Obtener todos los archivos con extensión .pkl o .pth
-        model_files = [f for f in os.listdir(model_directory) if f.endswith(('.pkl', '.pth'))]
+        if args.model == "tabnet":
+            model_directory = os.path.join(path_trained, "models_2025-03-29")
+            
+            model_files = [
+                f"tabnet_model_{key}.zip"
+                for key, _ in grouped_df
+            ]
+        else:
+            model_directory = os.path.join(path_trained, "models_2025-03-05")
+            
+            # Obtener todos los archivos con extensión .pkl o .pth
+            model_files = [f for f in os.listdir(model_directory) if f.endswith(('.pkl', '.pth'))]
 
         # Expresión regular para extraer el número dentro de los paréntesis
         def extract_number(filename):
@@ -155,13 +176,25 @@ def main():
         for (key, group), model_filename in zip(grouped_df, sorted_model_files):
             print(f"Explicabilidad para el grupo: {key}, usando el modelo: {model_filename}")
 
-            # Variables independientes (X) y dependientes (Y)
-            X = group.drop(columns=['PacmanMove'])
-            Y = group['PacmanMove']
+            if(args.model == "tabnet"):
+                
+                X, Y  = load_and_scale_tabnet(group, key, path_trained)
+                               
+                class_counts = Counter(Y)
+                valid_classes = {cls for cls, count in class_counts.items() if count >= 100}
+                mask = np.isin(Y, list(valid_classes))
+                X = X[mask]
+                Y = Y[mask]
+                        
+            else:
+                # Variables independientes (X) y dependientes (Y)
+                X = group.drop(columns=['PacmanMove'])
+                Y = group['PacmanMove'].values
+                
 
             # Dividimos el conjunto de datos
-            X_train, X_, y_train, y_ = train_test_split(X, Y, test_size=0.50, random_state=1)
-            X_cv, X_test, y_cv, y_test = train_test_split(X_, y_, test_size=0.20, random_state=1)
+            X_train, X_, y_train, y_ = train_test_split(X, Y, test_size=0.3, random_state=1)
+            X_cv, X_test, y_cv, y_test = train_test_split(X_, y_, test_size=0.33, random_state=1)
 
             # Cargar el modelo correspondiente
             full_model_path = os.path.join(model_directory, model_filename)
@@ -175,6 +208,9 @@ def main():
                 predictor = PyTorchPredictor(model)
             elif args.model == "sklearn":
                 model = MLPModel.load_model_mlp(full_model_path)
+            elif args.model == "tabnet":
+                model = TabNetClassifier(device_name=device)
+                model.load_model(full_model_path)
             
             if args.technique == "feature_importance":
                 explicador.ejecutar_explicabilidad(model, model_filename, args.technique, X_cv, key, y_cv)
