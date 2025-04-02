@@ -113,22 +113,24 @@ class Explicabilidad:
     
 
     def explicabilidad_lime(self, model, model_filename, X, node_index=165):
-        """Implementación de LIME para explicar las predicciones del modelo en una interseccion en concreto (funciona para Scikit-Learn y PyTorch)."""
+        """Implementacion de LIME para explicar las predicciones del modelo en una interseccion en concreto (funciona para Scikit-Learn y PyTorch)."""
         try:
 
+            # Encontrar en nodo de interseccion de ese modelo de red, que viene en el nombre entre ()
             match = re.search(r'\((\d+),\)', model_filename)
             modelo_node_index = int(match.group(1)) if match else None
 
             if modelo_node_index != node_index:
-                print(f"⏩ Saltando modelo {model_filename}, no corresponde al nodo {node_index}")
+                print(f"--> Saltando modelo {model_filename}, no corresponde al nodo {node_index}")
                 return
 
-            # Si X no es un DataFrame, se convierte en uno para manejar las características adecuadamente
+            # Si X no es un DataFrame, se convierte en uno para manejar las caracteristicas adecuadamente
             if not isinstance(X, pd.DataFrame):
                 X = pd.DataFrame(X, columns=model.feature_names_in_)
 
             estados_filtrados = X[X["pacmanCurrentNodeIndex"] == node_index]
 
+            # Es muy raro que se de el caso, pero para prevenir
             if estados_filtrados.empty:
                 print(f"\n No se encontraron estados con pacmanCurrentNodeIndex = {node_index} para el modelo {model_filename}. Saltando explicabilidad LIME.\n")
                 return
@@ -137,8 +139,8 @@ class Explicabilidad:
             i = np.random.randint(0, len(estados_filtrados))
             instance = estados_filtrados.iloc[i]
 
-            print("\n🕹 **Estado seleccionado para explicación con LIME:**")
-            print(instance.to_frame().T)  # Transponer para mejor lectura
+            print("\nEstado seleccionado para explicación con LIME:")
+            print(instance.to_frame().T)    #Para que se vea en horizontal
 
             # Crea el explicador de LIME
             explainer = LimeTabularExplainer(
@@ -167,7 +169,7 @@ class Explicabilidad:
             print(f"Ejecutando la explicabilidad LIME para el modelo {model_filename}")
             exp = explainer.explain_instance(instance.values, predict_fn, num_features=5)
             
-            # Guarda los resultados de la explicación LIME
+            # Guarda los resultados de la explicacion LIME
             self.explicaciones.append({
                 "technique": "lime", 
                 "lime_exp": exp,
@@ -175,10 +177,11 @@ class Explicabilidad:
                 "modelo_filename": model_filename
             })
 
-            # Guardar en un .txt
+            # Guardar en el .txt de explicacioones LIME
             ruta_carpeta = os.path.join('..', 'images', 'Explicabilidad', 'Lime')
             os.makedirs(ruta_carpeta, exist_ok=True)
 
+            # Hora del sistema para identificar y diferenciar
             hora_act = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             ruta_txt = os.path.join(ruta_carpeta, 'explicaciones_LIME.txt')
 
@@ -189,21 +192,21 @@ class Explicabilidad:
                         f.write('Archivo recopilatorio de explicaciones generadas con LIME\n')
                         f.write('------------------------------------------------------------------\n\n')             
 
-                # Luego, siempre abre en modo append para meter nueva info
+                # Se abre en modo append para meter nueva info
                 with open(ruta_txt, 'a', encoding='utf-8') as f:
                     f.write(f'Explicacion LIME para el modelo: {model_filename}\n')
                     f.write(f'Fecha y hora: {hora_act}\n')
                     f.write('Estado analizado:\n')
                     f.write(instance.to_frame().T.to_string(index=False))
-                    f.write('\n\nCaracterísticas mas influyentes:\n')
+                    f.write('\n\nCaracteristicas mas influyentes:\n')
                     for feature, influence in exp.as_list():
                         f.write(f' - {feature}: {influence:.4f}\n')
                     f.write('\n--------------------------------------------------\n\n')
 
             except Exception as e:
-                print(f"Error guardando explicaciones en TXT: {e}")
+                print(f"Error guardando explicaciones en .txt: {e}")
 
-            # Se guarda el grafico
+            # Se guarda el grafico en la misma carpeta
             self.generar_grafico_lime_individual(model_filename)
 
         except Exception as e:
@@ -222,30 +225,27 @@ class Explicabilidad:
 
         lime_exp = lime_exps[0]["lime_exp"]
 
-        # Crear la figura de LIME
+        # Crea la figura de LIME
         fig = lime_exp.as_pyplot_figure()
         plt.title(f"Explicabilidad LIME")
-
-        # Estética del gráfico
         plt.yticks(fontsize=10)
         plt.subplots_adjust(left=0.4)
         plt.xlabel('Valor de impacto', fontsize=10)
         plt.ylabel('Características', fontsize=10)
 
-        # Ruta para guardar
+        # Ruta donde esta la explicabilidad
         ruta_carpeta = os.path.join('..', 'images', 'Explicabilidad', 'Lime')
         os.makedirs(ruta_carpeta, exist_ok=True)
 
-        # Nombre del archivo con timestamp
+        # El nombre del archivo, es el nombre del modelo y la hora, para diferenciarlos
         hora_actual = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         nombre_archivo = f"LIME_{model_filename}_{hora_actual}.png"
         ruta_completa = os.path.join(ruta_carpeta, nombre_archivo)
 
-        # Guardar el gráfico
         plt.savefig(ruta_completa, bbox_inches='tight')
         plt.close()
 
-        print(f"Gráfico de explicabilidad LIME guardado en: {ruta_completa}")
+        print(f"Grafico de explicabilidad LIME guardado en: {ruta_completa}")
         
         
     def generar_grafico_explicabilidad_global(self, model):
