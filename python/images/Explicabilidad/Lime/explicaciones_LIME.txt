@@ -91,3 +91,93 @@ Características mas influyentes:
 
 --------------------------------------------------
 
+Explicacion LIME para el modelo: mlp_trained_model_2025-03-12_(165,).pkl
+Fecha y hora: 2025-04-02 12:41:29
+Estado analizado:
+ totalTime  score  pacmanCurrentNodeIndex  ghost1NodeIndex  ghost1EdibleTime  ghost1LairTime  ghost2NodeIndex  ghost2EdibleTime  ghost2LairTime  ghost3NodeIndex  ghost3EdibleTime  ghost3LairTime  ghost4NodeIndex  ghost4EdibleTime  ghost4LairTime  timeOfLastGlobalReversal  pacmanWasEaten  ghost1Eaten  ghost2Eaten  ghost3Eaten  ghost4Eaten  ghost1Distance  ghost2Distance  ghost3Distance  ghost4Distance  euclideanDistanceToPp  pathDistanceToPp  remainingPp  ghost1LastMove_DOWN  ghost1LastMove_LEFT  ghost1LastMove_NEUTRAL  ghost1LastMove_RIGHT  ghost1LastMove_UP  ghost2LastMove_DOWN  ghost2LastMove_LEFT  ghost2LastMove_NEUTRAL  ghost2LastMove_RIGHT  ghost2LastMove_UP  ghost3LastMove_DOWN  ghost3LastMove_LEFT  ghost3LastMove_NEUTRAL  ghost3LastMove_RIGHT  ghost3LastMove_UP  ghost4LastMove_DOWN  ghost4LastMove_LEFT  ghost4LastMove_NEUTRAL  ghost4LastMove_RIGHT  ghost4LastMove_UP
+    1660.0 3280.0                   165.0            182.0               0.0             0.0            320.0               0.0             0.0            429.0               0.0             0.0            493.0               0.0             0.0                    1283.0             0.0          0.0          0.0          0.0          0.0            17.0            37.0            33.0            53.0                   94.0              94.0          1.0                  0.0                  1.0                     0.0                   0.0                0.0                  0.0                  0.0                     0.0                   0.0                1.0                  0.0                  0.0                     0.0                   0.0                1.0                  0.0                  1.0                     0.0                   0.0                0.0
+
+Características mas influyentes:
+ - totalTime > 1593.00: -0.0596
+ - timeOfLastGlobalReversal > 870.00: -0.0353
+ - ghost1NodeIndex <= 187.00: -0.0350
+ - remainingPp <= 1.00: 0.0288
+ - ghost4EdibleTime <= 0.00: -0.0256
+
+--------------------------------------------------
+
+Explicacion LIME para el modelo: mlp_trained_model_2025-03-12_(165,).pkl
+Fecha y hora: 2025-04-02 12:42:49
+Estado analizado:
+ totalTime  score  pacmanCurrentNodeIndex  ghost1NodeIndex  ghost1EdibleTime  ghost1LairTime  ghost2NodeIndex  ghost2EdibleTime  ghost2LairTime  ghost3NodeIndex  ghost3EdibleTime  ghost3LairTime  ghost4NodeIndex  ghost4EdibleTime  ghost4LairTime  timeOfLastGlobalReversal  pacmanWasEaten  ghost1Eaten  ghost2Eaten  ghost3Eaten  ghost4Eaten  ghost1Distance  ghost2Distance  ghost3Distance  ghost4Distance  euclideanDistanceToPp  pathDistanceToPp  remainingPp  ghost1LastMove_DOWN  ghost1LastMove_LEFT  ghost1LastMove_NEUTRAL  ghost1LastMove_RIGHT  ghost1LastMove_UP  ghost2LastMove_DOWN  ghost2LastMove_LEFT  ghost2LastMove_NEUTRAL  ghost2LastMove_RIGHT  ghost2LastMove_UP  ghost3LastMove_DOWN  ghost3LastMove_LEFT  ghost3LastMove_NEUTRAL  ghost3LastMove_RIGHT  ghost3LastMove_UP  ghost4LastMove_DOWN  ghost4LastMove_LEFT  ghost4LastMove_NEUTRAL  ghost4LastMove_RIGHT  ghost4LastMove_UP
+     502.0 1790.0                   165.0            422.0               0.0             0.0            255.0              91.0             0.0            504.0               0.0             0.0             83.0              91.0             0.0                     393.0             0.0          0.0          0.0          0.0          0.0            67.0            38.0            64.0            71.0                   80.0              80.0          2.0                  0.0                  0.0                     0.0                   0.0                1.0                  1.0                  0.0                     0.0                   0.0                0.0                  0.0                  0.0                     0.0                   1.0                0.0                  1.0                  0.0                     0.0                   0.0                0.0
+
+Características mas influyentes:
+ - ghost4EdibleTime > 43.00: 0.0467
+ - ghost1EdibleTime <= 0.00: -0.0403
+ - ghost4NodeIndex <= 232.00: -0.0378
+ - ghost4LairTime <= 0.00: 0.0229
+ - 361.00 < totalTime <= 766.00: 0.0220
+
+--------------------------------------------------
+
+Explicacion LIME para el modelo: mlp_trained_model_2025-03-12_(165,).pkl
+Fecha y hora: 2025-04-02 12:43:22
+Estado analizado:
+ totalTime  score  pacmanCurrentNodeIndex  ghost1NodeIndex  ghost1EdibleTime  ghost1LairTime  ghost2NodeIndex  ghost2EdibleTime  ghost2LairTime  ghost3NodeIndex  ghost3EdibleTime  ghost3LairTime  ghost4NodeIndex  ghost4EdibleTime  ghost4LairTime  timeOfLastGlobalReversal  pacmanWasEaten  ghost1Eaten  ghost2Eaten  ghost3Eaten  ghost4Eaten  ghost1Distance  ghost2Distance  ghost3Distance  ghost4Distance  euclideanDistanceToPp  pathDistanceToPp  remainingPp  ghost1LastMove_DOWN  ghost1LastMove_LEFT  ghost1LastMove_NEUTRAL  ghost1LastMove_RIGHT  ghost1LastMove_UP  ghost2LastMove_DOWN  ghost2LastMove_LEFT  ghost2LastMove_NEUTRAL  ghost2LastMove_RIGHT  ghost2LastMove_UP  ghost3LastMove_DOWN  ghost3LastMove_LEFT  ghost3LastMove_NEUTRAL  ghost3LastMove_RIGHT  ghost3LastMove_UP  ghost4LastMove_DOWN  ghost4LastMove_LEFT  ghost4LastMove_NEUTRAL  ghost4LastMove_RIGHT  ghost4LastMove_UP
+     540.0  710.0                   165.0            123.0               0.0             0.0            593.0               0.0             0.0            237.0               0.0             0.0             21.0               0.0             0.0                     326.0             0.0          0.0          0.0          0.0          0.0            16.0            57.0            69.0            24.0                   94.0              94.0          2.0                  1.0                  0.0                     0.0                   0.0                0.0                  0.0                  0.0                     0.0                   1.0                0.0                  0.0                  0.0                     0.0                   1.0                0.0                  0.0                  1.0                     0.0                   0.0                0.0
+
+Características mas influyentes:
+ - ghost4NodeIndex <= 232.00: -0.0397
+ - ghost1NodeIndex <= 187.00: -0.0310
+ - ghost4EdibleTime <= 0.00: -0.0295
+ - ghost1EdibleTime <= 0.00: -0.0277
+ - ghost2EdibleTime <= 0.00: -0.0173
+
+--------------------------------------------------
+
+Explicacion LIME para el modelo: mlp_trained_model_2025-03-12_(165,).pkl
+Fecha y hora: 2025-04-02 12:43:35
+Estado analizado:
+ totalTime  score  pacmanCurrentNodeIndex  ghost1NodeIndex  ghost1EdibleTime  ghost1LairTime  ghost2NodeIndex  ghost2EdibleTime  ghost2LairTime  ghost3NodeIndex  ghost3EdibleTime  ghost3LairTime  ghost4NodeIndex  ghost4EdibleTime  ghost4LairTime  timeOfLastGlobalReversal  pacmanWasEaten  ghost1Eaten  ghost2Eaten  ghost3Eaten  ghost4Eaten  ghost1Distance  ghost2Distance  ghost3Distance  ghost4Distance  euclideanDistanceToPp  pathDistanceToPp  remainingPp  ghost1LastMove_DOWN  ghost1LastMove_LEFT  ghost1LastMove_NEUTRAL  ghost1LastMove_RIGHT  ghost1LastMove_UP  ghost2LastMove_DOWN  ghost2LastMove_LEFT  ghost2LastMove_NEUTRAL  ghost2LastMove_RIGHT  ghost2LastMove_UP  ghost3LastMove_DOWN  ghost3LastMove_LEFT  ghost3LastMove_NEUTRAL  ghost3LastMove_RIGHT  ghost3LastMove_UP  ghost4LastMove_DOWN  ghost4LastMove_LEFT  ghost4LastMove_NEUTRAL  ghost4LastMove_RIGHT  ghost4LastMove_UP
+    2075.0 3790.0                   165.0            918.0               0.0             0.0             30.0               0.0             0.0            213.0               0.0             0.0            195.0               0.0             0.0                    1683.0             0.0          0.0          0.0          0.0          0.0            99.0            19.0            87.0            69.0                   34.0              34.0          4.0                  1.0                  0.0                     0.0                   0.0                0.0                  0.0                  1.0                     0.0                   0.0                0.0                  0.0                  0.0                     0.0                   1.0                0.0                  0.0                  0.0                     0.0                   1.0                0.0
+
+Características mas influyentes:
+ - totalTime > 1593.00: -0.0647
+ - ghost1NodeIndex > 646.00: 0.0503
+ - ghost1EdibleTime <= 0.00: -0.0423
+ - ghost4NodeIndex <= 232.00: -0.0360
+ - timeOfLastGlobalReversal > 870.00: -0.0358
+
+--------------------------------------------------
+
+Explicacion LIME para el modelo: mlp_trained_model_2025-03-12_(165,).pkl
+Fecha y hora: 2025-04-02 12:43:48
+Estado analizado:
+ totalTime  score  pacmanCurrentNodeIndex  ghost1NodeIndex  ghost1EdibleTime  ghost1LairTime  ghost2NodeIndex  ghost2EdibleTime  ghost2LairTime  ghost3NodeIndex  ghost3EdibleTime  ghost3LairTime  ghost4NodeIndex  ghost4EdibleTime  ghost4LairTime  timeOfLastGlobalReversal  pacmanWasEaten  ghost1Eaten  ghost2Eaten  ghost3Eaten  ghost4Eaten  ghost1Distance  ghost2Distance  ghost3Distance  ghost4Distance  euclideanDistanceToPp  pathDistanceToPp  remainingPp  ghost1LastMove_DOWN  ghost1LastMove_LEFT  ghost1LastMove_NEUTRAL  ghost1LastMove_RIGHT  ghost1LastMove_UP  ghost2LastMove_DOWN  ghost2LastMove_LEFT  ghost2LastMove_NEUTRAL  ghost2LastMove_RIGHT  ghost2LastMove_UP  ghost3LastMove_DOWN  ghost3LastMove_LEFT  ghost3LastMove_NEUTRAL  ghost3LastMove_RIGHT  ghost3LastMove_UP  ghost4LastMove_DOWN  ghost4LastMove_LEFT  ghost4LastMove_NEUTRAL  ghost4LastMove_RIGHT  ghost4LastMove_UP
+     320.0 1060.0                   165.0            108.0               0.0             0.0              1.0               0.0             0.0            272.0               0.0             0.0             67.0               0.0             0.0                     114.0             0.0          0.0          0.0          0.0          0.0            84.0            31.0            29.0            81.0                   21.0              21.0          3.0                  0.0                  0.0                     0.0                   0.0                1.0                  0.0                  1.0                     0.0                   0.0                0.0                  0.0                  0.0                     0.0                   0.0                1.0                  0.0                  1.0                     0.0                   0.0                0.0
+
+Características mas influyentes:
+ - totalTime <= 361.00: 0.1087
+ - timeOfLastGlobalReversal <= 156.00: 0.0425
+ - ghost4NodeIndex <= 232.00: -0.0354
+ - ghost1EdibleTime <= 0.00: -0.0301
+ - euclideanDistanceToPp <= 21.00: 0.0299
+
+--------------------------------------------------
+
+Explicacion LIME para el modelo: mlp_trained_model_2025-03-12_(165,).pkl
+Fecha y hora: 2025-04-02 12:44:05
+Estado analizado:
+ totalTime  score  pacmanCurrentNodeIndex  ghost1NodeIndex  ghost1EdibleTime  ghost1LairTime  ghost2NodeIndex  ghost2EdibleTime  ghost2LairTime  ghost3NodeIndex  ghost3EdibleTime  ghost3LairTime  ghost4NodeIndex  ghost4EdibleTime  ghost4LairTime  timeOfLastGlobalReversal  pacmanWasEaten  ghost1Eaten  ghost2Eaten  ghost3Eaten  ghost4Eaten  ghost1Distance  ghost2Distance  ghost3Distance  ghost4Distance  euclideanDistanceToPp  pathDistanceToPp  remainingPp  ghost1LastMove_DOWN  ghost1LastMove_LEFT  ghost1LastMove_NEUTRAL  ghost1LastMove_RIGHT  ghost1LastMove_UP  ghost2LastMove_DOWN  ghost2LastMove_LEFT  ghost2LastMove_NEUTRAL  ghost2LastMove_RIGHT  ghost2LastMove_UP  ghost3LastMove_DOWN  ghost3LastMove_LEFT  ghost3LastMove_NEUTRAL  ghost3LastMove_RIGHT  ghost3LastMove_UP  ghost4LastMove_DOWN  ghost4LastMove_LEFT  ghost4LastMove_NEUTRAL  ghost4LastMove_RIGHT  ghost4LastMove_UP
+     506.0 1030.0                   165.0            805.0             171.0             0.0             37.0             171.0             0.0            611.0             171.0             0.0            407.0             171.0             0.0                     477.0             0.0          0.0          0.0          0.0          0.0            99.0            40.0           100.0            45.0                   94.0              94.0          2.0                  1.0                  0.0                     0.0                   0.0                0.0                  0.0                  0.0                     0.0                   1.0                0.0                  0.0                  0.0                     0.0                   0.0                1.0                  0.0                  1.0                     0.0                   0.0                0.0
+
+Características mas influyentes:
+ - ghost1NodeIndex > 646.00: 0.0641
+ - ghost1EdibleTime > 80.00: 0.0454
+ - ghost4EdibleTime > 43.00: 0.0342
+ - 550.00 < score <= 1380.00: 0.0211
+ - ghost2NodeIndex <= 177.00: 0.0194
+
+--------------------------------------------------
+
