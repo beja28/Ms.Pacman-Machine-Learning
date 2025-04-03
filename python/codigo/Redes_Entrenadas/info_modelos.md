@@ -36,6 +36,9 @@
 - Asimetría (Skewness): 0,92  
 - Curtosis (Kurtosis): 1,27
 
+![Resultado](images\pytorch_models_2025-03-05_histograma.png)
+![Resultado](images\pytorch_models_2025-03-05_boxplot.png)
+
 
 ## Estadisticas-Modelo-2025-03-12
 **Rivales (100 partidas por cada uno)**  
@@ -62,3 +65,5 @@
 - Asimetría (Skewness): 1,00
 - Curtosis (Kurtosis): 2,75
 
+![Resultado](images\sklearn_models_2025-03-12_histograma.png)
+![Resultado](images\sklearn_models_2025-03-12_boxplot.png)

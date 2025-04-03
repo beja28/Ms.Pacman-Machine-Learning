@@ -4,8 +4,8 @@
 	- es.ucm.fdi.ici.c2324.practica1.grupo08.Ghosts
 	- es.ucm.fdi.ici.c2223.practica1.grupo06.MsPacMan
 	
-![Resultado](03_gameStatesDataIni.png)
-![Resultado](03_gameStatesDataFin.png)
+![Resultado](images\03_gameStatesDataIni.png)
+![Resultado](images\03_gameStatesDataFin.png)
 
 <br>
 <br>
@@ -14,8 +14,8 @@
 	- es.ucm.fdi.ici.c2324.practica1.grupo08.Ghosts
 	- es.ucm.fdi.ici.c2223.practica1.grupo06.MsPacMan
 	
-![Resultado](04_gameStatesDataIni.png)
-![Resultado](04_gameStatesDataFin.png)
+![Resultado](images\04_gameStatesDataIni.png)
+![Resultado](images\04_gameStatesDataFin.png)
 
 
 <br>
@@ -36,8 +36,8 @@
 	- es.ucm.fdi.ici.c2324.practica2.grupo04.Ghosts (1924)
 	- es.ucm.fdi.ici.c2122.practica2.grupo01.Ghosts (2648)
 	
-![Resultado](05_gameStatesDataIni.png)
-![Resultado](05_gameStatesDataFin.png)
+![Resultado](images\05_gameStatesDataIni.png)
+![Resultado](images\05_gameStatesDataFin.png)
 
 <br>
 <br>
@@ -57,8 +57,8 @@
 	- es.ucm.fdi.ici.c2324.practica2.grupo04.Ghosts (1924)
 	- es.ucm.fdi.ici.c2122.practica2.grupo01.Ghosts (2648)
 	
-![Resultado](06_gameStatesDataIni.png)
-![Resultado](06_gameStatesDataFin.png)
+![Resultado](images\06_gameStatesDataIni.png)
+![Resultado](images\06_gameStatesDataFin.png)
 
 
 	Estadísticas de las partidas jugadas para obtener el dataset
@@ -74,6 +74,9 @@
 	- Percentil 90: 8370,00
 	- Asimetría (Skewness): 0,95
 	- Curtosis (Kurtosis): 0,13
+
+![Resultado](images\06_gameStatesData_boxplot.png)
+![Resultado](images\06_gameStatesData_histograma.png)
 
 
 
@@ -92,9 +95,8 @@
 	- es.ucm.fdi.ici.c2324.practica2.grupo04.Ghosts (1924)
 	- es.ucm.fdi.ici.c2122.practica2.grupo01.Ghosts (2648)
 	
-![Resultado](07_gameStatesDataIni.png)
-![Resultado](07_gameStatesDataFin.png)
-
+![Resultado](images\07_gameStatesDataIni.png)
+![Resultado](images\07_gameStatesDataFin.png)
 
 	Estadísticas de las partidas jugadas para obtener el dataset
 	- Media: 3725,17
