@@ -110,30 +110,34 @@ class Explainability:
         })
 
     def explain_with_lime(self, model, model_filename, X, node_index=165):
-        """Implementación de LIME para explicar las predicciones del modelo en una intersección concreta."""
+        """Implementacion de LIME para explicar las predicciones del modelo en una interseccion en concreto (funciona para Scikit-Learn y PyTorch)."""
         try:
+
+            # Encontrar en nodo de interseccion de ese modelo de red, que viene en el nombre entre ()
             match = re.search(r'\((\d+),\)', model_filename)
             model_node_index = int(match.group(1)) if match else None
 
             if model_node_index != node_index:
-                print(f"Saltando modelo {model_filename}, no corresponde al nodo {node_index}")
+                print(f"--> Saltando modelo {model_filename}, no corresponde al nodo {node_index}")
                 return
-            # Si X no es un DataFrame, se convierte en uno para manejar las características adecuadamente
+
+            # Si X no es un DataFrame, se convierte en uno para manejar las caracteristicas adecuadamente
             if not isinstance(X, pd.DataFrame):
                 X = pd.DataFrame(X, columns=model.feature_names_in_)
 
             filtered_states = X[X["pacmanCurrentNodeIndex"] == node_index]
 
+            # Es muy raro que se de el caso, pero para prevenir
             if filtered_states.empty:
                 print(f"\n No se encontraron estados con pacmanCurrentNodeIndex = {node_index} para el modelo {model_filename}. Saltando explicabilidad LIME.\n")
                 return
-            
+
             # Selecciona aleatoriamente un estado filtrado
             i = np.random.randint(0, len(filtered_states))
             instance = filtered_states.iloc[i]
 
-            print("\n**Estado seleccionado para explicación con LIME:**")
-            print(instance.to_frame().T)
+            print("\nEstado seleccionado para explicación con LIME:")
+            print(instance.to_frame().T)    #Para que se vea en horizontal
 
             # Crea el explicador de LIME
             explainer = LimeTabularExplainer(
@@ -142,66 +146,75 @@ class Explainability:
                 feature_names=X.columns,
                 discretize_continuous=True
             )
-
+            
             # Si el modelo es de Scikit-Learn, usa predict_proba. Si es de PyTorch, crea un predict_proba personalizado
             if hasattr(model, "predict_proba"):
+                # Para modelos de Scikit-Learn, usa predict_proba directamente
                 predict_fn = model.predict_proba
             elif isinstance(model, torch.nn.Module):
+                # Para modelos de PyTorch, crea una función predict_proba
                 def predict_fn(X_input):
-                    model.eval()
-                    with torch.no_grad(): # Desactiva gradientes para eficiencia
+                    model.eval()  # Cambia a modo evaluación
+                    with torch.no_grad():  # Desactiva gradientes para eficiencia
                         X_tensor = torch.tensor(X_input, dtype=torch.float32)
                         outputs = model(X_tensor)
-                        return torch.softmax(outputs, dim=1).cpu().numpy()
+                        return torch.softmax(outputs, dim=1).cpu().numpy()  # Devuelve las probabilidades
             else:
                 raise NotImplementedError("El modelo debe implementar 'predict_proba' o ser de PyTorch.")
 
+            # Explica la instancia seleccionada usando LIME
             print(f"Ejecutando la explicabilidad LIME para el modelo {model_filename}")
             exp = explainer.explain_instance(instance.values, predict_fn, num_features=5)
-
-            # Guarda los resultados de la explicación LIME
-            self.explanations.append({
-                "technique": "lime",
+            
+            # Guarda los resultados de la explicacion LIME
+            self.explicaciones.append({
+                "technique": "lime", 
                 "lime_exp": exp,
                 "feature_names": X.columns,
-                "model_filename": model_filename
+                "modelo_filename": model_filename
             })
 
+            # Guardar en el .txt de explicacioones LIME
             lime_folder = os.path.join('..', 'images', 'Explicabilidad', 'Lime')
             os.makedirs(lime_folder, exist_ok=True)
 
+            # Hora del sistema para identificar y diferenciar
             current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             lime_txt_path = os.path.join(lime_folder, 'explicaciones_LIME.txt')
 
             try:
+                # Si no existe se crea el txt y la cabecera
                 if not os.path.exists(lime_txt_path):
                     with open(lime_txt_path, 'w', encoding='utf-8') as f:
                         f.write('Archivo recopilatorio de explicaciones generadas con LIME\n')
-                        f.write('------------------------------------------------------------------\n\n')
+                        f.write('------------------------------------------------------------------\n\n')             
 
+                # Se abre en modo append para meter nueva info
                 with open(lime_txt_path, 'a', encoding='utf-8') as f:
                     f.write(f'Explicacion LIME para el modelo: {model_filename}\n')
                     f.write(f'Fecha y hora: {current_time}\n')
                     f.write('Estado analizado:\n')
                     f.write(instance.to_frame().T.to_string(index=False))
-                    f.write('\n\nCaracterísticas mas influyentes:\n')
+                    f.write('\n\nCaracteristicas mas influyentes:\n')
                     for feature, influence in exp.as_list():
                         f.write(f' - {feature}: {influence:.4f}\n')
                     f.write('\n--------------------------------------------------\n\n')
 
             except Exception as e:
-                print(f"Error guardando explicaciones en TXT: {e}")
+                print(f"Error guardando explicaciones en .txt: {e}")
 
+            # Se guarda el grafico en la misma carpeta
             self.generate_lime_plot(model_filename)
 
         except Exception as e:
             print(f"Error durante la explicabilidad LIME: {e}")
 
+
     def generate_lime_plot(self, model_filename):
-        """Genera y guarda una gráfica LIME para un modelo específico."""
-        
+        """ Genera y guarda una grafica LIME para un modelo especifico en su carpeta correspondiente """
+
         # Busca el LIME correspondiente al modelo
-        lime_exps = [exp for exp in self.explanations if exp["technique"] == "lime" and exp.get("model_filename") == model_filename]
+        lime_exps = [exp for exp in self.explanations if exp["technique"] == "lime" and exp.get("modelo_filename") == model_filename]
 
         if not lime_exps:
             print(f"No se encontraron explicaciones LIME para el modelo: {model_filename}")
@@ -209,17 +222,19 @@ class Explainability:
 
         lime_exp = lime_exps[0]["lime_exp"]
 
+        # Crea la figura de LIME
         fig = lime_exp.as_pyplot_figure()
         plt.title(f"Explicabilidad LIME")
-
         plt.yticks(fontsize=10)
         plt.subplots_adjust(left=0.4)
         plt.xlabel('Valor de impacto', fontsize=10)
         plt.ylabel('Características', fontsize=10)
 
+        # Ruta donde esta la explicabilidad
         lime_folder = os.path.join('..', 'images', 'Explicabilidad', 'Lime')
         os.makedirs(lime_folder, exist_ok=True)
 
+        # El nombre del archivo, es el nombre del modelo y la hora, para diferenciarlos
         current_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         filename = f"LIME_{model_filename}_{current_time}.png"
         full_path = os.path.join(lime_folder, filename)
@@ -227,7 +242,7 @@ class Explainability:
         plt.savefig(full_path, bbox_inches='tight')
         plt.close()
 
-        print(f"Gráfico de explicabilidad LIME guardado en: {full_path}")
+        print(f"Grafico de explicabilidad LIME guardado en: {full_path}")
 
     def generate_tabnet_feature_importance(self, path):
         all_importances = []
