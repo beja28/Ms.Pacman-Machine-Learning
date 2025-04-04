@@ -1,5 +1,4 @@
 from preprocessing import preprocess_csv
-from preprocessing_aux import preprocess_csv_aux, load_and_scale_tabnet
 from model_pytorch import train_pytorch_nn, save_model_pth
 from model_sklearn import MLPModel
 from pytorch_tabnet.tab_model import TabNetClassifier
@@ -11,11 +10,8 @@ import torch
 import re
 from sklearn.model_selection import train_test_split
 from torch.utils.data import TensorDataset, DataLoader
-from collections import Counter
 import argparse
 import os
-import numpy as np
-import joblib
                 
 
 # Ruta de datos y de la carpeta para guardar modelos --> RUTA ABSOLUTA --> PROBLEMA
