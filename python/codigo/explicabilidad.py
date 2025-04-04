@@ -1,8 +1,10 @@
 import shap
 from lime.lime_tabular import LimeTabularExplainer
 import numpy as np
+import json
 import torch
 from sklearn.inspection import permutation_importance
+from pytorch_tabnet.tab_model import TabNetClassifier
 import pandas as pd
 import matplotlib.pyplot as plt
 import os
@@ -11,116 +13,111 @@ from datetime import datetime
 import re
 
 
-class Explicabilidad:
+class Explainability:
     def __init__(self):
-        self.explicaciones = []  # Almacena resultados de explicabilidad
-        self.dic_map = {} # Diccionario para almacenar los valores SHAP organizados por interseccion 
+        self.explanations = []  # Almacena resultados de explicabilidad
+        self.map_dict = {}  # Diccionario para almacenar los valores SHAP organizados por intersección
 
-    def ejecutar_explicabilidad(self, model, model_filename, technique, X, key, Y=None):
+    def run_explainability(self, model, model_filename, technique, X, key, Y=None):
         """Ejecuta la técnica de explicabilidad seleccionada."""
         if technique == "shap":
-            self.explicabilidad_shap(model, model_filename, X, key)
+            self.explain_with_shap(model, model_filename, X, key)
         elif technique == "feature_importance":
-            self.explicabilidad_feature_importance(model, model_filename, X, Y)
+            self.explain_with_feature_importance(model, model_filename, X, Y)
         elif technique == "lime":
-            self.explicabilidad_lime(model, model_filename, X)
-
-    
-    def explicabilidad_shap(self, model, model_filename, X, key):
+            self.explain_with_lime(model, model_filename, X)
+            
+    def explain_with_shap(self, model, model_filename, X, key):
         """Implementación de SHAP para explicar las predicciones del modelo."""
         try:
             print({key})
-            shap_values_global = None
-            feature_names = X.columns  # Guardamos los nombres de las características
+            global_shap_values = None
+            feature_names = X.columns
 
             if isinstance(model, torch.nn.Module):  # Si es un modelo PyTorch
                 background_data = X.sample(n=200)
                 data_tensor = torch.tensor(background_data.values, dtype=torch.float32)
-                
-                # Configurar dispositivo
+
                 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
                 model.to(device)
                 data_tensor = data_tensor.to(device)
-                
+
                 print(f"Ejecuta la explicabilidad para el modelo {model_filename}")
-                
+
                 explainer = shap.DeepExplainer(model, data_tensor)
-                
+
                 data_to_explain = X.sample(n=10)
-                data_to_explain_tensor = torch.tensor(data_to_explain.values, dtype=torch.float32).to(device)
-                
-                shap_values = explainer.shap_values(data_to_explain_tensor)
-                shap_values_global = shap_values
+                data_tensor_to_explain = torch.tensor(data_to_explain.values, dtype=torch.float32).to(device)
+
+                shap_values = explainer.shap_values(data_tensor_to_explain)
+                global_shap_values = shap_values
             else:
                 background_data = shap.sample(X, 200)
                 
                 print(f"Ejecuta la explicabilidad para el modelo {model_filename}")
-
+                
                 explainer = shap.KernelExplainer(model.predict, background_data)
-
+                
                 data_to_explain = X.sample(n=100)
-                shap_values = explainer.shap_values(data_to_explain)  # Calcula los valores SHAP
-                shap_values_global = shap_values 
+                shap_values = explainer.shap_values(data_to_explain)
+                global_shap_values = shap_values
+                
 
-            # Guardar los resultados de SHAP, incluyendo los nombres de las características
-            self.explicaciones.append({
-                "technique": "shap", 
-                "shap_values": shap_values_global, 
+            self.explanations.append({
+                "technique": "shap",
+                "shap_values": global_shap_values,
                 "feature_names": feature_names
             })
-            
             # Guardar los valores SHAP en un diccionario estructurado por intersección y característica
-            self.dic_map[key] = {feature: value for feature, value in zip(feature_names, shap_values[0])}
-        
+            self.map_dict[key] = {feature: value for feature, value in zip(feature_names, shap_values[0])}
+
         except Exception as e:
             print(f"Error durante la explicabilidad SHAP: {e}")
 
-    def explicabilidad_feature_importance(self, model, model_filename, X, Y):
-        """Implementación de Feature Importance utilizando Permutation Importance."""
-        try:
-            if hasattr(model, 'predict'):  # Comprobar que tiene método predict
-                X_sampled = X.sample(n=500, random_state=42)  # Muestra de 500 instancias
-                Y_sampled = Y[X_sampled.index]  # Etiquetas correspondientes a las muestras
+    def explain_with_feature_importance(self, model, model_filename, X, Y):
+        """Implementación de Feature Importance."""
+        
+        # Scikit-Learn
+        if hasattr(model, 'predict'):
+            print(f"Ejecuta la explicabilidad para el modelo {model_filename}")
+            feature_names = X.columns
 
-                print(f"Ejecuta la explicabilidad para el modelo {model_filename}")
+            X_sampled = X.sample(n=500, random_state=42)
+            Y_sampled = Y[X_sampled.index]
 
-                results = permutation_importance(
-                    model, 
-                    X_sampled, 
-                    Y_sampled, 
-                    n_repeats=5,  # Reducir repeticiones para mejorar rendimiento
-                    random_state=1
-                )
-                importances = results.importances_mean 
+            results = permutation_importance(
+                model,
+                X_sampled,
+                Y_sampled,
+                n_repeats=5,
+                random_state=1
+            )
+            importances = results.importances_mean
 
-                feature_names = X.columns
-                feature_importances = pd.DataFrame({
-                    'Feature': feature_names,
-                    'Importance': importances
-                })
+            feature_importances = pd.DataFrame({
+                'Feature': feature_names,
+                'Importance': importances
+            })
+        else:
+            raise ValueError("Modelo no compatible con feature importance")
 
-                feature_importances = feature_importances.sort_values(by="Importance", ascending=False)
+        feature_importances = feature_importances.sort_values(by="Importance", ascending=False)
+        # Guardar los resultados de Feature Importance
+        self.explanations.append({
+            "technique": "feature_importance",
+            "importances": feature_importances,
+            "feature_names": feature_names
+        })
 
-                # Guardar los resultados de Feature Importance
-                self.explicaciones.append({
-                    "technique": "feature_importance", 
-                    "importances": feature_importances,
-                    "feature_names": feature_names
-                })
-
-        except Exception as e:
-            print(f"Error durante la explicabilidad Feature Importance: {e}")
-    
-
-    def explicabilidad_lime(self, model, model_filename, X, node_index=165):
+    def explain_with_lime(self, model, model_filename, X, node_index=165):
         """Implementacion de LIME para explicar las predicciones del modelo en una interseccion en concreto (funciona para Scikit-Learn y PyTorch)."""
         try:
 
             # Encontrar en nodo de interseccion de ese modelo de red, que viene en el nombre entre ()
             match = re.search(r'\((\d+),\)', model_filename)
-            modelo_node_index = int(match.group(1)) if match else None
+            model_node_index = int(match.group(1)) if match else None
 
-            if modelo_node_index != node_index:
+            if model_node_index != node_index:
                 print(f"--> Saltando modelo {model_filename}, no corresponde al nodo {node_index}")
                 return
 
@@ -128,16 +125,16 @@ class Explicabilidad:
             if not isinstance(X, pd.DataFrame):
                 X = pd.DataFrame(X, columns=model.feature_names_in_)
 
-            estados_filtrados = X[X["pacmanCurrentNodeIndex"] == node_index]
+            filtered_states = X[X["pacmanCurrentNodeIndex"] == node_index]
 
             # Es muy raro que se de el caso, pero para prevenir
-            if estados_filtrados.empty:
+            if filtered_states.empty:
                 print(f"\n No se encontraron estados con pacmanCurrentNodeIndex = {node_index} para el modelo {model_filename}. Saltando explicabilidad LIME.\n")
                 return
 
             # Selecciona aleatoriamente un estado filtrado
-            i = np.random.randint(0, len(estados_filtrados))
-            instance = estados_filtrados.iloc[i]
+            i = np.random.randint(0, len(filtered_states))
+            instance = filtered_states.iloc[i]
 
             print("\nEstado seleccionado para explicación con LIME:")
             print(instance.to_frame().T)    #Para que se vea en horizontal
@@ -178,24 +175,24 @@ class Explicabilidad:
             })
 
             # Guardar en el .txt de explicacioones LIME
-            ruta_carpeta = os.path.join('..', 'images', 'Explicabilidad', 'Lime')
-            os.makedirs(ruta_carpeta, exist_ok=True)
+            lime_folder = os.path.join('..', 'images', 'Explicabilidad', 'Lime')
+            os.makedirs(lime_folder, exist_ok=True)
 
             # Hora del sistema para identificar y diferenciar
-            hora_act = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-            ruta_txt = os.path.join(ruta_carpeta, 'explicaciones_LIME.txt')
+            current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            lime_txt_path = os.path.join(lime_folder, 'explicaciones_LIME.txt')
 
             try:
                 # Si no existe se crea el txt y la cabecera
-                if not os.path.exists(ruta_txt):
-                    with open(ruta_txt, 'w', encoding='utf-8') as f:
+                if not os.path.exists(lime_txt_path):
+                    with open(lime_txt_path, 'w', encoding='utf-8') as f:
                         f.write('Archivo recopilatorio de explicaciones generadas con LIME\n')
                         f.write('------------------------------------------------------------------\n\n')             
 
                 # Se abre en modo append para meter nueva info
-                with open(ruta_txt, 'a', encoding='utf-8') as f:
+                with open(lime_txt_path, 'a', encoding='utf-8') as f:
                     f.write(f'Explicacion LIME para el modelo: {model_filename}\n')
-                    f.write(f'Fecha y hora: {hora_act}\n')
+                    f.write(f'Fecha y hora: {current_time}\n')
                     f.write('Estado analizado:\n')
                     f.write(instance.to_frame().T.to_string(index=False))
                     f.write('\n\nCaracteristicas mas influyentes:\n')
@@ -207,17 +204,17 @@ class Explicabilidad:
                 print(f"Error guardando explicaciones en .txt: {e}")
 
             # Se guarda el grafico en la misma carpeta
-            self.generar_grafico_lime_individual(model_filename)
+            self.generate_lime_plot(model_filename)
 
         except Exception as e:
             print(f"Error durante la explicabilidad LIME: {e}")
 
 
-    def generar_grafico_lime_individual(self, model_filename):
+    def generate_lime_plot(self, model_filename):
         """ Genera y guarda una grafica LIME para un modelo especifico en su carpeta correspondiente """
 
         # Busca el LIME correspondiente al modelo
-        lime_exps = [exp for exp in self.explicaciones if exp["technique"] == "lime" and exp.get("modelo_filename") == model_filename]
+        lime_exps = [exp for exp in self.explanations if exp["technique"] == "lime" and exp.get("modelo_filename") == model_filename]
 
         if not lime_exps:
             print(f"No se encontraron explicaciones LIME para el modelo: {model_filename}")
@@ -234,170 +231,131 @@ class Explicabilidad:
         plt.ylabel('Características', fontsize=10)
 
         # Ruta donde esta la explicabilidad
-        ruta_carpeta = os.path.join('..', 'images', 'Explicabilidad', 'Lime')
-        os.makedirs(ruta_carpeta, exist_ok=True)
+        lime_folder = os.path.join('..', 'images', 'Explicabilidad', 'Lime')
+        os.makedirs(lime_folder, exist_ok=True)
 
         # El nombre del archivo, es el nombre del modelo y la hora, para diferenciarlos
-        hora_actual = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        nombre_archivo = f"LIME_{model_filename}_{hora_actual}.png"
-        ruta_completa = os.path.join(ruta_carpeta, nombre_archivo)
+        current_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        filename = f"LIME_{model_filename}_{current_time}.png"
+        full_path = os.path.join(lime_folder, filename)
 
-        plt.savefig(ruta_completa, bbox_inches='tight')
+        plt.savefig(full_path, bbox_inches='tight')
         plt.close()
 
-        print(f"Grafico de explicabilidad LIME guardado en: {ruta_completa}")
-        
-        
-    def generar_grafico_explicabilidad_global(self, model):
-        """Genera un gráfico que combine la explicabilidad global de todas las redes y lo guarda en un archivo."""
+        print(f"Grafico de explicabilidad LIME guardado en: {full_path}")
 
+    def generate_tabnet_feature_importance(self, path):
+        all_importances = []
+        feature_names = None
+
+        for file in os.listdir(path):
+            if file.startswith("feature_importances"):
+                full_path = os.path.join(path, file)
+                with open(full_path, 'r') as f:
+                    data = json.load(f)
+
+                    if feature_names is None:
+                        feature_names = data["features"]
+                    else:
+                        assert data["features"] == feature_names, f"Features distintas en {file}"
+
+                    all_importances.append(data["importances"])
+
+        importances_df = pd.DataFrame(all_importances, columns=feature_names)
+        mean_importances = importances_df.mean().sort_values(ascending=False)
+
+        return mean_importances
+
+    def generate_global_explainability_plot(self, model, technique, path):
+        """Genera un gráfico que combine la explicabilidad global de todas las redes."""
+        
         # Combinar todos los valores SHAP
-        shap_exps = [exp for exp in self.explicaciones if exp["technique"] == "shap"]
-        if shap_exps:
-            # Concatenar todos los valores SHAP de cada modelo
+        shap_exps = [exp for exp in self.explanations if exp["technique"] == "shap"]
+        if technique == "shap" and shap_exps:
             all_shap_values = [exp["shap_values"] for exp in shap_exps]
             all_shap_values = np.concatenate(all_shap_values, axis=0)
 
-            # Calcular la importancia media de cada característica (media de los valores SHAP)
-            mean_shap_values = np.mean(np.abs(all_shap_values), axis=0)  # Valor absoluto de los SHAP para ver la importancia global
+            # Calcular la importancia media de cada característica
+            mean_shap_values = np.mean(np.abs(all_shap_values), axis=0)
 
-            # Obtener los nombres de las características (usados en todos los modelos)
             feature_names = shap_exps[0]["feature_names"]
-            
-            if model == "pytorch":                           
-                # Reducir `mean_shap_values` a una dimension
-                mean_shap_values = np.mean(mean_shap_values, axis=1)              
-                      
-            # Ordenar por la importancia (de mayor a menor)
-            sorted_idx = np.argsort(mean_shap_values)[::-1]
 
-            # Ordenar nombres y valores
+            if model == "pytorch":
+                # Reducir a una dimension
+                mean_shap_values = np.mean(mean_shap_values, axis=1)
+
+            #Ordenar por importancia (mayor a menor)
+            sorted_idx = np.argsort(mean_shap_values)[::-1]
             sorted_feature_names = np.array(feature_names)[sorted_idx]
             sorted_mean_shap_values = mean_shap_values[sorted_idx]
-            
 
-            # Crear gráfico de barras
             plt.figure(figsize=(10, 20))
             plt.barh(sorted_feature_names, sorted_mean_shap_values, color='skyblue')
-            plt.gca().invert_yaxis()  # Invertir el eje Y para que el de mayor importancia quede arriba
+            plt.gca().invert_yaxis()
             plt.xlabel("Importancia media de SHAP", fontsize=10)
             plt.ylabel("Características", fontsize=10)
             plt.title("Importancia global de características (SHAP)")
-            
-            # Ajustar el tamaño de las etiquetas del eje Y
-            plt.yticks(fontsize=14)  # Tamaño de letra más pequeño para las etiquetas del eje Y
-
-            # Ajustar el espaciado de los nombres de las características
+            plt.yticks(fontsize=14)
             plt.subplots_adjust(left=0.2, right=0.8, top=0.9, bottom=0.1)
-            
             plt.show()
 
+        elif technique == "feature_importance":
+            if model == "tabnet":
+                mean_importances = self.generate_tabnet_feature_importance(path)
+            else:
+                feature_imp_exps = [exp for exp in self.explanations if exp["technique"] == "feature_importance"]
+                if feature_imp_exps:
+                    importances_list = [exp["importances"] for exp in feature_imp_exps]
+                    combined = pd.concat(importances_list, axis=0)
+                    mean_importances = combined.groupby('Feature')['Importance'].mean().sort_values(ascending=False)
 
-        # Generar gráfico de Importancia de características global
-        feature_importance_exps = [exp for exp in self.explicaciones if exp["technique"] == "feature_importance"]
-        if feature_importance_exps:
-            importancias_list = []
-
-            # Extraer las importancias de características de todos los modelos
-            for explicacion in feature_importance_exps:
-                importancias_list.append(explicacion["importances"])
-
-            # Combinar las importancias promediando a través de todos los modelos
-            if importancias_list:
-                combined_importances = pd.concat(importancias_list, axis=0)
-                importancias_mean = combined_importances.groupby('Feature')['Importance'].mean().sort_values(ascending=False)
-
-                # Generar la gráfica combinada de Feature Importance
-                plt.figure(figsize=(10, 20))
-                importancias_mean.plot(kind='barh', color='skyblue')
-                plt.gca().invert_yaxis()
-                plt.xlabel("Mean Importance")
-                plt.ylabel("Features", fontsize=10)
-                plt.title("Importancia Global de Características")
-
-                # Ajustar el tamaño de las etiquetas del eje Y
-                plt.yticks(fontsize=14)  # Tamaño de letra más pequeño para las etiquetas del eje Y
-
-                # Ajustar el espaciado de los nombres de las características
-                plt.subplots_adjust(left=0.2, right=0.8, top=0.9, bottom=0.1)
-                
-                plt.show()
-
-        # Generar gráfico LIME global
-        lime_exps = [exp for exp in self.explicaciones if exp["technique"] == "lime"]
-        if lime_exps:
-            # Usar el primer experimento de LIME, aunque podrías combinar los resultados si lo deseas
-            lime_exp = lime_exps[0]["lime_exp"]
-            lime_exp.as_pyplot_figure()
-            plt.title("Explicabilidad global de LIME")
-            
-            # Ajustar el tamaño de las etiquetas del eje Y
-            plt.yticks(fontsize=10)  # Tamaño de letra más pequeño para las etiquetas del eje Y
-
-            # Ajustar el espaciado de los nombres de las características
+            plt.figure(figsize=(10, 20))
+            mean_importances.plot(kind='barh', color='skyblue')
+            plt.gca().invert_yaxis()
+            plt.xlabel("Mean Importance")
+            plt.ylabel("Features", fontsize=10)
+            plt.title("Importancia Global de Características")
+            plt.yticks(fontsize=14)
             plt.subplots_adjust(left=0.2, right=0.8, top=0.9, bottom=0.1)
-            plt.subplots_adjust(left=0.4)
-            
-            plt.xlabel('Valor de impacto', fontsize=10)
-            plt.ylabel('Características', fontsize=10)
-            
             plt.show()
 
+    def calculate_intersection_impact(self):
+        """Calcula el impacto total de cada característica en cada intersección."""
+        intersection_impact = {}
+        print("El diccionario es: {self.map_dict}")
 
-    def calcular_impacto_por_interseccion(self):
-        """
-        Calcula el impacto total de cada característica en cada intersección.
-
-        shap_values_dict: diccionario con estructura {intersección: {característica: valores SHAP}}
-                        (los valores SHAP pueden ser un array con valores para cada clase de salida)
-
-        Retorna un diccionario con el impacto promedio por intersección y característica.
-        """
-        impacto_intersecciones = {}
-        print("El diccionario es: {self.dic_map}")
-
-        for interseccion, caracteristicas in self.dic_map.items():
-            impacto_intersecciones[interseccion] = {
-                feature: np.mean(shap_values)  # Promedio absoluto del impacto de la característica
-                for feature, shap_values in caracteristicas.items()
+        for intersection, features in self.map_dict.items():
+            intersection_impact[intersection] = {
+                feature: np.mean(shap_values)
+                for feature, shap_values in features.items()
             }
 
-        return impacto_intersecciones
+        return intersection_impact
 
-    def guardar_explicabilidad_txt(self, directorio, model):
-        """
-        Guarda un archivo TXT para cada característica con el impacto en cada intersección.
-        
-        impacto_intersecciones: dict con {interseccion: {caracteristica: impacto}}
-        directorio: ruta donde se guardarán los archivos
-        carpeta: subcarpeta donde almacenar los txt
-        """
-        
-        if model == "pytorch":       
-            path_completo = os.path.join(directorio, "mapas_explicabilidad_txt_pytorch")
-            os.makedirs(path_completo, exist_ok=True)  
+    def save_explainability_txt(self, directory, model):
+        """Guarda un archivo TXT para cada característica con el impacto en cada intersección."""
+        if model == "pytorch":
+            full_path = os.path.join(directory, "mapas_explicabilidad_txt_pytorch")
         elif model == "sklearn":
-            path_completo = os.path.join(directorio, "mapas_explicabilidad_txt_sklearn")
-            os.makedirs(path_completo, exist_ok=True) 
-        
-        impacto_intersecciones = self.calcular_impacto_por_interseccion()
-        
+            full_path = os.path.join(directory, "mapas_explicabilidad_txt_sklearn")
 
-        # Transponer el diccionario para agrupar por característica en lugar de intersección
-        caracteristicas = set()
-        for impactos in impacto_intersecciones.values():
-            caracteristicas.update(impactos.keys())
-            
+        os.makedirs(full_path, exist_ok=True)
 
-        # Escribir un archivo para cada característica
-        for feature in caracteristicas:
-            file_path = os.path.join(path_completo, f"{feature}.txt")
+        intersection_impact = self.calculate_intersection_impact()
+
+        features = set()
+        for impacts in intersection_impact.values():
+            features.update(impacts.keys())
+
+        for feature in features:
+            file_path = os.path.join(full_path, f"{feature}.txt")
             with open(file_path, "w") as f:
-                for interseccion, impactos in impacto_intersecciones.items():
-                    if feature in impactos:
-                        f.write(f"Intersección {interseccion}: {impactos[feature]:.6f}\n")
+                for intersection, impacts in intersection_impact.items():
+                    if feature in impacts:
+                        f.write(f"Intersección {intersection}: {impacts[feature]:.6f}\n")
 
-        print(f"Archivos guardados en: {path_completo}")
+        print(f"Archivos guardados en: {full_path}")
+
 
 
 
