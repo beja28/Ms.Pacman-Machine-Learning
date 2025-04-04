@@ -45,6 +45,8 @@ import pacman.game.consolePrinter.MessagePrinter;
 import pacman.game.consolePrinter.UserPrompt;
 import pacman.game.dataManager.DataSetRecorder;
 import pacman.game.dataManager.GameStateFilter;
+import pacman.game.dataStatistics.BoxPlot;
+import pacman.game.dataStatistics.Histogram;
 import pacman.game.dataStatistics.ScoreStatistics;
 import pacman.game.internal.Node;
 import pacman.game.internal.POType;
@@ -234,6 +236,16 @@ public class ExecutorModes {
             if (tickLimit != -1 && tickLimit < game.getTotalTime()) {
                 break;
             }
+            
+            /* Por si se quiere saber el numero de interseccion por el cual esta pasando en ese instante
+            int[] intersecciones = game.getJunctionIndices();
+            for(int i: intersecciones) {
+            	if(i == game.getPacmanCurrentNodeIndex()) {
+                	System.out.println(game.getPacmanCurrentNodeIndex());
+                }
+            }
+            */
+            
             handlePeek(game);
             game.advanceGame(
                     pacManController.getMove(getPacmanCopy(game), System.currentTimeMillis() + timeLimit),
@@ -309,15 +321,24 @@ public class ExecutorModes {
 		ScoreStatistics scoreStats = new ScoreStatistics(printer);
 		scoreStats.calcularEstadisticas(scores);
 		
+		// Mostrar histograma
+		Histogram.createHistogram(scores);
+		
+		// Mostrar BoxPlot
+		BoxPlot.createBoxPlot(scores);
+		
 		if(fileName != "") {
 			scoreStats.guardarEstadisticasEnArchivo(scores, fileName);
+			Histogram.guardarGraficaEnArchivo(scores, fileName);
+			BoxPlot.guardarGraficaEnArchivo(scores, fileName);
 		}
 	}
 	
 	public void runGameGenerateMultiDataSet(List<PacmanController> pacManControllers, List<GhostController> ghostControllers, int iter, String fileName, boolean DEBUG, int min_score) {
 	    
 		//Mensajes de informacion
-	    MessagePrinter printer = new MessagePrinter(DEBUG);
+	    MessagePrinter printer = new MessagePrinter(true);
+	    MessagePrinter debug_printer= new MessagePrinter(DEBUG);
 	    printer.mostrarResumenEjecucion(fileName, iter, min_score, pacManControllers.size(), ghostControllers.size());
 	    
 	    //Confirmacion para comenzar ejecucion
@@ -372,7 +393,7 @@ public class ExecutorModes {
 	                        dataRecorder.saveDataToCsv(fileName, true);
 	                        savedScores.add(game.getScore());
 	                        if (DEBUG) {
-	                            printer.mostrarDebug((partidasJugadas+1) + ". " + pacManController.getName() + " vs " + ghostController.getName() + " - Estados guardados en: " + fileName + ".csv con score: " + game.getScore());
+	                            debug_printer.mostrarDebug((partidasJugadas+1) + ". " + pacManController.getName() + " vs " + ghostController.getName() + " - Estados guardados en: " + fileName + ".csv con score: " + game.getScore());
 	                        }
 	                    } catch (IOException e) {
 	                        e.printStackTrace();
@@ -393,6 +414,25 @@ public class ExecutorModes {
 	    
 	    //Mostrar resumen final de ejecucion
 	    printer.mostrarResumenFinal(inicio, fileName, lineasIniciales, DataSetRecorder.contarLineas(fileName), savedScores, min_score);
+	    
+	    // Mostrar estadisticas
+	 	ScoreStatistics scoreStats = new ScoreStatistics(printer);
+	 	scoreStats.calcularEstadisticas(savedScores);
+	 	
+	 	// Mostrar histograma
+	 	Histogram.createHistogram(savedScores);
+	 		
+	 	// Mostrar BoxPlot
+	 	BoxPlot.createBoxPlot(savedScores);
+	 		
+	 	if(fileName != "") {
+	 		scoreStats.guardarEstadisticasEnArchivo(savedScores, fileName + "_statistics");
+	 		Histogram.guardarGraficaEnArchivo(savedScores, fileName);
+			BoxPlot.guardarGraficaEnArchivo(savedScores, fileName);
+	 	}
+	 	
+	 	//Mostrar el numero de movimientos invalidos
+	 	printer.mostrarInfo("Movimientos inválidos en intersecciones " + DataSetRecorder.getInvalidMoveRatio());
 	}
 
 	

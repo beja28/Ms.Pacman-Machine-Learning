@@ -19,6 +19,7 @@ import java.util.Set;
 import pacman.game.Constants.GHOST;
 import pacman.game.Constants.MOVE;
 import pacman.game.Game;
+import pacman.game.consolePrinter.MessagePrinter;
 
 
 public class DataSetRecorder {
@@ -27,19 +28,27 @@ public class DataSetRecorder {
     private Set<Integer> junctionNodes;
     
     private GameStateFilter gameStateFilter;
+    private MessagePrinter printer;
     private BaseGameStateTracker gameStateTracker;
+    
+    // Contadores de movimientos inválidos y totales
+    private static int invalidMoves = 0;
+    private static int totalMoves = 0;
     
 
     public DataSetRecorder(Game game) {
         this.validGameStates = new ArrayList<>();
         this.gameStateFilter = new GameStateFilter();
         this.gameStateTracker = new GameStateTrackerShortTerm();
+        this.printer = new MessagePrinter();
         this.junctionNodes = new HashSet<>();
         loadJunctionIndices(game);
     }
     
     
-    public void collectGameState(MOVE pacmanMove, Game game) {
+    public void collectGameState(MOVE pacmanMove, Game game) {   	
+    	
+    	gameStateTracker.updateGameStateTracker(game);
     	
     	//Procesar estados pendientes
     	String st = gameStateTracker.processBufferStates(game);
@@ -47,10 +56,18 @@ public class DataSetRecorder {
     		validGameStates.add(st);
     	}
     	
-    	gameStateTracker.updateGameStateTracker(game);
-    	
     	//Si Pacman se encuentra en una INTERSECCION...
     	if(junctionNodes.contains(game.getPacmanCurrentNodeIndex())) {
+    		this.totalMoves++;
+    		
+    		// HAY QUE ANYADIR UNA NUEVA COMPROBACION PARA CHECKEAR QUE EL MOVIMIENTO SEA VALIDO
+        	List<MOVE> validMoves = MovementFilter.getValidMoves(game);        	
+        	
+        	if (!validMoves.contains(pacmanMove)) {
+        		//printer.mostrarError("El movimiento a realizar por la implmentacion de Pacman que esta jugando ES INVALIDO: " + pacmanMove.toString() + " --> Por lo que no se guarda en el DataSet");
+        		this.invalidMoves++;
+        		return;
+        	}
     		
     		//Se recoge el estado del juego y se eliminan las caracteristicas que no queremos
         	List<String> filteredState = gameStateFilter.filterGameState(game.getGameState());
@@ -65,6 +82,11 @@ public class DataSetRecorder {
         	gameStateTracker.storeJunctionState(game, pendingState);
 		}
 	}
+    
+    public static String getInvalidMoveRatio() {
+    	double ratio = (double) invalidMoves / totalMoves * 100;
+        return Integer.toString(invalidMoves) + "/" + Integer.toString(totalMoves) + " - " + String.format("%.2f", ratio) + "%";
+    }
 	
     
     /*

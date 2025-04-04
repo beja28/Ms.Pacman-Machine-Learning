@@ -86,7 +86,7 @@ public class MessagePrinter {
         
         if (!savedScores.isEmpty()) {
             double media = savedScores.stream().mapToInt(Integer::intValue).average().orElse(0.0);
-            mostrarConTabulacion("Puntuación media de las partidas guardadas: " + media);
+            mostrarConTabulacion("Puntuación media de las partidas guardadas: " + media + "\n");
         } else {
         	mostrarConTabulacion("No se guardaron partidas con puntuaciones mayores a " + min_score);
         }
