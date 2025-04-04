@@ -4,7 +4,7 @@ from model_pytorch import train_pytorch_nn, save_model_pth
 from model_sklearn import MLPModel
 from pytorch_tabnet.tab_model import TabNetClassifier
 from prueba_socket import start_socket 
-from explicabilidad import Explicabilidad
+from explicabilidad import Explainability
 from Pytorch_Predictor import PyTorchPredictor
 from model_pytorch import MyModelPyTorch
 import torch
@@ -75,16 +75,12 @@ def main():
     n_features = 0
     n_classes = 0
 
-    if not (args.command == "model" and (args.model == "tabnet" or args.model == "sklearn")):
-        if args.model == "tabnet":
-            grouped_df = preprocess_csv_aux(dataset_path)
-
-            n_features = grouped_df.first().shape[1]
-            n_classes = 4
-        else:          
-            grouped_df  = preprocess_csv(dataset_path)
-            n_features = grouped_df.first().shape[1]
-            n_classes = 5
+    if not (args.command == "model" and args.model == "tabnet"):
+        grouped_df  = preprocess_csv(dataset_path)
+        # Configuramos los parámetros de la red
+        # acceder al primer grupo por ej
+        n_features = grouped_df.first().shape[1]
+        n_classes = 5  # 5 posibles movimientos de Pac-Man
 
 
     if args.command == "model":
@@ -136,7 +132,7 @@ def main():
                 
     elif args.command == "explain":
 
-        explicador = Explicabilidad()
+        explainer = Explainability()
         
         """ 
         --------------------------------------------------------------------------------------------------
@@ -176,22 +172,10 @@ def main():
         for (key, group), model_filename in zip(grouped_df, sorted_model_files):
             print(f"Explicabilidad para el grupo: {key}, usando el modelo: {model_filename}")
 
-            if(args.model == "tabnet"):
+            # Variables independientes (X) y dependientes (Y)
+            X = group.drop(columns=['PacmanMove'])
+            Y = group['PacmanMove'].values
                 
-                X, Y  = load_and_scale_tabnet(group, key, path_trained)
-                               
-                class_counts = Counter(Y)
-                valid_classes = {cls for cls, count in class_counts.items() if count >= 100}
-                mask = np.isin(Y, list(valid_classes))
-                X = X[mask]
-                Y = Y[mask]
-                        
-            else:
-                # Variables independientes (X) y dependientes (Y)
-                X = group.drop(columns=['PacmanMove'])
-                Y = group['PacmanMove'].values
-                
-
             # Dividimos el conjunto de datos
             X_train, X_, y_train, y_ = train_test_split(X, Y, test_size=0.3, random_state=1)
             X_cv, X_test, y_cv, y_test = train_test_split(X_, y_, test_size=0.33, random_state=1)
@@ -213,19 +197,22 @@ def main():
                 model.load_model(full_model_path)
             
             if args.technique == "feature_importance":
-                explicador.ejecutar_explicabilidad(model, model_filename, args.technique, X_cv, key, y_cv)
+                # Para tabnet cogemos la explicabilidad de la red entrenada
+                if(args.model == "sklearn"):
+                    explainer.run_explainability(model, model_filename, args.technique, X_cv, key, y_cv)
+
             elif args.technique == "lime":
                 if args.model == "pytorch":
                     predictor = PyTorchPredictor(model)
                 else:
                     predictor = model  # Los modelos de Scikit-Learn ya tienen predict_proba
-                explicador.ejecutar_explicabilidad(predictor, model_filename, args.technique, X_cv, key)
+                explainer.run_explainability(predictor, model_filename, args.technique, X_cv, key)
             else: # SHAP
-                explicador.ejecutar_explicabilidad(model, model_filename, args.technique, X_cv, key)
+                explainer.run_explainability(model, model_filename, args.technique, X_cv, key)
         
         if(args.technique != "lime"):
-            explicador.generar_grafico_explicabilidad_global(args.model)
-            explicador.guardar_explicabilidad_txt(directorio_actual, args.model)
+            explainer.generate_global_explainability_plot(args.model, args.technique, model_directory)
+            explainer.save_explainability_txt(directorio_actual, args.model)
 
 
 if __name__ == "__main__":

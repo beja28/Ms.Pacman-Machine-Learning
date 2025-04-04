@@ -156,30 +156,4 @@ def convert_types(data_dict):
 
     return data_dict
 
-def load_and_scale_tabnet(group, key, path_trained):
-    
-    # Separar X e Y
-    X = group.drop(columns=['PacmanMove']) 
-    Y = group['PacmanMove'].values
-
-    # Detectar columnas a escalar
-    one_hot_cols = [col for col in X.columns if any(prefix in col for prefix in columns_to_encode)]
-    columns_no_scale = boolean_col + one_hot_cols
-
-    X_num = X.drop(columns=columns_no_scale)
-    X_rest = X[columns_no_scale]
-
-    # Cargar scaler específico para esta intersección
-    scaler_path = os.path.join(path_trained, "models_2025-03-29", f"scaler_({key},).pkl")
-    scaler_bundle = joblib.load(scaler_path)
-    scaler = scaler_bundle['scaler']
-    columns_scaled = scaler_bundle['columns']
-
-    X_num = X_num[columns_scaled]
-    X_num_scaled = scaler.transform(X_num)
-
-    # Concatenar arrays como ndarray final
-    X_final = np.hstack([X_num_scaled, X_rest.values])
-
-    return X_final, Y
 
