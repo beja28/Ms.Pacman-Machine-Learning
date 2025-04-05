@@ -208,7 +208,7 @@ def main():
         
         if(args.technique != "lime"):
             explainer.generate_global_explainability_plot(args.model, args.technique, model_directory)
-            explainer.save_explainability_txt(directorio_actual, args.model)
+            explainer.save_explainability_txt(directorio_actual, model_directory, args.model)
 
 
 if __name__ == "__main__":

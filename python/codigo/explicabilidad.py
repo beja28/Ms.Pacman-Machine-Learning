@@ -319,10 +319,20 @@ class Explainability:
             plt.subplots_adjust(left=0.2, right=0.8, top=0.9, bottom=0.1)
             plt.show()
 
-    def calculate_intersection_impact(self):
+    def calculate_intersection_impact(self, model, models_dir):
         """Calcula el impacto total de cada característica en cada intersección."""
         intersection_impact = {}
-        print("El diccionario es: {self.map_dict}")
+
+        if model == "tabnet":
+            for filename in os.listdir(models_dir):
+                if filename.startswith("feature_importances"):
+                    intersection = filename.split("_")[-1].replace(".json", "") # Extrae del nombre la intersección como (intersección,)
+                    full_path = os.path.join(models_dir, filename)
+                    with open(full_path, 'r') as f:
+                        data = json.load(f)
+                        features = data["features"]
+                        importances = data["importances"]
+                        intersection_impact[intersection] = dict(zip(features, importances))
 
         for intersection, features in self.map_dict.items():
             intersection_impact[intersection] = {
@@ -332,16 +342,18 @@ class Explainability:
 
         return intersection_impact
 
-    def save_explainability_txt(self, directory, model):
+    def save_explainability_txt(self, directory, models_dir, model):
         """Guarda un archivo TXT para cada característica con el impacto en cada intersección."""
         if model == "pytorch":
             full_path = os.path.join(directory, "mapas_explicabilidad_txt_pytorch")
         elif model == "sklearn":
             full_path = os.path.join(directory, "mapas_explicabilidad_txt_sklearn")
+        elif model == "tabnet":
+            full_path = os.path.join(directory, "mapas_explicabilidad_txt_tabnet")
 
         os.makedirs(full_path, exist_ok=True)
 
-        intersection_impact = self.calculate_intersection_impact()
+        intersection_impact = self.calculate_intersection_impact(model, models_dir)
 
         features = set()
         for impacts in intersection_impact.values():
