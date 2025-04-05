@@ -86,7 +86,7 @@ def main():
             # Pasa el modelo correctamente al predictor
             predictor = PyTorchPredictor(model)
         elif args.model == "sklearn":
-            model = MLPModel.load_model(os.path.join(path_trained, "mlp_trained_model_2025-02-11.pkl"))
+            model = MLPModel.load_model(os.path.join(path_trained, "mlp_trained_model_2025-03-18.pkl"))
         
         if args.technique == "feature_importance":
             explicador.ejecutar_explicabilidad(model, args.technique, X_cv, y_cv)
