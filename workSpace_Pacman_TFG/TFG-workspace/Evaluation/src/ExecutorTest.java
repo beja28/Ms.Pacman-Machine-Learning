@@ -46,7 +46,7 @@ public class ExecutorTest {
         PacmanController pacMan = new PacManNeuro();
         GhostController ghosts = new es.ucm.fdi.ici.c2324.practica2.grupo02.Ghosts();
         
-        executor.runGame(pacMan, ghosts, 150, true); //last parameter defines speed     
+        executor.runGame(pacMan, ghosts, 30, true); //last parameter defines speed     
     }
 	
 }
