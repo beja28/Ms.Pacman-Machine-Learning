@@ -52,9 +52,9 @@ public class GameStateFilter {
     	}
     	
         //Ditancia euclidea y del path a la PP activa mas cercana
-        int euclideanToPpDistancia = calculateEuclideanDistanceToNearestPP(game, game.getPacmanCurrentNodeIndex());
+        //int euclideanToPpDistancia = calculateEuclideanDistanceToNearestPP(game, game.getPacmanCurrentNodeIndex());
         int pathToPpDistancia = calculateEuclideanDistanceToNearestPP(game, game.getPacmanCurrentNodeIndex());
-        gameState.add(euclideanToPpDistancia + "");
+        //gameState.add(euclideanToPpDistancia + "");
         gameState.add(pathToPpDistancia + "");
         
         //Numero de PP restantes

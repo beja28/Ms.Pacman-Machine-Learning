@@ -455,6 +455,12 @@ public class ExecutorModes {
 	        "score", "totalTime", "timeOfLastGlobalReversal", "ghost3NodeIndex", "ghost4NodeIndex",
 	        "ghost2NodeIndex", "ghost1NodeIndex", "scoreDiff50", "scoreDiff25", "ghost3EdibleTime"
 	    };
+	    
+	    // Lista de las 10 características mas importantes segun la explicabilidad en tabnet
+	    String[] selectedFeatures_tabnet = {
+	        "pacmanLastMoveMade_UP", "pacmanLastMoveMade_DOWN", "pacmanLastMoveMade_LEFT", "pacmanLastMoveMade_RIGHT", "ghost2LastMove_RIGHT",
+	        "powerPill_2", "ghost3EdibleTime", "pillWasEaten", "powerPill_0", "ghost2Distance"
+	    };
 		
 		if(model == "pytorch") {
 			model_features = selectedFeatures_pytorch;
@@ -465,6 +471,11 @@ public class ExecutorModes {
 			model_features = selectedFeatures_sklearn;
 			name_save_dir = "mapas_sklearn";
 			name_load_dir = "mapas_explicabilidad_txt_sklearn";
+		}
+		else if(model == "tabnet") {
+			model_features = selectedFeatures_tabnet;
+			name_save_dir = "mapas_tabnet";
+			name_load_dir = "mapas_explicabilidad_txt_tabnet";
 		}
 		
 		String directorioActual = System.getProperty("user.dir"); // Esto te da el directorio raíz del proyecto

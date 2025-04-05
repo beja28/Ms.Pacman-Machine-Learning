@@ -35,9 +35,14 @@ public class HeatMap {
 	    }
 	    else if(model == "sklearn") {
 	        maxImpact = 0.7;
-
+	        
 	    	 // Escalamos el impacto en relación a su distancia con 0 (máximo impacto en 1 o -1)
 	        ratio = Math.min(1, absImpact / maxImpact); // Como los valores pocas veces superan 1, usamos 1 como referencia
+	    }
+	    else if(model == "tabnet") {
+	        maxImpact = 0.12;
+	        
+	        ratio = Math.min(1, absImpact / maxImpact); // Como los valores nunca superan 1, usamos 1 como referencia
 	    }
 
 
