@@ -56,7 +56,7 @@ public class PacManNeuro extends PacmanController{
             
     		List<MOVE> validMoves = MovementFilter.getValidMoves(game);
     		
-            String stateAndMoves = String.join(",", finalState);
+            String stateAndMoves = String.join(",", finalState) + "\n" + validMoves;
 
             // Enviar estado del juego y movimientos válidos al servidor
             String response = socketPython.sendAndReceivePrediction(stateAndMoves);
