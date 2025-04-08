@@ -31,7 +31,11 @@ public class DataSetVariables {
 	// Variables que quiero añadir al estado del juego
 	public static final List<String> VARIABLES_AGREGAR_GAME_STATE = Arrays.asList(
 	        "ghost1Distance", "ghost2Distance", "ghost3Distance", "ghost4Distance", "euclideanDistanceToPp",
+	        "pathDistanceToPp", "remainingPp"
 	);
+	
+	
+	//Reibe dos listas de strings, y borra los strings de la segunda lista en la primera lista
 	public static List<String> restarListas(List<String> stringsTotales, List<String> stringsBorrar) {
 	    // Creamos una nueva lista basada en variablesGameState
 	    List<String> listaFiltrada = new ArrayList<>(stringsTotales);

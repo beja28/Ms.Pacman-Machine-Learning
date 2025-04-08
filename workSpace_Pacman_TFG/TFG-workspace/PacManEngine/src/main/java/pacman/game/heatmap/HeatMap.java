@@ -21,55 +21,24 @@ import java.util.Map;
 
 public class HeatMap {
 
-	public static Color getColorFromImpact(double impact, String model) {
-	    double absImpact = Math.abs(impact); // Trabajamos con el valor absoluto para la escala de color
-	    double ratio = 0;
+	public static Color getColorFromImpact(double impact) {
+        // Normalizar el impacto en el rango [-1, 1] para que los colores sean más consistentes
+        double normalizedImpact = Math.max(-1, Math.min(1, impact));
 
-	    // Definir límites para la interpolación de colores
-	    double maxImpact = 0;  // Impacto máximo
-	    
-	    if(model == "pytorch") {
-		    maxImpact = 30;
-		    ratio = Math.min(1, absImpact / maxImpact); // Escalar el impacto dentro del rango
+        int red, green;
+        
+        if (normalizedImpact < 0) {  
+            // Valores negativos: de amarillo a rojo
+            red = 255;
+            green = (int) (255 * (1 + normalizedImpact)); // Se reduce el verde a medida que se acerca a -1
+        } else {  
+            // Valores positivos: de amarillo a verde
+            green = 255;
+            red = (int) (255 * (1 - normalizedImpact)); // Se reduce el rojo a medida que se acerca a 1
+        }
 
-	    }
-	    else if(model == "sklearn") {
-	        maxImpact = 0.7;
-	        
-	    	 // Escalamos el impacto en relación a su distancia con 0 (máximo impacto en 1 o -1)
-	        ratio = Math.min(1, absImpact / maxImpact); // Como los valores pocas veces superan 1, usamos 1 como referencia
-	    }
-	    else if(model == "tabnet") {
-	        maxImpact = 0.12;
-	        
-	        ratio = Math.min(1, absImpact / maxImpact); // Como los valores nunca superan 1, usamos 1 como referencia
-	    }
-
-
-	    // Transición de colores: Rojo -> Naranja -> Amarillo -> Verde
-	    int red, green;
-
-	    if (ratio < 0.33) {
-	        // Rojo -> Naranja
-	        red = 255;
-	        green = (int) (ratio * 3 * 128);  
-	    } else if (ratio < 0.66) {
-	        // Naranja -> Amarillo
-	        red = 255;
-	        green = (int) (128 + (ratio - 0.33) * 3 * 127);
-	    } else {
-	        // Amarillo -> Verde
-	        red = (int) (255 - (ratio - 0.66) * 3 * 255);
-	        green = 255;
-	    }
-
-	    // Asegurar que los valores de los colores no superen 255
-	    red = Math.min(255, Math.max(0, red));
-	    green = Math.min(255, Math.max(0, green));
-
-	    return new Color(red, green, 0);
-	}
-
+        return new Color(red, green, 0); // Azul siempre 0 para mantener el espectro rojo-amarillo-verde
+    }
 
     // Método para leer el archivo y devolver un mapa con intersecciones y sus impactos
     public static Map<Integer, Double> loadHeatMapData(String filePath, String featureName) {

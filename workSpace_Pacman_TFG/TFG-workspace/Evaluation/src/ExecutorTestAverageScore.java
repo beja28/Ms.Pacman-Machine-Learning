@@ -48,7 +48,7 @@ public class ExecutorTestAverageScore {
 
         PacmanController pacMan = new PacManNeuro();
         List<GhostController> ghostControllers = new ArrayList<>();
-        ghostControllers.add(new es.ucm.fdi.ici.c2223.practica2.grupo02.Ghosts());
+        ghostControllers.add(new es.ucm.fdi.ici.c2324.practica1.grupo06.Ghosts());
         ghostControllers.add(new es.ucm.fdi.ici.c2324.practica1.grupo01.Ghosts());
         ghostControllers.add(new es.ucm.fdi.ici.c2324.practica1.grupo08.Ghosts());
         ghostControllers.add(new es.ucm.fdi.ici.c2324.practica2.grupo04.Ghosts());
@@ -72,6 +72,6 @@ public class ExecutorTestAverageScore {
          * - Muestra las estadísticas por consola
          * - Guarda las estadísticas en un archivo .txt en la carpeta 'statistics', si se ha especificado un nombre de archivo
          */
-        executor.runGameCalculateAverageScore(pacMan, ghostControllers, 25, 1000, "estadisticas_tabnet");
+        executor.runGameCalculateAverageScore(pacMan, ghostControllers, 10, 1000, "pruebas");
     }
 }

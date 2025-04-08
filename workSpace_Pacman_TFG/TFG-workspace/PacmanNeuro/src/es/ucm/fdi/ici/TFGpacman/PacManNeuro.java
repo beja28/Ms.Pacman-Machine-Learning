@@ -10,7 +10,6 @@ import pacman.game.Constants.MOVE;
 import pacman.game.Game;
 import pacman.game.consolePrinter.MessagePrinter;
 import pacman.game.dataManager.GameStateFilter;
-import pacman.game.dataManager.MovementFilter;
 
 public class PacManNeuro extends PacmanController{
 
@@ -43,19 +42,15 @@ public class PacManNeuro extends PacmanController{
     		List<String> filteredState = gameStateFilter.filterGameState(game.getGameState());
     		List<String> finalState = gameStateFilter.addNewVariablesToFilteredState(game, filteredState);
     		
-    		/*
             // Obtener movimientos posibles sin colisiones
             MOVE[] possibleMoves = game.getPossibleMoves(game.getPacmanCurrentNodeIndex());
             List<MOVE> validMoves = new ArrayList<>(Arrays.asList(possibleMoves));
 					
-            // Restringir la vuelta atras
+            // Restringir la vuelta atrás
             MOVE lastMove = game.getPacmanLastMoveMade();
             MOVE oppositeMove = lastMove.opposite();
             validMoves.remove(oppositeMove);
-            */
             
-    		List<MOVE> validMoves = MovementFilter.getValidMoves(game);
-    		
             String stateAndMoves = String.join(",", finalState) + "\n" + validMoves;
 
             // Enviar estado del juego y movimientos válidos al servidor
