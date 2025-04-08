@@ -30,7 +30,7 @@ public class DataSetVariables {
 	
 	// Variables que quiero añadir al estado del juego
 	public static final List<String> VARIABLES_AGREGAR_GAME_STATE = Arrays.asList(
-	        "ghost1Distance", "ghost2Distance", "ghost3Distance", "ghost4Distance", "euclideanDistanceToPp",
+	        "ghost1Distance", "ghost2Distance", "ghost3Distance", "ghost4Distance", "euclideanDistanceToPp"
 	);
 	public static List<String> restarListas(List<String> stringsTotales, List<String> stringsBorrar) {
 	    // Creamos una nueva lista basada en variablesGameState
