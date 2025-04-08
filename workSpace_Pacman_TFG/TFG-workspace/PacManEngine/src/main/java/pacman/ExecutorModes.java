@@ -45,6 +45,8 @@ import pacman.game.consolePrinter.MessagePrinter;
 import pacman.game.consolePrinter.UserPrompt;
 import pacman.game.dataManager.DataSetRecorder;
 import pacman.game.dataManager.GameStateFilter;
+import pacman.game.dataStatistics.BoxPlot;
+import pacman.game.dataStatistics.Histogram;
 import pacman.game.dataStatistics.ScoreStatistics;
 import pacman.game.internal.Node;
 import pacman.game.internal.POType;
@@ -234,6 +236,16 @@ public class ExecutorModes {
             if (tickLimit != -1 && tickLimit < game.getTotalTime()) {
                 break;
             }
+            
+            /* Por si se quiere saber el numero de interseccion por el cual esta pasando en ese instante
+            int[] intersecciones = game.getJunctionIndices();
+            for(int i: intersecciones) {
+            	if(i == game.getPacmanCurrentNodeIndex()) {
+                	System.out.println(game.getPacmanCurrentNodeIndex());
+                }
+            }
+            */
+            
             handlePeek(game);
             game.advanceGame(
                     pacManController.getMove(getPacmanCopy(game), System.currentTimeMillis() + timeLimit),
@@ -309,15 +321,24 @@ public class ExecutorModes {
 		ScoreStatistics scoreStats = new ScoreStatistics(printer);
 		scoreStats.calcularEstadisticas(scores);
 		
+		// Mostrar histograma
+		Histogram.createHistogram(scores);
+		
+		// Mostrar BoxPlot
+		BoxPlot.createBoxPlot(scores);
+		
 		if(fileName != "") {
 			scoreStats.guardarEstadisticasEnArchivo(scores, fileName);
+			Histogram.guardarGraficaEnArchivo(scores, fileName);
+			BoxPlot.guardarGraficaEnArchivo(scores, fileName);
 		}
 	}
 	
 	public void runGameGenerateMultiDataSet(List<PacmanController> pacManControllers, List<GhostController> ghostControllers, int iter, String fileName, boolean DEBUG, int min_score) {
 	    
 		//Mensajes de informacion
-	    MessagePrinter printer = new MessagePrinter(DEBUG);
+	    MessagePrinter printer = new MessagePrinter(true);
+	    MessagePrinter debug_printer= new MessagePrinter(DEBUG);
 	    printer.mostrarResumenEjecucion(fileName, iter, min_score, pacManControllers.size(), ghostControllers.size());
 	    
 	    //Confirmacion para comenzar ejecucion
@@ -372,7 +393,7 @@ public class ExecutorModes {
 	                        dataRecorder.saveDataToCsv(fileName, true);
 	                        savedScores.add(game.getScore());
 	                        if (DEBUG) {
-	                            printer.mostrarDebug((partidasJugadas+1) + ". " + pacManController.getName() + " vs " + ghostController.getName() + " - Estados guardados en: " + fileName + ".csv con score: " + game.getScore());
+	                            debug_printer.mostrarDebug((partidasJugadas+1) + ". " + pacManController.getName() + " vs " + ghostController.getName() + " - Estados guardados en: " + fileName + ".csv con score: " + game.getScore());
 	                        }
 	                    } catch (IOException e) {
 	                        e.printStackTrace();
@@ -393,29 +414,40 @@ public class ExecutorModes {
 	    
 	    //Mostrar resumen final de ejecucion
 	    printer.mostrarResumenFinal(inicio, fileName, lineasIniciales, DataSetRecorder.contarLineas(fileName), savedScores, min_score);
+	    
+	    // Mostrar estadisticas
+	 	ScoreStatistics scoreStats = new ScoreStatistics(printer);
+	 	scoreStats.calcularEstadisticas(savedScores);
+	 	
+	 	// Mostrar histograma
+	 	Histogram.createHistogram(savedScores);
+	 		
+	 	// Mostrar BoxPlot
+	 	BoxPlot.createBoxPlot(savedScores);
+	 		
+	 	if(fileName != "") {
+	 		scoreStats.guardarEstadisticasEnArchivo(savedScores, fileName + "_statistics");
+	 		Histogram.guardarGraficaEnArchivo(savedScores, fileName);
+			BoxPlot.guardarGraficaEnArchivo(savedScores, fileName);
+	 	}
+	 	
+	 	//Mostrar el numero de movimientos invalidos
+	 	printer.mostrarInfo("Movimientos inválidos en intersecciones " + DataSetRecorder.getInvalidMoveRatio());
 	}
 
 	
 	
 	
-	public void runGameHeatMaps(Controller<MOVE> pacManController, GhostController ghostController, int delay) {
+	public void runGameHeatMaps(Controller<MOVE> pacManController, GhostController ghostController, int delay, String model) {
 		boolean imageSaved = false;
+		String[] model_features = null;
+		String name_save_dir = null;
+		String name_load_dir = null;
 		
-		String directorioActual = System.getProperty("user.dir"); // Esto te da el directorio raíz del proyecto
-		
-		// Construir la ruta relativa a 'mapas_explicabilidad' (Ajustar en funcion de si es sklearn o pytorch)
-		Path mapsPath = Paths.get(directorioActual, "mapas_explicabilidad_txt_pytorch"); 
-		
-	    Game game = setupGame();
-	    precompute(pacManController, ghostController);
-
-	    GameView gv = (visuals) ? setupGameView(pacManController, game) : null;
-	    GhostController ghostControllerCopy = ghostController.copy(ghostPO);
-
 	    // Lista de las 10 características mas importantes segun la explicabilidad en sklearn
 	    String[] selectedFeatures_sklearn = {
-	        "score", "euclideanDistanceToPp", "pathDistanceToPp", "totalTime", "timeOfLastGlobalReversal",
-	        "ghost3NodeIndex", "pacmanLastMoveMade_LEFT", "pacmanLastMoveMade_UP", "pacmanLastMoveMade_DOWN", "ghost1NodeIndex"
+	        "score", "totalTime", "timeOfLastGlobalReversal", "remainingPp", "ghost1NodeIndex",
+	        "euclideanDistanceToPp", "ghost3NodeIndex", "pathDistanceToPp", "ghost4NodeIndex", "ghost1Distance"
 	    };
 	    
 	    // Lista de las 10 características mas importantes segun la explicabilidad en pytorch
@@ -423,15 +455,49 @@ public class ExecutorModes {
 	        "score", "totalTime", "timeOfLastGlobalReversal", "ghost3NodeIndex", "ghost4NodeIndex",
 	        "ghost2NodeIndex", "ghost1NodeIndex", "scoreDiff50", "scoreDiff25", "ghost3EdibleTime"
 	    };
+	    
+	    // Lista de las 10 características mas importantes segun la explicabilidad en tabnet
+	    String[] selectedFeatures_tabnet = {
+	        "pacmanLastMoveMade_UP", "pacmanLastMoveMade_DOWN", "pacmanLastMoveMade_LEFT", "pacmanLastMoveMade_RIGHT", "ghost2LastMove_RIGHT",
+	        "powerPill_2", "ghost3EdibleTime", "pillWasEaten", "powerPill_0", "ghost2Distance"
+	    };
+		
+		if(model == "pytorch") {
+			model_features = selectedFeatures_pytorch;
+			name_save_dir = "mapas_pytorch";
+			name_load_dir = "mapas_explicabilidad_txt_pytorch";
+		}
+		else if(model == "sklearn") {
+			model_features = selectedFeatures_sklearn;
+			name_save_dir = "mapas_sklearn";
+			name_load_dir = "mapas_explicabilidad_txt_sklearn";
+		}
+		else if(model == "tabnet") {
+			model_features = selectedFeatures_tabnet;
+			name_save_dir = "mapas_tabnet";
+			name_load_dir = "mapas_explicabilidad_txt_tabnet";
+		}
+		
+		String directorioActual = System.getProperty("user.dir"); // Esto te da el directorio raíz del proyecto
+		
+		// Construir la ruta relativa a 'mapas_explicabilidad' (Ajustar en funcion de si es sklearn o pytorch)
+		Path mapsPath = Paths.get(directorioActual, name_load_dir); 
+		
+	    Game game = setupGame();
+	    precompute(pacManController, ghostController);
+
+	    GameView gv = (visuals) ? setupGameView(pacManController, game) : null;
+	    GhostController ghostControllerCopy = ghostController.copy(ghostPO);
+
 
 	    // Carpeta donde se guardarán los mapas de calor
-	    Path heatmapFolder = Paths.get(directorioActual, "mapas_pytorch");
+	    Path heatmapFolder = Paths.get(directorioActual, name_save_dir);
 	    new File(heatmapFolder.toString()).mkdirs(); // Crea la carpeta si no existe
 
 	    Map<String, Map<Integer, Double>> heatmapData = new HashMap<>();
 
 	    // Cargar los datos de los 10 archivos seleccionados (elegir entre sklearn / pytorch)
-	    for (String feature : selectedFeatures_pytorch) {
+	    for (String feature : model_features) {
 	        String filePath = mapsPath.toString();
 	        Map<Integer, Double> featureData = HeatMap.loadHeatMapData(filePath, feature);
 	        heatmapData.put(feature, featureData);
@@ -450,13 +516,13 @@ public class ExecutorModes {
 	        );
 
 	        // Para cada característica, dibuja su mapa de calor (cambiar dependiendo de sklearn o pytorch)
-	        for (String feature : selectedFeatures_pytorch) {
+	        for (String feature : model_features) {
 	            Map<Integer, Double> data = heatmapData.get(feature);
 	            if (data != null) {
 	                for (Map.Entry<Integer, Double> entry : data.entrySet()) {
 	                    int intersection = entry.getKey();
 	                    double impact = entry.getValue();
-	                    Color color = HeatMap.getColorFromImpact(impact);
+	                    Color color = HeatMap.getColorFromImpact(impact, model);
 	                    GameView.addPoints(game, color, intersection);
 	                }
 	            }
