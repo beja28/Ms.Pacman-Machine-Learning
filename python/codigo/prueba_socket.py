@@ -64,7 +64,7 @@ def get_prediction(model_type, mensaje, mlp_model=None, modelPytorch=None):
         predicted_index = torch.argmax(prediccion)      
     elif model_type == 'sklearn':
         prediccion = mlp_model.predict(preprocessed_state) 
-        predicted_index = np.argmax(prediccion) # Como prediccion no es un tensor si no una lista en este caso, usamos np en vez de torch
+        predicted_index = prediccion[0] # Prediccion me devuelve el indice del movimiento
     
 
     moves = ['UP', 'DOWN', 'LEFT', 'RIGHT', 'NEUTRAL']

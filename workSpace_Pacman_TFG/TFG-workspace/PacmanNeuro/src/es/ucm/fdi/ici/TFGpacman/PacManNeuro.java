@@ -51,7 +51,7 @@ public class PacManNeuro extends PacmanController{
             MOVE oppositeMove = lastMove.opposite();
             validMoves.remove(oppositeMove);
             
-            String stateAndMoves = String.join(",", finalState) + "\n" + validMoves;
+            String stateAndMoves = String.join(",", finalState);
 
             // Enviar estado del juego y movimientos válidos al servidor
             String response = socketPython.sendAndReceivePrediction(stateAndMoves);
