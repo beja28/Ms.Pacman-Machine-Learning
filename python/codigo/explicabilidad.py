@@ -11,6 +11,7 @@ import os
 import torch.nn.functional as F
 from datetime import datetime
 import re
+from Pytorch_Predictor import PyTorchPredictor
 
 
 class Explainability:
@@ -113,10 +114,9 @@ class Explainability:
         """Implementacion de LIME para explicar las predicciones del modelo en una interseccion en concreto (funciona para Scikit-Learn y PyTorch)."""
         try:
 
-            # Encontrar en nodo de interseccion de ese modelo de red, que viene en el nombre entre ()
+            # Encontramos el nodo de interseccion de ese modelo de red, que viene en el nombre entre ()
             match = re.search(r'\((\d+),\)', model_filename)
             model_node_index = int(match.group(1)) if match else None
-
             if model_node_index != node_index:
                 print(f"--> Saltando modelo {model_filename}, no corresponde al nodo {node_index}")
                 return
@@ -125,19 +125,18 @@ class Explainability:
             if not isinstance(X, pd.DataFrame):
                 X = pd.DataFrame(X, columns=model.feature_names_in_)
 
+            # Filtramos los estados que estan en la posicion deseada
             filtered_states = X[X["pacmanCurrentNodeIndex"] == node_index]
-
-            # Es muy raro que se de el caso, pero para prevenir
             if filtered_states.empty:
                 print(f"\n No se encontraron estados con pacmanCurrentNodeIndex = {node_index} para el modelo {model_filename}. Saltando explicabilidad LIME.\n")
                 return
 
-            # Selecciona aleatoriamente un estado filtrado
+            # Se elige aleatoriamente uno de esos estados
             i = np.random.randint(0, len(filtered_states))
             instance = filtered_states.iloc[i]
 
             print("\nEstado seleccionado para explicación con LIME:")
-            print(instance.to_frame().T)    #Para que se vea en horizontal
+            print(instance.to_frame().T)
 
             # Crea el explicador de LIME
             explainer = LimeTabularExplainer(
@@ -149,8 +148,17 @@ class Explainability:
             
             # Si el modelo es de Scikit-Learn, usa predict_proba. Si es de PyTorch, crea un predict_proba personalizado
             if hasattr(model, "predict_proba"):
-                # Para modelos de Scikit-Learn, usa predict_proba directamente
+                # funcion para LIME (obligatoriamente debe ser predict_proba)
                 predict_fn = model.predict_proba
+
+                # prediccion real del modelo en este estado
+                moves = ['UP', 'DOWN', 'LEFT', 'RIGHT', 'NEUTRAL']
+                probabilidades = model.predict_proba(instance.values.reshape(1, -1))[0]
+                predicted_index = np.argmax(probabilidades)
+
+                # Convertimos ese índice numérico al nombre del movimiento
+                y_pred = moves[predicted_index]
+
             elif isinstance(model, torch.nn.Module):
                 # Para modelos de PyTorch, crea una función predict_proba
                 def predict_fn(X_input):
@@ -159,15 +167,24 @@ class Explainability:
                         X_tensor = torch.tensor(X_input, dtype=torch.float32)
                         outputs = model(X_tensor)
                         return torch.softmax(outputs, dim=1).cpu().numpy()  # Devuelve las probabilidades
+                    
+
+                # Prediccion real del modelo en el estado seleccionado
+                model.eval()
+                with torch.no_grad():
+                    instance_tensor = torch.tensor(instance.values.reshape(1, -1), dtype=torch.float32)
+                    output = model(instance_tensor)
+                    y_pred = model.predict(instance.values.reshape(1, -1))[0]
             else:
                 raise NotImplementedError("El modelo debe implementar 'predict_proba' o ser de PyTorch.")
 
             # Explica la instancia seleccionada usando LIME
-            print(f"Ejecutando la explicabilidad LIME para el modelo {model_filename}")
+            print(f"\nEl movimiento predecido por el modelo {model_filename} en la posicion {node_index} ha sido =>> {y_pred}")
+            print(f"Ejecutando la explicabilidad LIME para el modelo {model_filename} \n")
             exp = explainer.explain_instance(instance.values, predict_fn, num_features=5)
             
             # Guarda los resultados de la explicacion LIME
-            self.explicaciones.append({
+            self.explanations.append({
                 "technique": "lime", 
                 "lime_exp": exp,
                 "feature_names": X.columns,
@@ -193,6 +210,7 @@ class Explainability:
                 with open(lime_txt_path, 'a', encoding='utf-8') as f:
                     f.write(f'Explicacion LIME para el modelo: {model_filename}\n')
                     f.write(f'Fecha y hora: {current_time}\n')
+                    f.write(f'Movimiento predecido por el modelo para este estado ha sido: {y_pred}\n')
                     f.write('Estado analizado:\n')
                     f.write(instance.to_frame().T.to_string(index=False))
                     f.write('\n\nCaracteristicas mas influyentes:\n')
@@ -204,13 +222,13 @@ class Explainability:
                 print(f"Error guardando explicaciones en .txt: {e}")
 
             # Se guarda el grafico en la misma carpeta
-            self.generate_lime_plot(model_filename)
+            self.generate_lime_plot(model_filename, node_index, y_pred)
 
         except Exception as e:
             print(f"Error durante la explicabilidad LIME: {e}")
 
 
-    def generate_lime_plot(self, model_filename):
+    def generate_lime_plot(self, model_filename, node_index, move):
         """ Genera y guarda una grafica LIME para un modelo especifico en su carpeta correspondiente """
 
         # Busca el LIME correspondiente al modelo
@@ -230,6 +248,11 @@ class Explainability:
         plt.xlabel('Valor de impacto', fontsize=10)
         plt.ylabel('Características', fontsize=10)
 
+
+        # Comentario personalizado debajo del gráfico
+        comentario = f"Intersección número: {node_index} --- Movimiento realizado: {move}"
+        plt.figtext(0.5, -0.05, comentario, ha='center', fontsize=10)
+
         # Ruta donde esta la explicabilidad
         lime_folder = os.path.join('..', 'images', 'Explicabilidad', 'Lime')
         os.makedirs(lime_folder, exist_ok=True)
@@ -242,7 +265,7 @@ class Explainability:
         plt.savefig(full_path, bbox_inches='tight')
         plt.close()
 
-        print(f"Grafico de explicabilidad LIME guardado en: {full_path}")
+        print(f"Grafico de explicabilidad LIME guardado en: {full_path} \n")
 
     def generate_tabnet_feature_importance(self, path):
         all_importances = []

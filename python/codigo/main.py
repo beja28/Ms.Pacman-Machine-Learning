@@ -26,7 +26,7 @@ import os
 directorio_actual = os.path.dirname(os.path.abspath(__file__))
 
 # Construir la ruta que sube dos niveles desde 'codigo' y entra en 'DataSets'
-dataset_path = os.path.join(directorio_actual, '..', '..', 'DataSets', '18_gameStatesData_enriched.csv')
+dataset_path = os.path.join(directorio_actual, '..', '..', 'DataSets', '06_gameStatesData.csv')
 
 # Normalizar la ruta para evitar problemas con distintos sistemas operativos
 dataset_path = os.path.normpath(dataset_path)
@@ -144,7 +144,7 @@ def main():
                 for key, _ in grouped_df
             ]
         else:
-            model_directory = os.path.join(path_trained, "models_2025-03-05")
+            model_directory = os.path.join(path_trained, "models_2025-03-12")
             
             # Obtener todos los archivos con extensión .pkl o .pth
             model_files = [f for f in os.listdir(model_directory) if f.endswith(('.pkl', '.pth'))]
@@ -161,7 +161,6 @@ def main():
         if len(model_files) != len(grouped_df):
             print("Error: El número de modelos no coincide con el número de grupos.")
             return
-
         
         
         # Iterar sobre los archivos de modelo y los grupos del DataFrame al mismo tiempo
