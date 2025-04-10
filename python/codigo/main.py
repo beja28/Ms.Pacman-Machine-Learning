@@ -144,7 +144,7 @@ def main():
                 for key, _ in grouped_df
             ]
         else:
-            model_directory = os.path.join(path_trained, "models_2025-03-12")
+            model_directory = os.path.join(path_trained, "models_2025-03-05")
             
             # Obtener todos los archivos con extensión .pkl o .pth
             model_files = [f for f in os.listdir(model_directory) if f.endswith(('.pkl', '.pth'))]
