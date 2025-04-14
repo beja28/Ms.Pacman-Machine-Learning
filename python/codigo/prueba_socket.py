@@ -82,11 +82,20 @@ def get_prediction(model_type, mensaje, n_features, n_classes):
     if model_type != 'tabnet':
         intersection_id = identify_intersection(preprocessed_state)
 
+    """
     # Cargar el modelo para la predicción
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     mlp_model, modelPytorch, modelTabNet = model_for_prediction(
         model_type, n_features, n_classes, intersection_id, device
     )
+    """
+
+    try:
+        mlp_model, modelPytorch, modelTabNet = model_for_prediction(
+            model_type, n_features, n_classes, intersection_id, device)
+    except Exception as e:
+        print(f"NO EXISTE MODELO para la intersección {intersection_id}, retornando movimiento <NEUTRAL>")
+        return "NEUTRAL"
 
     if model_type == 'pytorch':
         input_tensor = torch.tensor(preprocessed_state.values, dtype=torch.float32).to(device)

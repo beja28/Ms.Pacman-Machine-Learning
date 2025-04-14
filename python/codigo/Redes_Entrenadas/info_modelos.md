@@ -1,13 +1,14 @@
 # Documentación de Modelos Entrenados
 
-| Nombre del Modelo | Tipo de Modelo | DataSet Utilizado     | Experimento | Estadísticas de las Partidas                                                            | Estadísticas específicas del modelo |
-|-------------------|----------------|-----------------------|------------|-----------------------------------------------------------------------------------------|-----------------------------|
-| models_2024-12-13 | Sklearn        | N/A                   | Fallido    | -                                                                                       | -                           |
-| models_2024-12-14 | Pytorch        | N/A                   | Fallido    | -                                                                                       | -                           |
-| models_2025-02-12 | Sklearn        | N/A                   | Fallido    | -                                                                                       | -                           |
-| models_2025-02-14 | Pytorch        | N/A                   | Fallido    | -                                                                                       | -                           |
-| models_2025-03-05 | Pytorch        | 06_gameStatesData.csv | 2          | [Ver detalles](#estadisticas-modelo-2025-03-05 "Ir a sección detallada de estadísticas")| **Accuracy**= ?? %, **F1**= ??, **etc...** |
-| models_2025-03-12 | Sklearn        | 06_gameStatesData.csv | 2          | [Ver detalles](#estadisticas-modelo-2025-03-12 "Ir a sección detallada de estadísticas")                                                                   | Pendiente de análisis       |
+| Nombre del Modelo | Tipo de Modelo | DataSet Utilizado     | Experimento | Estadísticas de las Partidas                                                            |
+|-------------------|----------------|-----------------------|------------|-----------------------------------------------------------------------------------------|
+| models_2024-12-13 | Sklearn        | N/A                   | Fallido    | -                                                                                       |
+| models_2024-12-14 | Pytorch        | N/A                   | Fallido    | -                                                                                       |
+| models_2025-02-12 | Sklearn        | N/A                   | Fallido    | -                                                                                       |
+| models_2025-02-14 | Pytorch        | N/A                   | Fallido    | -                                                                                       |
+| models_2025-03-05 | Pytorch        | 06_gameStatesData.csv | 2          | [Ver detalles](#estadisticas-modelo-2025-03-05 "Ir a sección detallada de estadísticas")|
+| models_2025-03-12 | Sklearn        | 06_gameStatesData.csv | 2          | [Ver detalles](#estadisticas-modelo-2025-03-12 "Ir a sección detallada de estadísticas")|
+| models_2025-03-29 | TabNet     | 18_gameStatesData_enriched.csv           | 3          | [Ver detalles](#estadisticas-modelo-2025-03-29 "Ir a sección detallada de estadísticas")                          |
 
 ---
 
@@ -67,3 +68,33 @@
 
 ![Resultado](images\sklearn_models_2025-03-12_histograma.png)
 ![Resultado](images\sklearn_models_2025-03-12_boxplot.png)
+
+
+
+## Estadisticas-Modelo-2025-03-29
+**Rivales (100 partidas por cada uno)**  
+- es.ucm.fdi.ici.c2324.practica1.grupo06.Ghosts()  
+- es.ucm.fdi.ici.c2324.practica1.grupo01.Ghosts()  
+- es.ucm.fdi.ici.c2324.practica1.grupo08.Ghosts()  
+- es.ucm.fdi.ici.c2324.practica2.grupo04.Ghosts()  
+- es.ucm.fdi.ici.c2324.practica2.grupo01.Ghosts()  
+- es.ucm.fdi.ici.c2324.practica2.grupo02.Ghosts()
+
+------
+
+**Estadísticas Avanzadas**  
+- Media:  
+- Mediana: 
+- Desviación típica: 
+- Varianza:  
+- Máximo:  
+- Mínimo:  
+- Rango:  
+- Percentil 25: 
+- Percentil 75: 
+- Percentil 90: 
+- Asimetría (Skewness):
+- Curtosis (Kurtosis): 
+
+![Resultado](images\tabnet_models_2025-03-29_histograma.png)
+![Resultado](images\tabnet_models_2025-03-29_boxplot.png)
