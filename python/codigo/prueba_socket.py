@@ -56,6 +56,7 @@ def model_for_prediction(model_type, n_features, n_classes, intersection_id=None
     elif model_type == 'tabnet':
         model_filename = f'tabnet_model_({intersection_id},).zip'
         full_model_path = os.path.join(path_trained, 'models_2025-03-29', model_filename)
+        print(model_filename)
 
         modelTabNet = TabNetClassifier(device_name=device)
         modelTabNet.load_model(full_model_path)
@@ -82,6 +83,7 @@ def get_prediction(model_type, mensaje, n_features, n_classes):
     if model_type != 'tabnet':
         intersection_id = identify_intersection(preprocessed_state)
 
+    
     """
     # Cargar el modelo para la predicción
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -90,12 +92,15 @@ def get_prediction(model_type, mensaje, n_features, n_classes):
     )
     """
 
+    
     try:
         mlp_model, modelPytorch, modelTabNet = model_for_prediction(
-            model_type, n_features, n_classes, intersection_id, device)
+            model_type, n_features, n_classes, intersection_id, device="cpu")
     except Exception as e:
         print(f"NO EXISTE MODELO para la intersección {intersection_id}, retornando movimiento <NEUTRAL>")
         return "NEUTRAL"
+          
+
 
     if model_type == 'pytorch':
         input_tensor = torch.tensor(preprocessed_state.values, dtype=torch.float32).to(device)
@@ -202,9 +207,9 @@ def start_socket(model_type, n_features, n_classes):
                     predicted_move = get_prediction(model_type, mensaje, n_features, n_classes)
                     
 
-                    print(f"Datos recibidos: {mensaje}", end="")
+                    print(f"\nDatos recibidos: {mensaje}", end="")
                     print(f"Enviando respuesta: {predicted_move}")
-                    print()
+                    print("\n---\n")
 
                     respuesta = f"{predicted_move}\n"
                     conn.sendall(respuesta.encode('utf-8'))
