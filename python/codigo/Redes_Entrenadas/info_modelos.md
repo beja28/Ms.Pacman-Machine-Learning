@@ -83,18 +83,18 @@
 ------
 
 **Estadísticas Avanzadas**  
-- Media:  
-- Mediana: 
-- Desviación típica: 
-- Varianza:  
-- Máximo:  
-- Mínimo:  
-- Rango:  
-- Percentil 25: 
-- Percentil 75: 
-- Percentil 90: 
-- Asimetría (Skewness):
-- Curtosis (Kurtosis): 
+- Media: 2479,68
+- Mediana: 2390,00
+- Desviación típica: 814,57
+- Varianza: 663523,27
+- Máximo: 6550,00
+- Mínimo: 320,00
+- Rango: 6230,00
+- Percentil 25: 1990,00
+- Percentil 75: 2890,00
+- Percentil 90: 3509,00
+- Asimetría (Skewness): 0,95
+- Curtosis (Kurtosis): 2,70
 
 ![Resultado](images\tabnet_models_2025-03-29_histograma.png)
 ![Resultado](images\tabnet_models_2025-03-29_boxplot.png)
