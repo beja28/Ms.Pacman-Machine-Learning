@@ -61,6 +61,10 @@ public class GameStateFilter {
         int remainingPPills = getRemainingPowerPills(game);
         gameState.add(remainingPPills + "");
 
+        //Numero de pills comidas
+        double pillsEaten = getPillsEaten(game);
+        gameState.add(pillsEaten + "");
+
         return gameState;
     }    
     
@@ -127,8 +131,16 @@ public class GameStateFilter {
         //Calcula y devuelve la distancia euclidea
         return (int) game.getEuclideanDistance(pacmanNode, nearestPP);
     }
-    
-    
+
+    // Calcula el porcentaje de pills que ha comido
+    public double getPillsEaten(Game game) {
+        double remaining = (double) game.getNumberOfActivePills();
+        double total = (double) game.getNumberOfPills();
+        double ratio = 1.0 - (remaining / total);
+        return Math.sqrt(ratio);
+    }
+
+       
     //Calcula el numero de PowerPills restantes
     public int getRemainingPowerPills(Game game) {
     	

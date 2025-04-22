@@ -11,6 +11,7 @@ import pacman.game.Game;
 import pacman.game.consolePrinter.MessagePrinter;
 import pacman.game.dataManager.GameStateFilter;
 import pacman.game.dataManager.MovementFilter;
+import pacman.game.dataManager.ReinforcementScore;
 
 public class PacManNeuro extends PacmanController{
 
@@ -18,6 +19,7 @@ public class PacManNeuro extends PacmanController{
 	private SocketPython socketPython;
 	private GameStateFilter gameStateFilter;
 	private MessagePrinter printer;
+	private ReinforcementScore rScore;
 	
 	public PacManNeuro() {
 		
@@ -34,7 +36,13 @@ public class PacManNeuro extends PacmanController{
 	
 	
     @Override
-    public MOVE getMove(Game game, long timeDue) {    	
+    public MOVE getMove(Game game, long timeDue) {    
+    	
+    	//Solo se hace la primera vez
+    	if (rScore == null)
+    	    rScore = new ReinforcementScore(game);
+    	else
+    	    rScore.update(game);
     	
     	MOVE pacmanMove = MOVE.NEUTRAL;
     	
@@ -43,7 +51,11 @@ public class PacManNeuro extends PacmanController{
     		List<String> filteredState = gameStateFilter.filterGameState(game.getGameState());
     		List<String> finalState = gameStateFilter.addNewVariablesToFilteredState(game, filteredState);
     		
-    		/*
+    		
+    		//Ponemos el score calculado por refuerzo, no el real del juego
+    		finalState.set(2, String.valueOf(rScore.getScore()));
+    		
+    		
             // Obtener movimientos posibles sin colisiones
             MOVE[] possibleMoves = game.getPossibleMoves(game.getPacmanCurrentNodeIndex());
             List<MOVE> validMoves = new ArrayList<>(Arrays.asList(possibleMoves));
@@ -52,9 +64,9 @@ public class PacManNeuro extends PacmanController{
             MOVE lastMove = game.getPacmanLastMoveMade();
             MOVE oppositeMove = lastMove.opposite();
             validMoves.remove(oppositeMove);
-            */
             
-    		List<MOVE> validMoves = MovementFilter.getValidMoves(game);
+            
+    		//List<MOVE> validMoves = MovementFilter.getValidMoves(game);
     		
             String stateAndMoves = String.join(",", finalState) + "\n" + validMoves;
 
