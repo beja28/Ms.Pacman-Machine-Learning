@@ -39,7 +39,7 @@ public class DataSetRecorder {
     public DataSetRecorder(Game game) {
         this.validGameStates = new ArrayList<>();
         this.gameStateFilter = new GameStateFilter();
-        this.gameStateTracker = new GameStateTrackerShortTerm();
+        this.gameStateTracker = new GameStateTrackerReinforcement();
         this.printer = new MessagePrinter();
         this.junctionNodes = new HashSet<>();
         loadJunctionIndices(game);

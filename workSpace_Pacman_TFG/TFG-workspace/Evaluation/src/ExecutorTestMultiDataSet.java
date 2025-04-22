@@ -58,9 +58,9 @@ public class ExecutorTestMultiDataSet {
         ghostControllers.add(new es.ucm.fdi.ici.c2324.practica2.grupo01.Ghosts());
         
         
-        int ITERS = 1000;
-        String fileName = "08_gameStatesData";
-        boolean DEBUG = false;
+        int ITERS = 1;
+        String fileName = "pruebas_score_refuerzo_07";
+        boolean DEBUG = true;
         int min_score = -1;
         
         
