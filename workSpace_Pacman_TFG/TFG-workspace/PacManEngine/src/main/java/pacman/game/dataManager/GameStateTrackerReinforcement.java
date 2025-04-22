@@ -10,7 +10,9 @@ import pacman.game.Constants.DM;
 public class GameStateTrackerReinforcement extends BaseGameStateTracker{
 	
 	private int lastJuctionIndex;
+    private int score;
     private LinkedList<Integer> lastJunctionsTimes = new LinkedList<>();
+    private LinkedList<Integer> lastJunctionScore = new LinkedList<>(); // Score de la ultima interseccion por la que ha pasado el PacMan
 	public static final int MAX_TIME = 25;
 	private ReinforcementScore reinforScore;
 	private final List<GhostEaten> ghostsEaten = new ArrayList<>();
@@ -18,7 +20,7 @@ public class GameStateTrackerReinforcement extends BaseGameStateTracker{
 	
 	public GameStateTrackerReinforcement() {
 		super();
-		
+		this.score = 0;
 		this.lastJuctionIndex = 1;
 		this.reinforScore = null;
 		this.pacmanEaten = new ArrayList<>();
@@ -32,8 +34,8 @@ public class GameStateTrackerReinforcement extends BaseGameStateTracker{
 	    else
 	    	reinforScore.update(game);
 		
-		updatePacmanDead(game);
-		updateGhostsDead(game);
+		//updatePacmanDead(game);
+		//updateGhostsDead(game);
 	}
 
 	
@@ -56,44 +58,60 @@ public class GameStateTrackerReinforcement extends BaseGameStateTracker{
         	//Se obtiene el primer elemento de la cola sin eliminarlo
             List<String> state = bufferGameStates.peek();
             
-            //Se comprueba si el estado ha pasado sufiente tiempo
-            if (isDiffTime(game, state)) {
-                //SE PONE EL SCORE POR REFUERZO
+            // //Se comprueba si el estado ha pasado sufiente tiempo
+            // if (isDiffTime(game, state)) {
+            //     //SE PONE EL SCORE POR REFUERZO
                 int stateTick = Integer.parseInt(state.get(1));		//Momento en el que se guardo el estado
                 int tickOffset = game.getTotalTime() - stateTick;	//Hace cuanto se guardo
                 
-                int refScore = reinforScore.getScoreAt(tickOffset);
-                state.set(2, String.valueOf(refScore));
+                score = reinforScore.getScoreAt(tickOffset);
+                state.set(2, String.valueOf(score));
                 
-                // en vez de mirar ultimos 25 ticks, hay que mirar entre intersecciones
-                if (ghostsEaten.size() >= 26) {
-                    int fromTick = lastJunctionsTimes.getFirst();
-                    int toTick = lastJunctionsTimes.getLast();
+                addJunctionScore(score);
+                
+            //     // en vez de mirar ultimos 25 ticks, hay que mirar entre intersecciones
+            //     if (ghostsEaten.size() >= 26) {
+            //         int fromTick = lastJunctionsTimes.getFirst();
+            //         int toTick = lastJunctionsTimes.getLast();
 
-                    GhostEaten eatenInRange = checkGhostsEatenBuffer(fromTick, toTick);
+            //         GhostEaten eatenInRange = checkGhostsEatenBuffer(fromTick, toTick);
 
-                    boolean g1 = eatenInRange.isGhost1Eaten();
-                    boolean g2 = eatenInRange.isGhost2Eaten();
-                    boolean g3 = eatenInRange.isGhost3Eaten();
-                    boolean g4 = eatenInRange.isGhost4Eaten();
+            //         boolean g1 = eatenInRange.isGhost1Eaten();
+            //         boolean g2 = eatenInRange.isGhost2Eaten();
+            //         boolean g3 = eatenInRange.isGhost3Eaten();
+            //         boolean g4 = eatenInRange.isGhost4Eaten();
 
-                    state.add(String.valueOf(g1));
-                    state.add(String.valueOf(g2));
-                    state.add(String.valueOf(g3));
-                    state.add(String.valueOf(g4));
-                }
+            //         state.add(String.valueOf(g1));
+            //         state.add(String.valueOf(g2));
+            //         state.add(String.valueOf(g3));
+            //         state.add(String.valueOf(g4));
+            //     }
                 
                 st = String.join(",", state);
                 bufferGameStates.poll();	//Se elimina de la cola
-            }
+
+                
+            //}
         }
         
         return st;
 	}
+
+	@Override
+    public LinkedList<Integer> getJunctionScore() {
+        return lastJunctionScore;
+    }
+    
+    public void addJunctionScore(Integer score) {
+        if (lastJunctionScore.size() >= 2) {
+        	lastJunctionScore.removeFirst(); // Elimina el más antiguo
+        }
+        lastJunctionScore.addLast(score); // Añade el nuevo al final
+    }
     
     public void addJunctionTime(Integer time) {
         if (lastJunctionsTimes.size() >= 2) {
-            lastJunctionsTimes.removeFirst(); // Elimina el más antiguo
+        	lastJunctionsTimes.removeFirst(); // Elimina el más antiguo
         }
         lastJunctionsTimes.addLast(time); // Añade el nuevo al final
     }
@@ -105,44 +123,44 @@ public class GameStateTrackerReinforcement extends BaseGameStateTracker{
     }
     
     
-    //Si en un estado a muerto pacman, calcula cuantos ticks anteriores han pasado hasta la ultima decision tomada
-    public void updatePacmanDead(Game game) {
+    // //Si en un estado a muerto pacman, calcula cuantos ticks anteriores han pasado hasta la ultima decision tomada
+    // public void updatePacmanDead(Game game) {
     	
-    	if(game.wasPacManEaten()) {
-    		int actIdx = game.getPacmanCurrentNodeIndex();
-    		double dist = game.getDistance(lastJuctionIndex, actIdx, DM.PATH);
+    // 	if(game.wasPacManEaten()) {
+    // 		int actIdx = game.getPacmanCurrentNodeIndex();
+    // 		double dist = game.getDistance(lastJuctionIndex, actIdx, DM.PATH);
     		
-    		reinforScore.pacmanEatenPenalizePreviousScores((int) dist);
-    	}    	
-    }
+    // 		reinforScore.pacmanEatenPenalizePreviousScores((int) dist);
+    // 	}    	
+    // }
     
     
-    public void updateGhostsDead(Game game) {
+    // public void updateGhostsDead(Game game) {
     	
-    	GameStateTrackerReinforcement.GhostEaten eaten = new GameStateTrackerReinforcement.GhostEaten(false, false, false, false);
+    // 	GameStateTrackerReinforcement.GhostEaten eaten = new GameStateTrackerReinforcement.GhostEaten(false, false, false, false);
     	
-    	if (game.wasGhostEaten(Constants.GHOST.BLINKY)) {
-    		eaten.setGhost1Eaten(true);
-	    }
-    	if (game.wasGhostEaten(Constants.GHOST.PINKY)) {
-    		eaten.setGhost2Eaten(true);
-	    }
-    	if (game.wasGhostEaten(Constants.GHOST.INKY)) {
-    		eaten.setGhost3Eaten(true);
-	    }
-    	if (game.wasGhostEaten(Constants.GHOST.SUE)) {
-    		eaten.setGhost4Eaten(true);
-	    }
+    // 	if (game.wasGhostEaten(Constants.GHOST.BLINKY)) {
+    // 		eaten.setGhost1Eaten(true);
+	//     }
+    // 	if (game.wasGhostEaten(Constants.GHOST.PINKY)) {
+    // 		eaten.setGhost2Eaten(true);
+	//     }
+    // 	if (game.wasGhostEaten(Constants.GHOST.INKY)) {
+    // 		eaten.setGhost3Eaten(true);
+	//     }
+    // 	if (game.wasGhostEaten(Constants.GHOST.SUE)) {
+    // 		eaten.setGhost4Eaten(true);
+	//     }
     	
-    	if(eaten.anyGhostEaten()) {
-    		int actIdx = game.getPacmanCurrentNodeIndex();
-    		double dist = game.getDistance(lastJuctionIndex, actIdx, DM.PATH);
+    // 	if(eaten.anyGhostEaten()) {
+    // 		int actIdx = game.getPacmanCurrentNodeIndex();
+    // 		double dist = game.getDistance(lastJuctionIndex, actIdx, DM.PATH);
     		
-    		reinforScore.ghostEatenIncreasePreviousScores((int) dist);
-    	}
+    // 		reinforScore.ghostEatenIncreasePreviousScores((int) dist);
+    // 	}
     	
-    	this.ghostsEaten.add(eaten);
-    }
+    // 	this.ghostsEaten.add(eaten);
+    // }
         
     
     public GhostEaten checkGhostsEatenBuffer(int fromTick, int toTick) {
@@ -246,5 +264,16 @@ public class GameStateTrackerReinforcement extends BaseGameStateTracker{
             return ghost1Eaten || ghost2Eaten || ghost3Eaten || ghost4Eaten;
         }
     }
+    
+    public class Pair<A, B> {
+        public final A first;
+        public final B second;
+
+        public Pair(A first, B second) {
+            this.first = first;
+            this.second = second;
+        }
+    }
+
 	
 }

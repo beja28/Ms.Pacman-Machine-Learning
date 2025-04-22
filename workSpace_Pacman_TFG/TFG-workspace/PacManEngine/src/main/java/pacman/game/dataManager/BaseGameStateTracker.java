@@ -20,5 +20,6 @@ public abstract class BaseGameStateTracker {
 	public abstract void updateGameStateTracker(Game game);	
 	public abstract void storeJunctionState(Game game, List<String> pendingState);	
 	public abstract String processBufferStates(Game game);
+	public abstract LinkedList<Integer> getJunctionScore();
 	
 }

@@ -49,7 +49,7 @@ public class PacManNeuro extends PacmanController{
     	if (game.isJunction(game.getPacmanCurrentNodeIndex())) {
     		//Obtener estado del juego procesado
     		List<String> filteredState = gameStateFilter.filterGameState(game.getGameState());
-    		List<String> finalState = gameStateFilter.addNewVariablesToFilteredState(game, filteredState);
+    		List<String> finalState = gameStateFilter.addNewVariablesToFilteredState(game, filteredState, null);
     		
     		
     		//Ponemos el score calculado por refuerzo, no el real del juego

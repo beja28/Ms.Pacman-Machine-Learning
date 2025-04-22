@@ -1,6 +1,7 @@
 package pacman.game.dataManager;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import pacman.game.Game;
@@ -43,7 +44,7 @@ public class GameStateFilter {
     
         
     // Añade nuevas variables al estado del juego, en ese instante de tiempo
-    public List<String> addNewVariablesToFilteredState(Game game, List<String> gameState) {
+    public List<String> addNewVariablesToFilteredState(Game game, List<String> gameState, LinkedList<Integer> lastJunctionScore) {
 
     	//Distancia del path a los fantasmas
     	for (GHOST ghost : GHOST.values()) {
@@ -61,9 +62,11 @@ public class GameStateFilter {
         int remainingPPills = getRemainingPowerPills(game);
         gameState.add(remainingPPills + "");
 
-        //Numero de pills comidas
-        double pillsEaten = getPillsEaten(game);
-        gameState.add(pillsEaten + "");
+        int sinceLastReversal = getsinceLastReversal(game);
+        gameState.add(sinceLastReversal + "");
+        
+        int reward = getReward(game, lastJunctionScore);
+        gameState.add(reward + "");
 
         return gameState;
     }    
@@ -146,6 +149,36 @@ public class GameStateFilter {
     	
     	//Retorna la longitud del array de PP activas
         return game.getActivePowerPillsIndices().length;
+    }
+    
+    // Calcular hace cuanto tiempo fue la ultima inversion global
+    public int getsinceLastReversal(Game game) {
+    	int sinceLastReversal = game.getTotalTime() - game.getTimeOfLastGlobalReversal();
+    	
+    	return sinceLastReversal;
+    }
+    
+    // Calcula la diferencia de score de una interseccion a otra. Cambiará en funcion de los rewards que se le asignen en el tramo de una interseccion a otra
+    public int getReward(Game game, LinkedList<Integer> lastJunctionScore) {
+    	
+    	if(lastJunctionScore == null) {
+    		return 0; 
+    	}
+    	
+    	if (lastJunctionScore.isEmpty()) {
+            // Casos extremos: lista nula o incompleta -> asumimos reward 0
+            return 0;
+        }
+
+        if (lastJunctionScore.size() == 1) {
+            return lastJunctionScore.get(0);
+        }
+
+        int scorePrev = lastJunctionScore.get(0);
+        int scoreNow = lastJunctionScore.get(1);
+
+        return scoreNow - scorePrev;
+    	
     }
 
 
