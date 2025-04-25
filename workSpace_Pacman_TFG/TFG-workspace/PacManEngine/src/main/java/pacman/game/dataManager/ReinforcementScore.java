@@ -8,12 +8,12 @@ import pacman.game.Game;
 
 public class ReinforcementScore {	
 	
-	public static final int PILL_REWARD = 10;
-    public static final int POWER_PILL_REWARD = 50;
-    public static final int EDIBLE_GHOST_REWARD = 200;
+	public static final int PILL_REWARD = 12;
+    public static final int POWER_PILL_REWARD = 0;
+    public static final int EDIBLE_GHOST_REWARD = 40;
     public static final int STEP_PENALTY = -1;
-    public static final int WIN_REWARD = 200;
-    public static final int PACMAN_DEATH_PENALTY = -400;
+    public static final int WIN_REWARD = 50;
+    public static final int PACMAN_DEATH_PENALTY = -375;
 	
 	private int score;
 	private int activePills;
@@ -41,7 +41,7 @@ public class ReinforcementScore {
 	    if (checkEdibleGhost(game)) score += EDIBLE_GHOST_REWARD;
 	    if (checkStep(game)) score += STEP_PENALTY;
 	    if (checkWin(game)) score += WIN_REWARD;
-	    if (checkDeath(game)) score += PACMAN_DEATH_PENALTY;	//Ya se quita, cuando se restan los scores de la lista
+	    //if (checkDeath(game)) score += PACMAN_DEATH_PENALTY;	//Ya se quita, cuando se restan los scores de la lista
 	    
 	    
 	    scoreHistory.add(score);
@@ -103,26 +103,26 @@ public class ReinforcementScore {
 	}
 	
 	
-	// //Resta score a los ultimos scores de la lista
-	// public void pacmanEatenPenalizePreviousScores(int ticks) {
-    //     int size = scoreHistory.size();
-    //     int start = Math.max(size - ticks, 0);
+	//Resta score a los ultimos scores de la lista
+	public void pacmanEatenPenalizePreviousScores(int ticks) {
+        int size = scoreHistory.size();
+        int start = Math.max(size - ticks, 0);
 
-    //     for (int i = start; i < size; i++) {
-    //         scoreHistory.set(i, scoreHistory.get(i) - PACMAN_DEATH_PENALTY);
-    //     }
-    // }
+        for (int i = start; i < size; i++) {
+            scoreHistory.set(i, scoreHistory.get(i) - PACMAN_DEATH_PENALTY);
+        }
+    }
 	
 	
-	// //Resta score a los ultimos scores de la lista
-	// public void ghostEatenIncreasePreviousScores(int ticks) {
-    //     int size = scoreHistory.size();
-    //     int start = Math.max(size - ticks, 0);
+	//Resta score a los ultimos scores de la lista
+	public void ghostEatenIncreasePreviousScores(int ticks) {
+        int size = scoreHistory.size();
+        int start = Math.max(size - ticks, 0);
 
-    //     for (int i = start; i < size; i++) {
-    //         scoreHistory.set(i, scoreHistory.get(i) + EDIBLE_GHOST_REWARD);
-    //     }
-    // }
+        for (int i = start; i < size; i++) {
+            scoreHistory.set(i, scoreHistory.get(i) + EDIBLE_GHOST_REWARD);
+        }
+    }
 
 	
 	//Calcula la diferencia de puntuacion entre dos momentos distintos

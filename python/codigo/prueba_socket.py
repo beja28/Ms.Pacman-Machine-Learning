@@ -18,7 +18,7 @@ from pytorch_tabnet.tab_model import TabNetClassifier
 directorio_actual = os.path.dirname(os.path.abspath(__file__))
 
 # Construir la ruta que sube dos niveles desde 'codigo' y entra en 'DataSets'
-dataset_path = os.path.join(directorio_actual, '..', '..', 'DataSets', '18_gameStatesData_enriched.csv')
+dataset_path = os.path.join(directorio_actual, '..', '..', 'DataSets', '22_gameStatesData_enriched.csv')
 
 # Normalizar la ruta para evitar problemas con distintos sistemas operativos
 dataset_path = os.path.normpath(dataset_path)
@@ -55,7 +55,7 @@ def model_for_prediction(model_type, n_features, n_classes, intersection_id=None
     
     elif model_type == 'tabnet':
         model_filename = f'tabnet_model_({intersection_id},).zip'
-        full_model_path = os.path.join(path_trained, 'models_2025-03-29', model_filename)
+        full_model_path = os.path.join(path_trained, 'models_2025-04-24', model_filename)
         print(model_filename)
 
         modelTabNet = TabNetClassifier(device_name=device)
@@ -77,6 +77,7 @@ def get_prediction(model_type, mensaje, n_features, n_classes):
     valid_moves = [x.strip("] \r\n") for x in valid_moves_str.strip("[]").split(",")]
     if model_type == 'tabnet':
         preprocessed_state, intersection_id = preprocess_game_state_aux(game_state, dataset_path)
+
     else:
         preprocessed_state = preprocess_game_state(game_state, dataset_path)
     
@@ -84,13 +85,13 @@ def get_prediction(model_type, mensaje, n_features, n_classes):
         intersection_id = identify_intersection(preprocessed_state)
 
     
-    """
+    
     # Cargar el modelo para la predicción
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     mlp_model, modelPytorch, modelTabNet = model_for_prediction(
         model_type, n_features, n_classes, intersection_id, device
     )
-    """
+    
 
     
     try:

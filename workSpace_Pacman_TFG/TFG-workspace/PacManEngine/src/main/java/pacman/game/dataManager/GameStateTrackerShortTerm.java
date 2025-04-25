@@ -1,7 +1,6 @@
 package pacman.game.dataManager;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 import pacman.game.Game;
@@ -146,14 +145,6 @@ public class GameStateTrackerShortTerm extends BaseGameStateTracker{
     public int calculateScoreDifference(int initialScore, int ticks) {  
         return previousScores.get(previousScores.size() - ticks -1) - initialScore;
     }
-
-
-
-	@Override
-	public LinkedList<Integer> getJunctionScore() {
-		// TODO Auto-generated method stub
-		return null;
-	}
 	
 	
 

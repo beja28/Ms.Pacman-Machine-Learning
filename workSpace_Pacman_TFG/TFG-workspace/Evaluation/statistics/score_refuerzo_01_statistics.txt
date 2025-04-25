@@ -1,0 +1,13 @@
+------ Estadísticas Avanzadas de las partidas ------
+Media: 7470,74
+Mediana: 7180,00
+Desviación típica: 2472,80
+Varianza: 6114728,66
+Máximo: 20940,00
+Mínimo: 4010,00
+Rango: 16930,00
+Percentil 25: 5460,00
+Percentil 75: 8900,00
+Percentil 90: 10850,00
+Asimetría (Skewness): 0,87
+Curtosis (Kurtosis): 0,75

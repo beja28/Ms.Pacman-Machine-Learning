@@ -58,7 +58,15 @@ df = df.drop(columns=["powerPillsState"], errors="ignore")
 
 # Columnas relacionadas con fantasmas
 distance_cols = ["ghost1Distance", "ghost2Distance", "ghost3Distance", "ghost4Distance"]
+edible_cols = ["ghost1EdibleTime", "ghost2EdibleTime", "ghost3EdibleTime", "ghost4EdibleTime"]
+
+distance_threshold = 40 # Distancia máxima para considerar fantasmas cercanos
+time_threshold = 5 # Tiempo mínimo para considerar fantasmas comestibles y no peligrosos
+
 for col in distance_cols:
+    df[col] = pd.to_numeric(df[col], errors='coerce')
+    
+for col in edible_cols:
     df[col] = pd.to_numeric(df[col], errors='coerce')
 
 # Marcar fantasmas activos (solo para calcular distancias, luego se eliminan)
@@ -69,6 +77,45 @@ for i in range(1, 5):
 activity_mask = pd.DataFrame({
     col: df[f"ghost{i}Active"] for i, col in enumerate(distance_cols, 1)
 })
+
+ghost_edible_nearby = []
+ghost_dangerous_nearby = []
+
+# Calcular el número de fantasmas comestibles y peligrosos cercanos
+for _, row in df.iterrows():
+    edibles = 0
+    dangerous = 0
+    
+    for i in range(1, 5):
+        is_active = row[f"ghost{i}Active"]
+        distance = row[f"ghost{i}Distance"]
+        edible_time = row[f"ghost{i}EdibleTime"]
+        
+        if is_active and distance < distance_threshold and edible_time > time_threshold: # Si el fantasma va a dejar de ser comestible en un rango de tiempo menor que time_threshold no se considera ni peligroso ni comestible
+            edibles += 1
+        elif is_active and distance < distance_threshold and edible_time == 0:
+            dangerous += 1
+            
+    ghost_edible_nearby.append(edibles) # Añado para esa fila el numero de fantasmas comestibles cercanos
+    ghost_dangerous_nearby.append(dangerous) # Añado para esa fila el numero de fantasmas peligrosos cercanos
+    
+df["ghostEdibleNearby"] = ghost_edible_nearby
+df["ghostDangerousNearby"] = ghost_dangerous_nearby
+
+
+pacman_mode = [] # Lista de modos del PacMan en valores numericos
+
+# Para obtener el modo del PacMan recorremos todas las columnas de ghostEdibleNearby y ghostDangerousNearby y guardamos el modo en una nueva columna
+for edible, dangerous in zip(ghost_edible_nearby, ghost_dangerous_nearby):
+    if edible == 0 and dangerous == 0:
+        pacman_mode.append(0) # Modo normal -> comer pills
+    elif dangerous - edible > 0:
+        pacman_mode.append(1) # Modo peligroso -> huir
+    elif edible - dangerous >= 0:
+        pacman_mode.append(2) # Modo comestible -> cazar fantasmas
+
+df["pacmanMode"] = pacman_mode
+
 
 # Usar solo distancias de fantasmas activos
 active_distances = df[distance_cols].where(activity_mask == 1, np.nan)

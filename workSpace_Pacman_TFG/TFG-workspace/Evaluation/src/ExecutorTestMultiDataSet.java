@@ -45,23 +45,22 @@ public class ExecutorTestMultiDataSet {
 
     	
     	List<PacmanController> pacManControllers = new ArrayList<>();
-        pacManControllers.add(new es.ucm.fdi.ici.c2223.practica1.grupo06.MsPacMan());
-        pacManControllers.add(new es.ucm.fdi.ici.c2223.practica1.grupo10.MsPacMan());
-        pacManControllers.add(new es.ucm.fdi.ici.c2223.practica1.grupo07.MsPacMan());
-        pacManControllers.add(new es.ucm.fdi.ici.c2223.practica2.grupo02.MsPacMan());
-        pacManControllers.add(new es.ucm.fdi.ici.c2223.practica2.grupo01.MsPacMan());
+    	pacManControllers.add(new es.ucm.fdi.ici.c2223.practica1.grupo06.MsPacMan());
+        pacManControllers.add(new es.ucm.fdi.ici.c2122.practica1.grupo10.MsPacMan());
+
         List<GhostController> ghostControllers = new ArrayList<>();
-        ghostControllers.add(new es.ucm.fdi.ici.c2324.practica1.grupo06.Ghosts());
+        ghostControllers.add(new es.ucm.fdi.ici.c2223.practica2.grupo02.Ghosts());
         ghostControllers.add(new es.ucm.fdi.ici.c2324.practica1.grupo01.Ghosts());
         ghostControllers.add(new es.ucm.fdi.ici.c2324.practica1.grupo08.Ghosts());
         ghostControllers.add(new es.ucm.fdi.ici.c2324.practica2.grupo04.Ghosts());
         ghostControllers.add(new es.ucm.fdi.ici.c2324.practica2.grupo01.Ghosts());
+        ghostControllers.add(new es.ucm.fdi.ici.c2324.practica2.grupo02.Ghosts());
         
         
-        int ITERS = 1;
-        String fileName = "pruebas_score_refuerzo_07";
+        int ITERS = 4000;
+        String fileName = "score_refuerzo_01";
         boolean DEBUG = true;
-        int min_score = -1;
+        int min_score = 4000;
         
         
         
