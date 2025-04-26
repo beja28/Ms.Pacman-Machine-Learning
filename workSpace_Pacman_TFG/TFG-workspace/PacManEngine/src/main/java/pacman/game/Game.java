@@ -443,7 +443,7 @@ public final class Game {
 
         sb.append(mazeIndex + "," + totalTime + "," + score + "," + currentLevelTime + "," + levelCount + ","
                 + internalPacman.currentNodeIndex + "," + internalPacman.lastMoveMade + "," + internalPacman.numberOfLivesRemaining + "," + internalPacman.hasReceivedExtraLife + ",");
-
+        
         for (Ghost ghost : ghosts.values()) {
             sb.append(ghost.currentNodeIndex + "," + ghost.edibleTime + "," + ghost.lairTime + "," + ghost.lastMoveMade + ",");
         }

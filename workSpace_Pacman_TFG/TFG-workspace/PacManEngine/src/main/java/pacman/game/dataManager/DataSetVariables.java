@@ -22,7 +22,7 @@ public class DataSetVariables {
 	
 	//Variables que quiero quitar del estado del juego
 	public static final List<String> VARIABLES_BORRAR_GAME_STATE = Arrays.asList(
-	        "currentLevelTime", "levelCount", "pillsState",
+	        "currentLevelTime", "levelCount", "pillsState", "timeOfLastGlobalReversal", "pacmanWasEaten",
 	        "powerPillWasEaten", "pacmanReceivedExtraLife", "mazeIndex", "ghost1Eaten", "ghost2Eaten", "ghost3Eaten", "ghost4Eaten"
 	);
 
@@ -30,9 +30,16 @@ public class DataSetVariables {
 	// Variables que quiero añadir al estado del juego
 	public static final List<String> VARIABLES_AGREGAR_GAME_STATE = Arrays.asList(
 	        "ghost1Distance", "ghost2Distance", "ghost3Distance", "ghost4Distance",
-	        "pathDistanceToPp", "remainingPp", "pillsEaten", "ghost1EatenMod", "ghost2EatenMod", "ghost3EatenMod", "ghost4EatenMod"
+	        "pathDistanceToPp", "remainingPp"
 	);
 	
+	/*
+	// Variables que quiero añadir al estado del juego
+	public static final List<String> VARIABLES_AGREGAR_GAME_STATE = Arrays.asList(
+	        "ghost1Distance", "ghost2Distance", "ghost3Distance", "ghost4Distance",
+	        "pathDistanceToPp", "remainingPp", "sinceLastReversal" , "reward"
+	);
+	*/
 	
 	//Reibe dos listas de strings, y borra los strings de la segunda lista en la primera lista
 	public static List<String> restarListas(List<String> stringsTotales, List<String> stringsBorrar) {

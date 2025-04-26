@@ -51,13 +51,16 @@ public class DataSetRecorder {
     	gameStateTracker.updateGameStateTracker(game);
     	
     	//Procesar estados pendientes
-    	String st = gameStateTracker.processBufferStates(game);
+        String st;
+    	st = gameStateTracker.processBufferStates(game);
+        
     	if(st != null) {
     		validGameStates.add(st);
     	}
     	
     	//Si Pacman se encuentra en una INTERSECCION...
     	if(junctionNodes.contains(game.getPacmanCurrentNodeIndex())) {
+            
     		this.totalMoves++;
     		
     		// HAY QUE ANYADIR UNA NUEVA COMPROBACION PARA CHECKEAR QUE EL MOVIMIENTO SEA VALIDO
@@ -76,8 +79,7 @@ public class DataSetRecorder {
         	filteredState.add(0, pacmanMove.toString());	//El resto de posiciones se desplaza a la derecha
         	
         	//Se calculan las nuevas variables que queremos en ese instante, y se añaden
-        	List<String> pendingState = gameStateFilter.addNewVariablesToFilteredState(game, filteredState);
-        	
+        	List<String> pendingState = gameStateFilter.addNewVariablesToFilteredState(game, filteredState, gameStateTracker.getJunctionScore()); // Le pasamos tb la cola de scores
         	//Se guarda el estado temporalmente
         	gameStateTracker.storeJunctionState(game, pendingState);
 		}
@@ -122,7 +124,28 @@ public class DataSetRecorder {
         if (!fileExists && show_header) {
             fileContent.add(String.join(",", DataSetVariables.getFinalGameState()));
         }
+        
+        List<String> headersList = DataSetVariables.getFinalGameState();
 
+        if (!validGameStates.isEmpty()) {
+            // Buscar el índice de la columna "reward"
+            int rewardIndex = headersList.indexOf("reward");
+
+            if (rewardIndex != -1) {
+                for (int i = 0; i < validGameStates.size() - 1; i++) {
+                    String[] current = validGameStates.get(i).split(",");
+                    String[] next = validGameStates.get(i + 1).split(",");
+
+                    current[rewardIndex] = next[rewardIndex];
+                    validGameStates.set(i, String.join(",", current));
+                }
+
+                // Última fila: reward = 0
+                String[] last = validGameStates.get(validGameStates.size() - 1).split(",");
+                last[rewardIndex] = "0";
+                validGameStates.set(validGameStates.size() - 1, String.join(",", last));
+            }
+        }
         // Se añaden los estados calculados
         fileContent.addAll(validGameStates);
 
