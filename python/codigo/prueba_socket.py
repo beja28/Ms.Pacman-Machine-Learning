@@ -18,7 +18,7 @@ from pytorch_tabnet.tab_model import TabNetClassifier
 directorio_actual = os.path.dirname(os.path.abspath(__file__))
 
 # Construir la ruta que sube dos niveles desde 'codigo' y entra en 'DataSets'
-dataset_path = os.path.join(directorio_actual, '..', '..', 'DataSets', '22_gameStatesData_enriched.csv')
+dataset_path = os.path.join(directorio_actual, '..', '..', 'DataSets', '23_gameStatesData_enriched.csv')
 
 # Normalizar la ruta para evitar problemas con distintos sistemas operativos
 dataset_path = os.path.normpath(dataset_path)
@@ -29,6 +29,7 @@ path_trained = os.path.join(directorio_actual, 'Redes_Entrenadas')
 # Normalizar la ruta para evitar problemas con distintos sistemas operativos
 path_trained = os.path.normpath(path_trained)
 
+loaded_models = {} # Diccionario para almacenar los modelos cargados
 
 def model_for_prediction(model_type, n_features, n_classes, intersection_id=None, device='cpu'):
     """
@@ -55,8 +56,7 @@ def model_for_prediction(model_type, n_features, n_classes, intersection_id=None
     
     elif model_type == 'tabnet':
         model_filename = f'tabnet_model_({intersection_id},).zip'
-        full_model_path = os.path.join(path_trained, 'models_2025-04-24', model_filename)
-        print(model_filename)
+        full_model_path = os.path.join(path_trained, 'models_2025-04-26', model_filename)
 
         modelTabNet = TabNetClassifier(device_name=device)
         modelTabNet.load_model(full_model_path)
@@ -84,25 +84,15 @@ def get_prediction(model_type, mensaje, n_features, n_classes):
     if model_type != 'tabnet':
         intersection_id = identify_intersection(preprocessed_state)
 
-    
-    
-    # Cargar el modelo para la predicción
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    mlp_model, modelPytorch, modelTabNet = model_for_prediction(
-        model_type, n_features, n_classes, intersection_id, device
-    )
-    
-
-    
     try:
-        mlp_model, modelPytorch, modelTabNet = model_for_prediction(
-            model_type, n_features, n_classes, intersection_id, device="cpu")
-    except Exception as e:
-        print(f"NO EXISTE MODELO para la intersección {intersection_id}, retornando movimiento <NEUTRAL>")
+        # Cargar el modelo para la predicción
+        mlp_model, modelPytorch, modelTabNet = loaded_models[(model_type, intersection_id)]
+    except KeyError:
+        print(f"No se encontró el modelo para la intersección {intersection_id}. Devolviendo movimiento <NEUTRAL>")
         return "NEUTRAL"
-          
-
-
+    
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    
     if model_type == 'pytorch':
         input_tensor = torch.tensor(preprocessed_state.values, dtype=torch.float32).to(device)
         with torch.no_grad():
@@ -170,6 +160,21 @@ def identify_intersection(preprocessed_state):
     
     intersection = preprocessed_state.get('pacmanCurrentNodeIndex', None)
     return int(intersection.iloc[0])
+
+def load_all_models(model_type, n_features, n_classes, device):
+    print("Cargando todos los modelos, porfavor espere antes de comenzar una partida...")
+    
+    intersection_ids = [153, 165, 177, 189, 201, 213, 225, 237, 348, 361, 386, 399, 456, 480, 516, 540, 598, 599, 691, 716, 728, 753, 810, 834, 859, 883, 936, 948, 960, 972, 984, 996, 1008, 1020, 1211, 1223, 1259, 1271]
+    
+    for intersection_id in intersection_ids:
+        try:
+            mlp_model, modelPytorch, modelTabNet = model_for_prediction(model_type, n_features, n_classes, intersection_id, device)
+            loaded_models[(model_type, intersection_id)] = (mlp_model, modelPytorch, modelTabNet)
+            print(f"Modelo para la intersección {intersection_id} cargado correctamente.")
+        except Exception as e:
+            print(f"Error al cargar el modelo para la intersección {intersection_id}: {e}")
+    
+    print("Modelos cargados correctamente. Listo para comenzar la partida.")
     
 def start_socket(model_type, n_features, n_classes):
     #Configuración
@@ -181,6 +186,9 @@ def start_socket(model_type, n_features, n_classes):
     server_socket.bind((HOST, PORT))
     server_socket.listen() #Escuchar conexiones entrantes
     print(f"Servidor escuchando en {HOST}:{PORT}")
+
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    load_all_models(model_type, n_features, n_classes, device)
 
     # Manejar señales de cierre (CTRL+C o SIGTERM)
     def close_server(sig, frame):
