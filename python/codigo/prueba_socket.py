@@ -18,7 +18,7 @@ from pytorch_tabnet.tab_model import TabNetClassifier
 directorio_actual = os.path.dirname(os.path.abspath(__file__))
 
 # Construir la ruta que sube dos niveles desde 'codigo' y entra en 'DataSets'
-dataset_path = os.path.join(directorio_actual, '..', '..', 'DataSets', '22_gameStatesData_enriched.csv')
+dataset_path = os.path.join(directorio_actual, '..', '..', 'DataSets', '23_gameStatesData_enriched.csv')
 
 # Normalizar la ruta para evitar problemas con distintos sistemas operativos
 dataset_path = os.path.normpath(dataset_path)
@@ -56,7 +56,7 @@ def model_for_prediction(model_type, n_features, n_classes, intersection_id=None
     
     elif model_type == 'tabnet':
         model_filename = f'tabnet_model_({intersection_id},).zip'
-        full_model_path = os.path.join(path_trained, 'models_2025-04-24', model_filename)
+        full_model_path = os.path.join(path_trained, 'models_2025-04-26', model_filename)
 
         modelTabNet = TabNetClassifier(device_name=device)
         modelTabNet.load_model(full_model_path)

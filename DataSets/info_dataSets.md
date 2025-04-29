@@ -160,3 +160,18 @@
 
 
 	Movimientos inválidos en intersecciones 325469/1876569 - 17,34%
+
+### 20_gameStatesData 23/04/25
+#### (12M lineas) Generado con 10.000 ejecuciones del juego, score minimo desactivado y estas implementaciones
+
+    	pacManControllers.add(new es.ucm.fdi.ici.c2223.practica1.grupo06.MsPacMan());
+        pacManControllers.add(new es.ucm.fdi.ici.c2122.practica1.grupo10.MsPacMan());
+
+		ghostControllers.add(new es.ucm.fdi.ici.c2223.practica2.grupo02.Ghosts());
+        ghostControllers.add(new es.ucm.fdi.ici.c2324.practica1.grupo01.Ghosts());
+        ghostControllers.add(new es.ucm.fdi.ici.c2324.practica1.grupo08.Ghosts());
+        ghostControllers.add(new es.ucm.fdi.ici.c2324.practica2.grupo04.Ghosts());
+        ghostControllers.add(new es.ucm.fdi.ici.c2324.practica2.grupo01.Ghosts());
+        ghostControllers.add(new es.ucm.fdi.ici.c2324.practica2.grupo02.Ghosts());
+
+![Resultado]](20_gameStatesDataIni.PNG)

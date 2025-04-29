@@ -267,7 +267,43 @@ class Explainability:
 
         print(f"Grafico de explicabilidad LIME guardado en: {full_path} \n")
 
+    def group_pills_features(self, path):
+        for file in os.listdir(path):
+            if file.startswith("feature_importances"):
+                full_path = os.path.join(path, file)
+                with open(full_path, 'r') as f:
+                    data = json.load(f)
+
+                features = data["features"]
+                importances = data["importances"]
+                
+                new_features = []
+                new_importances = []
+                pills_sum = 0.0
+                
+                for feature, importance in zip(features, importances):
+                    if feature.startswith("pill_"):
+                        pills_sum += importance
+                    else:
+                        new_features.append(feature)
+                        new_importances.append(importance)
+                
+                new_features.append('pillsPresence')
+                new_importances.append(pills_sum)
+                
+                #Guardamos las nuevas importancias sobreescribiendo el actual
+                new_data = {
+                    "features": new_features,
+                    "importances": new_importances
+                }
+                with open(full_path, 'w') as f:
+                    json.dump(new_data, f, indent=4)
+                    
+
     def generate_tabnet_feature_importance(self, path):
+        
+        self.group_pills_features(path)  # Agrupar las características de las pills
+        
         all_importances = []
         feature_names = None
 

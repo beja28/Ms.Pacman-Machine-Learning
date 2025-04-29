@@ -16,9 +16,29 @@ directorio_actual = os.path.dirname(os.path.abspath(__file__))
 path_trained = os.path.join(directorio_actual, 'Redes_Entrenadas')
 
 # Columnas
-columns_not_scaled = ['ghost1LastMove', 'ghost2LastMove', 'ghost3LastMove', 'ghost4LastMove', 'pacmanLastMoveMade', 'pacmanMode', 'powerPill_0', 'powerPill_1', 'powerPill_2', 'powerPill_3']
+columns_not_scaled = ['ghost1LastMove', 'ghost2LastMove', 'ghost3LastMove', 'ghost4LastMove', 'pacmanLastMoveMade', 'pacmanMode', 'powerPill_0', 'powerPill_1', 'powerPill_2', 'powerPill_3'] + ['pill_' + str(i) for i in range(220)]
 columns_to_categorize = ['ghost1LastMove', 'ghost2LastMove', 'ghost3LastMove', 'ghost4LastMove', 'pacmanLastMoveMade']
 
+
+# Función de preprocesamiento del CSV con mapeo de 'PacmanMove' a números
+def preprocess_csv_aux(path):
+    df = pd.read_csv(path)
+    
+    # Mapeo de la columna 'PacmanMove' a números
+    move_mapping = {
+        'UP': 0,
+        'DOWN': 1,
+        'LEFT': 2,
+        'RIGHT': 3
+    }
+    
+    # Aplicamos el mapeo
+    df['PacmanMove'] = df['PacmanMove'].map(move_mapping)
+        
+    # Dividimos el dataframe por intersecciones
+    grouped_df = df.groupby(['pacmanCurrentNodeIndex'])
+
+    return grouped_df
 
 def preprocess_game_state_aux(game_state, path):
     start_time = time.perf_counter()
@@ -30,32 +50,31 @@ def preprocess_game_state_aux(game_state, path):
     # Quitar también las columnas derivadas
     cols_to_exclude = ["ghostEdibleNearby", "ghostDangerousNearby", "pacmanMode", "closestGhostDistance", "edibleClosestGhostDistance", 
                         "numEdibleGhosts", "ghostsNearby", "numActiveGhosts", "avgGhostDistance", "stdGhostDistance", "minGhostDistance", 
-                        "maxGhostDistance","powerPill_0", "powerPill_1", "powerPill_2", "powerPill_3"]  # + [f'pill_{i}' for i in range(220)]
+                        "maxGhostDistance","powerPill_0", "powerPill_1", "powerPill_2", "powerPill_3"] + [f'pill_{i}' for i in range(220)]
     
     columns_csv = [col for col in all_cols if col not in cols_to_exclude]
 
     # Convertir el string de entrada a lista
     data = game_state.strip().split(',')
 
-
     totalTime = int(data[0])
     score = int(data[1])
     # Sacar powerPillsState de la posición 21 y convertirlo
-    # pill_state_str = data[21]
-    power_pill_str = data[21]  # No lo quitamos aún, solo lo separamos srea 22
+    pill_state_str = data[21]
+    power_pill_str = data[22]  # No lo quitamos aún, solo lo separamos srea 22
 
     if not power_pill_str.isdigit() or len(power_pill_str) != 4:
         raise ValueError(f"❌ Valor inválido en powerPillsState: {power_pill_str}")
     
-    # if not (len(pill_state_str) != 220 and all(c in '01' for c in pill_state_str)):
-    #     raise ValueError(f"❌ Valor inválido en pillsState: {pill_state_str}")
+    if len(pill_state_str) != 220 or not all(c in '01' for c in pill_state_str):
+        raise ValueError(f"❌ Valor inválido en pillsState: {pill_state_str}")
 
-    # data.pop(22)
+
+    data.pop(22)
     data.pop(21)
     data.pop(1)
     data.pop(0)
 
-    
     print(len(data), len(columns_csv))
     if len(columns_csv) != len(data):
         raise ValueError("❌ Distinto número de datos que de columnas")
@@ -70,11 +89,15 @@ def preprocess_game_state_aux(game_state, path):
     df = pd.DataFrame([data_dict])
     
 
-    for i in range(4):
-        df[f"powerPill_{i}"] = int(power_pill_str[i])
+    # -------------------------------------
+    # Creamos todas las columnas nuevas aparte
+    # -------------------------------------
 
-    # for i in range(220):
-    #     df[f"pill_{i}"] = int(pill_state_str[i])
+    # Añadir powerPill
+    power_pills_dict = {f"powerPill_{i}": int(power_pill_str[i]) for i in range(4)}
+
+    # Añadir pills
+    pills_dict = {f"pill_{i}": int(pill_state_str[i]) for i in range(220)}
 
     # Convertir columnas necesarias a numéricas
     distance_cols = [f"ghost{i}Distance" for i in range(1, 5)]
@@ -92,45 +115,48 @@ def preprocess_game_state_aux(game_state, path):
     time_threshold = 5
 
     active_mask = (distances != -1) & (lair_times == 0)
+    masked_distances = np.where(active_mask, distances, -1)
     edible_nearby_mask = (distances < distance_threshold) & (edible_times > time_threshold) & active_mask
     dangerous_nearby_mask = (distances < distance_threshold) & (edible_times == 0) & active_mask
 
-    df["ghostEdibleNearby"] = edible_nearby_mask.sum(axis=1)
-    df["ghostDangerousNearby"] = dangerous_nearby_mask.sum(axis=1)
+    # Calculamos todas las nuevas features de golpe
+    with np.errstate(all='ignore'):
+        new_features = {
+            "ghostEdibleNearby": edible_nearby_mask.sum(axis=1),
+            "ghostDangerousNearby": dangerous_nearby_mask.sum(axis=1),
+            "pacmanMode": np.select(
+                [
+                    (edible_nearby_mask.sum(axis=1) == 0) & (dangerous_nearby_mask.sum(axis=1) == 0),
+                    (dangerous_nearby_mask.sum(axis=1) > edible_nearby_mask.sum(axis=1)),
+                    (edible_nearby_mask.sum(axis=1) >= dangerous_nearby_mask.sum(axis=1)),
+                ],
+                [0, 1, 2]
+            ),
+            "closestGhostDistance": np.nanmin(np.where(active_mask, distances, -1), axis=1),
+            "edibleClosestGhostDistance": np.where(
+                np.isfinite(np.min(np.where((edible_times > 0) & active_mask, distances, np.inf), axis=1)),
+                np.min(np.where((edible_times > 0) & active_mask, distances, np.inf), axis=1),
+                -1
+            ),
+            "numEdibleGhosts": (edible_times > 0).sum(axis=1),
+            "ghostsNearby": ((distances < 20) & active_mask).sum(axis=1),
+            "numActiveGhosts": (lair_times == 0).sum(axis=1),
+            "avgGhostDistance": np.nanmean(masked_distances, axis=1),
+            "stdGhostDistance": np.nanstd(masked_distances, axis=1),
+            "minGhostDistance": np.nanmin(masked_distances, axis=1),
+            "maxGhostDistance": np.nanmax(masked_distances, axis=1),
+        }
 
-    # pacmanMode
-    df["pacmanMode"] = np.select(
-        [
-            (df["ghostEdibleNearby"] == 0) & (df["ghostDangerousNearby"] == 0),
-            (df["ghostDangerousNearby"] > df["ghostEdibleNearby"]),
-            (df["ghostEdibleNearby"] >= df["ghostDangerousNearby"]),
-        ],
-        [0, 1, 2]
-    )
+    # Construimos el nuevo DataFrame con todas las features
+    new_cols_df = pd.DataFrame([{**power_pills_dict, **pills_dict, **new_features}])
 
-    # closestGhostDistance
-    masked_distances = np.where(active_mask, distances, -1)
-    df["closestGhostDistance"] = np.nanmin(masked_distances, axis=1)
+    # Concatenamos todo de golpe
+    df = pd.concat([df.reset_index(drop=True), new_cols_df.reset_index(drop=True)], axis=1)
 
-    # edibleClosestGhostDistance
-    masked_edible_distances = np.where((edible_times > 0) & active_mask, distances, np.inf)
-    min_edible_dist = np.min(masked_edible_distances, axis=1)
-    df["edibleClosestGhostDistance"] = np.where(np.isfinite(min_edible_dist), min_edible_dist, -1)
+    # Corregir pacmanMode si ha quedado como array
+    if isinstance(df.at[0, "pacmanMode"], (list, np.ndarray)):
+        df.at[0, "pacmanMode"] = int(df.at[0, "pacmanMode"][0])
 
-    # numEdibleGhosts
-    df["numEdibleGhosts"] = (edible_times > 0).sum(axis=1)
-
-    # ghostsNearby
-    df["ghostsNearby"] = ((distances < 20) & active_mask).sum(axis=1)
-
-    # numActiveGhosts
-    df["numActiveGhosts"] = (lair_times == 0).sum(axis=1)
-
-    # avgGhostDistance, stdGhostDistance, minGhostDistance, maxGhostDistance
-    df["avgGhostDistance"] = np.nanmean(masked_distances, axis=1)
-    df["stdGhostDistance"] = np.nanstd(masked_distances, axis=1)
-    df["minGhostDistance"] = np.nanmin(masked_distances, axis=1)
-    df["maxGhostDistance"] = np.nanmax(masked_distances, axis=1)
 
     
     # Rellenar NaN que pueda quedar por no haber fantasmas activos
@@ -158,11 +184,11 @@ def preprocess_game_state_aux(game_state, path):
             df[col] = df[col].map(move_mapping)
     
 
-    scaler_path = os.path.join(path_trained, "models_2025-04-24", f"scaler_({intersection_id},).pkl")
+    scaler_path = os.path.join(path_trained, "models_2025-04-26", f"scaler_({intersection_id},).pkl")
     scaler_bundle = joblib.load(scaler_path)
     scaler = scaler_bundle['scaler']
     columns_scaled = scaler_bundle['columns']
-    X_num = df[columns_scaled]
+    X_num = df[columns_scaled].fillna(-1)
     X_num_scaled = scaler.transform(X_num)
     X_rest = df[columns_not_scaled]
  

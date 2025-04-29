@@ -1,4 +1,5 @@
 from preprocessing import preprocess_csv
+from preprocessing_aux import preprocess_csv_aux
 from model_pytorch import train_pytorch_nn, save_model_pth
 from model_sklearn import MLPModel
 from pytorch_tabnet.tab_model import TabNetClassifier
@@ -14,10 +15,6 @@ import argparse
 import os
                 
 
-# Ruta de datos y de la carpeta para guardar modelos --> RUTA ABSOLUTA --> PROBLEMA
-# path = 'D:/Documentos/diego/universidad/4 Curso/TFG/Ms.Pacman-Machine-Learning/DataSets/01_gameStatesData.csv'
-# path_trained = 'D:/Documentos/diego/universidad/4 Curso/TFG/Ms.Pacman-Machine-Learning/python/codigo/Redes_Entrenadas'
-
 
 
 # --- CREAR PATHS USANDO RUTAS RELATIVAS ---
@@ -26,7 +23,7 @@ import os
 directorio_actual = os.path.dirname(os.path.abspath(__file__))
 
 # Construir la ruta que sube dos niveles desde 'codigo' y entra en 'DataSets'
-dataset_path = os.path.join(directorio_actual, '..', '..', 'DataSets', '22_gameStatesData_enriched.csv.csv')
+dataset_path = os.path.join(directorio_actual, '..', '..', 'DataSets', '23_gameStatesData_enriched.csv')
 
 # Normalizar la ruta para evitar problemas con distintos sistemas operativos
 dataset_path = os.path.normpath(dataset_path)
@@ -38,8 +35,6 @@ path_trained = os.path.join(directorio_actual, 'Redes_Entrenadas')
 path_trained = os.path.normpath(path_trained)
 
 
-
-# # --- PREPROCESAMIENTO ---
 
 
 
@@ -72,8 +67,11 @@ def main():
     n_classes = 0
 
     if not (args.command == "model" and args.model == "tabnet"):
-        grouped_df  = preprocess_csv(dataset_path)
-        # Configuramos los parámetros de la red
+        if(args.model == "tabnet"):
+            grouped_df = preprocess_csv_aux(dataset_path)
+        else:
+            grouped_df = preprocess_csv(dataset_path)
+            
         # acceder al primer grupo por ej
         n_features = grouped_df.first().shape[1]
         n_classes = 5  # 5 posibles movimientos de Pac-Man
@@ -137,7 +135,7 @@ def main():
         """
         
         if args.model == "tabnet":
-            model_directory = os.path.join(path_trained, "models_2025-03-29")
+            model_directory = os.path.join(path_trained, "models_2025-04-26")
             
             model_files = [
                 f"tabnet_model_{key}.zip"
@@ -162,48 +160,50 @@ def main():
             print("Error: El número de modelos no coincide con el número de grupos.")
             return
         
-        
-        # Iterar sobre los archivos de modelo y los grupos del DataFrame al mismo tiempo
-        for (key, group), model_filename in zip(grouped_df, sorted_model_files):
-            print(f"Explicabilidad para el grupo: {key}, usando el modelo: {model_filename}")
+        # Tabnet ya tiene cargadas las explicabilidades del entrenamiento
+        if(args.model == "pytorch" or args.model == "sklearn"):
 
-            # Variables independientes (X) y dependientes (Y)
-            X = group.drop(columns=['PacmanMove'])
-            Y = group['PacmanMove'].values
+            # Iterar sobre los archivos de modelo y los grupos del DataFrame al mismo tiempo
+            for (key, group), model_filename in zip(grouped_df, sorted_model_files):
+                print(f"Explicabilidad para el grupo: {key}, usando el modelo: {model_filename}")
+
+                # Variables independientes (X) y dependientes (Y)
+                X = group.drop(columns=['PacmanMove'])
+                Y = group['PacmanMove'].values
+                    
+                # Dividimos el conjunto de datos
+                X_train, X_, y_train, y_ = train_test_split(X, Y, test_size=0.3, random_state=1)
+                X_cv, X_test, y_cv, y_test = train_test_split(X_, y_, test_size=0.33, random_state=1)
+
+                # Cargar el modelo correspondiente
+                full_model_path = os.path.join(model_directory, model_filename)
                 
-            # Dividimos el conjunto de datos
-            X_train, X_, y_train, y_ = train_test_split(X, Y, test_size=0.3, random_state=1)
-            X_cv, X_test, y_cv, y_test = train_test_split(X_, y_, test_size=0.33, random_state=1)
-
-            # Cargar el modelo correspondiente
-            full_model_path = os.path.join(model_directory, model_filename)
-            
-            if args.model == "pytorch":
-                # Crea una instancia del modelo
-                model = MyModelPyTorch(n_features, n_classes)
-                # Carga los pesos
-                model.load_state_dict(torch.load(full_model_path, weights_only=True))
-                model.eval()
-                predictor = PyTorchPredictor(model)
-            elif args.model == "sklearn":
-                model = MLPModel.load_model_mlp(full_model_path)
-            elif args.model == "tabnet":
-                model = TabNetClassifier(device_name=device)
-                model.load_model(full_model_path)
-            
-            if args.technique == "feature_importance":
-                # Para tabnet cogemos la explicabilidad de la red entrenada
-                if(args.model == "sklearn"):
-                    explainer.run_explainability(model, model_filename, args.technique, X_cv, key, y_cv)
-
-            elif args.technique == "lime":
                 if args.model == "pytorch":
+                    # Crea una instancia del modelo
+                    model = MyModelPyTorch(n_features, n_classes)
+                    # Carga los pesos
+                    model.load_state_dict(torch.load(full_model_path, weights_only=True))
+                    model.eval()
                     predictor = PyTorchPredictor(model)
-                else:
-                    predictor = model  # Los modelos de Scikit-Learn ya tienen predict_proba
-                explainer.run_explainability(predictor, model_filename, args.technique, X_cv, key)
-            else: # SHAP
-                explainer.run_explainability(model, model_filename, args.technique, X_cv, key)
+                elif args.model == "sklearn":
+                    model = MLPModel.load_model_mlp(full_model_path)
+                elif args.model == "tabnet":
+                    model = TabNetClassifier(device_name=device)
+                    model.load_model(full_model_path)
+                
+                if args.technique == "feature_importance":
+                    # Para tabnet cogemos la explicabilidad de la red entrenada
+                    if(args.model == "sklearn"):
+                        explainer.run_explainability(model, model_filename, args.technique, X_cv, key, y_cv)
+
+                elif args.technique == "lime":
+                    if args.model == "pytorch":
+                        predictor = PyTorchPredictor(model)
+                    else:
+                        predictor = model  # Los modelos de Scikit-Learn ya tienen predict_proba
+                    explainer.run_explainability(predictor, model_filename, args.technique, X_cv, key)
+                else: # SHAP
+                    explainer.run_explainability(model, model_filename, args.technique, X_cv, key)
         
         if(args.technique != "lime"):
             explainer.generate_global_explainability_plot(args.model, args.technique, model_directory)
