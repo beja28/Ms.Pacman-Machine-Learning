@@ -267,34 +267,32 @@ class Explainability:
 
         print(f"Grafico de explicabilidad LIME guardado en: {full_path} \n")
 
-    def group_pills_features(self, path):
+    def remove_pill_features_inplace(self, path):
+        """
+        Elimina las características que contienen 'pill_' en su nombre
+        de todos los JSONs dentro del path.
+        """
         for file in os.listdir(path):
             if file.startswith("feature_importances"):
                 full_path = os.path.join(path, file)
                 with open(full_path, 'r') as f:
                     data = json.load(f)
 
-                features = data["features"]
-                importances = data["importances"]
-                
+                features = data['features']
+                importances = data['importances']
+
                 new_features = []
                 new_importances = []
-                pills_sum = 0.0
-                
+
                 for feature, importance in zip(features, importances):
-                    if feature.startswith("pill_"):
-                        pills_sum += importance
-                    else:
+                    if not feature.startswith('pill_'):
                         new_features.append(feature)
                         new_importances.append(importance)
-                
-                new_features.append('pillsPresence')
-                new_importances.append(pills_sum)
-                
-                #Guardamos las nuevas importancias sobreescribiendo el actual
+
+                # Guardar el JSON modificado sobrescribiendo el original
                 new_data = {
-                    "features": new_features,
-                    "importances": new_importances
+                    'features': new_features,
+                    'importances': new_importances
                 }
                 with open(full_path, 'w') as f:
                     json.dump(new_data, f, indent=4)
@@ -302,8 +300,7 @@ class Explainability:
 
     def generate_tabnet_feature_importance(self, path):
         
-        self.group_pills_features(path)  # Agrupar las características de las pills
-        
+        self.remove_pill_features_inplace(path) 
         all_importances = []
         feature_names = None
 

@@ -22,7 +22,7 @@ public class DataSetVariables {
 	
 	//Variables que quiero quitar del estado del juego
 	public static final List<String> VARIABLES_BORRAR_GAME_STATE = Arrays.asList(
-	        "currentLevelTime", "levelCount", "pillsState", "timeOfLastGlobalReversal", "pacmanWasEaten",
+	        "currentLevelTime", "levelCount", "timeOfLastGlobalReversal", "pacmanWasEaten",
 	        "powerPillWasEaten", "pacmanReceivedExtraLife", "mazeIndex", "ghost1Eaten", "ghost2Eaten", "ghost3Eaten", "ghost4Eaten"
 	);
 

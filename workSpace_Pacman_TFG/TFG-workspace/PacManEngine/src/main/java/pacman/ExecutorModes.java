@@ -458,8 +458,8 @@ public class ExecutorModes {
 	    
 	    // Lista de las 10 características mas importantes segun la explicabilidad en tabnet
 	    String[] selectedFeatures_tabnet = {
-	        "pacmanLastMoveMade_UP", "pacmanLastMoveMade_DOWN", "pacmanLastMoveMade_LEFT", "pacmanLastMoveMade_RIGHT", "ghost2LastMove_RIGHT",
-	        "powerPill_2", "ghost3EdibleTime", "pillWasEaten", "powerPill_0", "ghost2Distance"
+	        "pacmanLastMoveMade", "powerPill_3", "numEdibleGhosts", "ghostsNearby", "ghostDangerousNearby",
+	        "ghostEdibleNearby", "pacmanMode", "powerPill_0", "powerPill_1", "powerPill_2"
 	    };
 		
 		if(model == "pytorch") {

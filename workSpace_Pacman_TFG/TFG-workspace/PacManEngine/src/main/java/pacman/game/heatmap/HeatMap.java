@@ -40,7 +40,7 @@ public class HeatMap {
 	        ratio = Math.min(1, absImpact / maxImpact); // Como los valores pocas veces superan 1, usamos 1 como referencia
 	    }
 	    else if(model == "tabnet") {
-	        maxImpact = 0.12;
+	        maxImpact = 0.024;
 	        
 	        ratio = Math.min(1, absImpact / maxImpact); // Como los valores nunca superan 1, usamos 1 como referencia
 	    }
