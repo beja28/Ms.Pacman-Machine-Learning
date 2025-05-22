@@ -12,6 +12,10 @@ import matplotlib.pyplot as plt
 import joblib
 import time
 
+"""
+Es utilizada para el modelo de Tabnet
+"""
+
 directorio_actual = os.path.dirname(os.path.abspath(__file__))
 path_trained = os.path.join(directorio_actual, 'Redes_Entrenadas')
 
@@ -40,6 +44,7 @@ def preprocess_csv_aux(path):
 
     return grouped_df
 
+# Preprocesar el estado del juego
 def preprocess_game_state_aux(game_state, path):
     start_time = time.perf_counter()
     # Leer columnas del CSV (sin columnas derivadas)
@@ -64,11 +69,10 @@ def preprocess_game_state_aux(game_state, path):
     power_pill_str = data[22]  # No lo quitamos aún, solo lo separamos srea 22
 
     if not power_pill_str.isdigit() or len(power_pill_str) != 4:
-        raise ValueError(f"❌ Valor inválido en powerPillsState: {power_pill_str}")
+        raise ValueError(f"Valor inválido en powerPillsState: {power_pill_str}")
     
     if len(pill_state_str) != 220 or not all(c in '01' for c in pill_state_str):
-        raise ValueError(f"❌ Valor inválido en pillsState: {pill_state_str}")
-
+        raise ValueError(f"Valor inválido en pillsState: {pill_state_str}")
 
     data.pop(22)
     data.pop(21)
@@ -77,7 +81,7 @@ def preprocess_game_state_aux(game_state, path):
 
     print(len(data), len(columns_csv))
     if len(columns_csv) != len(data):
-        raise ValueError("❌ Distinto número de datos que de columnas")
+        raise ValueError("Distinto número de datos que de columnas")
 
     # Crear diccionario y convertir tipos
     data_dict = {columns_csv[i]: data[i] for i in range(len(columns_csv))}
@@ -87,11 +91,6 @@ def preprocess_game_state_aux(game_state, path):
 
     # Crear DataFrame base
     df = pd.DataFrame([data_dict])
-    
-
-    # -------------------------------------
-    # Creamos todas las columnas nuevas aparte
-    # -------------------------------------
 
     # Añadir powerPill
     power_pills_dict = {f"powerPill_{i}": int(power_pill_str[i]) for i in range(4)}
@@ -157,14 +156,10 @@ def preprocess_game_state_aux(game_state, path):
     if isinstance(df.at[0, "pacmanMode"], (list, np.ndarray)):
         df.at[0, "pacmanMode"] = int(df.at[0, "pacmanMode"][0])
 
-
-    
     # Rellenar NaN que pueda quedar por no haber fantasmas activos
     df[["avgGhostDistance", "stdGhostDistance", "minGhostDistance", "maxGhostDistance"]] = df[[
         "avgGhostDistance", "stdGhostDistance", "minGhostDistance", "maxGhostDistance"
     ]].fillna(-1)
-
-
 
     intersection_id = int(df['pacmanCurrentNodeIndex'].iloc[0])
     df = df.drop(columns=['pacmanCurrentNodeIndex'])
@@ -183,7 +178,6 @@ def preprocess_game_state_aux(game_state, path):
         if col in df.columns:
             df[col] = df[col].map(move_mapping)
     
-
     scaler_path = os.path.join(path_trained, "models_2025-04-26", f"scaler_({intersection_id},).pkl")
     scaler_bundle = joblib.load(scaler_path)
     scaler = scaler_bundle['scaler']
@@ -197,5 +191,5 @@ def preprocess_game_state_aux(game_state, path):
 
     end_time = time.perf_counter()
     elapsed_time = (end_time - start_time)* 1000
-    print(f"Tiempo de preprocesado: {elapsed_time:.2f} ms")
+
     return df_final, intersection_id

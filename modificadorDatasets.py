@@ -4,12 +4,10 @@ from sklearn.decomposition import PCA
 import joblib
 
 # Archivos de entrada y salida
-input_csv = "18_gameStatesData.csv"
-output_csv = "18_gameStatesData_enriched.csv"
+input_csv = "23_gameStatesData.csv"
+output_csv = "23_gameStatesData_enriched.csv"
 
-# ---------------------------
-# 📥 Cargar y filtrar por mazeIndex
-# ---------------------------
+
 df = pd.read_csv(
     input_csv,
     low_memory=False,
@@ -17,16 +15,14 @@ df = pd.read_csv(
     dtype={"powerPillsState": str}
 )
 
-print(f"✅ CSV cargado con éxito. Total de filas leídas: {len(df)}")
+print(f"CSV cargado con éxito. Total de filas leídas: {len(df)}")
 
 # Filtrar solo las filas con mazeIndex == 0
 df = df[df["mazeIndex"] == 0].reset_index(drop=True)
-print(f"🧮 Filas tras filtrar por mazeIndex == 0: {len(df)}")
+print(f"Filas tras filtrar por mazeIndex == 0: {len(df)}")
 
-# -------------------------
-# ⚡️ Procesar powerPillsState
-# -------------------------
-print("🔍 Valores únicos en powerPillsState:")
+# Procesar powerPillsState
+print("Valores únicos en powerPillsState:")
 print(df["powerPillsState"].unique())
 # Asegurarse de que son strings de longitud 4 compuestas de 0s y 1s
 valid_power_pills = df["powerPillsState"].astype(str).str.extract(r'([01]{4})')[0]
@@ -35,8 +31,8 @@ valid_power_pills = df["powerPillsState"].astype(str).str.extract(r'([01]{4})')[
 valid_mask = valid_power_pills.notnull()
 valid_power_pills = valid_power_pills[valid_mask]
 
-# 🧮 Mostrar cuántas filas fueron eliminadas
-print(f"⚠️ Se eliminaron {len(df) - len(valid_power_pills)} filas con powerPillsState inválido.")
+# mostrar cuántas filas fueron eliminadas
+print(f"Se eliminaron {len(df) - len(valid_power_pills)} filas con powerPillsState inválido.")
 
 # Aplicar máscara a df para mantener solo las filas válidas
 df = df.loc[valid_power_pills.index].reset_index(drop=True)
@@ -52,9 +48,8 @@ df = pd.concat([df, power_df], axis=1)
 # Eliminar columna original
 df = df.drop(columns=["powerPillsState"], errors="ignore")
 
-# -----------------------------------
-# 📊 Enriquecimiento fantasma
-# -----------------------------------
+
+# Enriquecimiento fantasma
 
 # Columnas relacionadas con fantasmas
 distance_cols = ["ghost1Distance", "ghost2Distance", "ghost3Distance", "ghost4Distance"]
@@ -140,4 +135,4 @@ del df["mazeIndex"]
 
 # Guardar CSV final
 df.to_csv(output_csv, index=False, float_format="%.2f")
-print(f"✅ CSV enriquecido guardado en: {output_csv}")
+print(f"CSV enriquecido guardado en: {output_csv}")

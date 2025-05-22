@@ -48,8 +48,8 @@ def preprocess_csv(path):
 
     return grouped_df
 
+# Preprocesar el estado del juego
 def preprocess_game_state(game_state, path):
-    
     
     # Leer el CSV y obtener los nombres de las columnas
     df_columns = pd.read_csv(path, nrows=0)

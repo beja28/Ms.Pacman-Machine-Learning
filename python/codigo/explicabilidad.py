@@ -19,6 +19,7 @@ class Explainability:
         self.explanations = []  # Almacena resultados de explicabilidad
         self.map_dict = {}  # Diccionario para almacenar los valores SHAP organizados por intersección
 
+    # Definición de la función para ejecutar la explicabilidad
     def run_explainability(self, model, model_filename, technique, X, key, Y=None):
         """Ejecuta la técnica de explicabilidad seleccionada."""
         if technique == "shap":
@@ -28,6 +29,7 @@ class Explainability:
         elif technique == "lime":
             self.explain_with_lime(model, model_filename, X)
             
+    # Genera los valores SHAP de un modelo Pytorch o Scikit-Learn
     def explain_with_shap(self, model, model_filename, X, key):
         """Implementación de SHAP para explicar las predicciones del modelo."""
         try:
@@ -75,6 +77,8 @@ class Explainability:
         except Exception as e:
             print(f"Error durante la explicabilidad SHAP: {e}")
 
+
+    # Genera la explicabilidad de Feature Importance para Scikit-Learn
     def explain_with_feature_importance(self, model, model_filename, X, Y):
         """Implementación de Feature Importance."""
         
@@ -110,6 +114,7 @@ class Explainability:
             "feature_names": feature_names
         })
 
+    # Genera la explicabilidad de LIME para una zona del tablero específica, obteniendo la predicción resultante en ese instante
     def explain_with_lime(self, model, model_filename, X, node_index=165):
         """Implementacion de LIME para explicar las predicciones del modelo en una interseccion en concreto (funciona para Scikit-Learn y PyTorch)."""
         try:
@@ -227,7 +232,7 @@ class Explainability:
         except Exception as e:
             print(f"Error durante la explicabilidad LIME: {e}")
 
-
+    # Genera la grafica LIME y la guarda en su carpeta correspondiente
     def generate_lime_plot(self, model_filename, node_index, move):
         """ Genera y guarda una grafica LIME para un modelo especifico en su carpeta correspondiente """
 
@@ -267,11 +272,9 @@ class Explainability:
 
         print(f"Grafico de explicabilidad LIME guardado en: {full_path} \n")
 
+    # Elimina las características que contienen 'pill_' en su nombre de todos los JSONs dentro del path.
     def remove_pill_features_inplace(self, path):
-        """
-        Elimina las características que contienen 'pill_' en su nombre
-        de todos los JSONs dentro del path.
-        """
+
         for file in os.listdir(path):
             if file.startswith("feature_importances"):
                 full_path = os.path.join(path, file)
@@ -298,6 +301,7 @@ class Explainability:
                     json.dump(new_data, f, indent=4)
                     
 
+    # Separa del JSON obtenido del entrenamiento de TabNet, las importancias de cada intersección
     def generate_tabnet_feature_importance(self, path):
         
         self.remove_pill_features_inplace(path) 
@@ -322,6 +326,7 @@ class Explainability:
 
         return mean_importances
 
+    # Genera un gráfico de explicabilidad global para todas las redes y lo guarda en la carpeta correspondiente
     def generate_global_explainability_plot(self, model, technique, path):
         """Genera un gráfico que combine la explicabilidad global de todas las redes."""
         
@@ -375,11 +380,12 @@ class Explainability:
             plt.subplots_adjust(left=0.2, right=0.8, top=0.9, bottom=0.1)
             plt.show()
 
+    # Calcula el impacto total de cada característica en cada intersección 
     def calculate_intersection_impact(self, model, models_dir):
-        """Calcula el impacto total de cada característica en cada intersección."""
+        
         intersection_impact = {}
 
-        if model == "tabnet":
+        if model == "tabnet": # Tabnet ya trae del entrenamiento el impacto de cada característica en cada intersección
             for filename in os.listdir(models_dir):
                 if filename.startswith("feature_importances"):
                     intersection = filename.split("_")[-1].replace(".json", "") # Extrae del nombre la intersección como (intersección,)
@@ -398,8 +404,9 @@ class Explainability:
 
         return intersection_impact
 
+    # Guarda para cada característica el impacto que tiene en cada interseccion del tablero y las guarda en un archivo que será usado para generar los mapas de calor
     def save_explainability_txt(self, directory, models_dir, model):
-        """Guarda un archivo TXT para cada característica con el impacto en cada intersección."""
+        
         if model == "pytorch":
             full_path = os.path.join(directory, "mapas_explicabilidad_txt_pytorch")
         elif model == "sklearn":

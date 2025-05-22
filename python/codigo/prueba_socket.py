@@ -31,14 +31,12 @@ path_trained = os.path.normpath(path_trained)
 
 loaded_models = {} # Diccionario para almacenar los modelos cargados
 
+# Carga la red neuronal para la interseccion recibida
 def model_for_prediction(model_type, n_features, n_classes, intersection_id=None, device='cpu'):
-    """
-    Cargar el modelo deseado basándose en la intersección.
-    """
 
     if model_type == 'sklearn':
         model_filename = f'mlp_trained_model_2025-03-12_({intersection_id},).pkl'
-        full_model_path = os.path.join(path_trained, 'models_2025-03-12', model_filename)
+        full_model_path = os.path.join(path_trained, 'models_2025-03-12', model_filename) # Seleccionar el modelo a ejecutar
         print(full_model_path)
         mlp_model = joblib.load(full_model_path)
         return mlp_model, None
@@ -46,7 +44,7 @@ def model_for_prediction(model_type, n_features, n_classes, intersection_id=None
     elif model_type == 'pytorch':
        
         model_filename = f'pytorch_model_2025-03-05_({intersection_id},).pth'
-        full_model_path = os.path.join(path_trained, 'models_2025-03-05', model_filename)
+        full_model_path = os.path.join(path_trained, 'models_2025-03-05', model_filename) # Seleccionar el modelo a ejecutar
         
         modelPytorch = MyModelPyTorch(n_features, n_classes)
         modelPytorch.load_state_dict(torch.load(full_model_path, weights_only=True))
@@ -56,7 +54,7 @@ def model_for_prediction(model_type, n_features, n_classes, intersection_id=None
     
     elif model_type == 'tabnet':
         model_filename = f'tabnet_model_({intersection_id},).zip'
-        full_model_path = os.path.join(path_trained, 'models_2025-04-26', model_filename)
+        full_model_path = os.path.join(path_trained, 'models_2025-04-26', model_filename) # Seleccionar el modelo a ejecutar
 
         modelTabNet = TabNetClassifier(device_name=device)
         modelTabNet.load_model(full_model_path)
@@ -66,7 +64,7 @@ def model_for_prediction(model_type, n_features, n_classes, intersection_id=None
     else:
         raise ValueError("Modelo no reconocido. Elige 'pytorch', 'sklearn' o 'tabnet'.")
 
-
+# Devuelve la predicción del movimiento a realizar
 def get_prediction(model_type, mensaje, n_features, n_classes):
     # Separar el mensaje en el estado del juego y la lista de movimientos válidos
     lines = mensaje.split('\n')
@@ -151,16 +149,18 @@ def get_prediction(model_type, mensaje, n_features, n_classes):
                 predicted_index = valid_probabilities[0][0]
                 predicted_move = class_list[predicted_index]
             else:
-                print("⚠️ Ninguno de los movimientos predichos es válido. Escogiendo el primero por defecto.")
+                print("Ninguno de los movimientos predichos es válido. Escogiendo el primero por defecto.")
                 predicted_move = class_list[0]
 
     return predicted_move
 
+# Identifica la intersección a partir del estado preprocesado
 def identify_intersection(preprocessed_state):
     
     intersection = preprocessed_state.get('pacmanCurrentNodeIndex', None)
     return int(intersection.iloc[0])
 
+# Carga todos los modelos para las intersecciones del primer mapa
 def load_all_models(model_type, n_features, n_classes, device):
     print("Cargando todos los modelos, porfavor espere antes de comenzar una partida...")
     
@@ -176,6 +176,7 @@ def load_all_models(model_type, n_features, n_classes, device):
     
     print("Modelos cargados correctamente. Listo para comenzar la partida.")
     
+# Inicia el socket para recibir datos del cliente
 def start_socket(model_type, n_features, n_classes):
     #Configuración
     HOST = 'localhost'  # Podemos poner una IP o localhost

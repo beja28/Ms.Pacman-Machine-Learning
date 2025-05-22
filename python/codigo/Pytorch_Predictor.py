@@ -6,7 +6,7 @@ class PyTorchPredictor:
         
 
     def predict_proba(self, X):
-        # Asegúrate de que el modelo devuelva probabilidades en el rango [0, 1]
+        
         self.model.eval()
         with torch.no_grad():
             X_tensor = torch.tensor(X, dtype=torch.float32)

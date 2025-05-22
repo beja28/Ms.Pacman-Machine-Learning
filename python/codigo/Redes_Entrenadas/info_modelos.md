@@ -9,6 +9,7 @@
 | models_2025-03-05 | Pytorch        | 06_gameStatesData.csv | 2          | [Ver detalles](#estadisticas-modelo-2025-03-05 "Ir a sección detallada de estadísticas")|
 | models_2025-03-12 | Sklearn        | 06_gameStatesData.csv | 2          | [Ver detalles](#estadisticas-modelo-2025-03-12 "Ir a sección detallada de estadísticas")|
 | models_2025-03-29 | TabNet     | 18_gameStatesData_enriched.csv           | 3          | [Ver detalles](#estadisticas-modelo-2025-03-29 "Ir a sección detallada de estadísticas")                          |
+| models_2025-04-26 | TabNet     | 23_gameStatesData_enriched.csv           | 4          | [Ver detalles](#estadisticas-modelo-2025-04-26 "Ir a sección detallada de estadísticas")                          |
 
 ---
 
@@ -98,3 +99,28 @@
 
 ![Resultado](images\tabnet_models_2025-03-29_histograma.png)
 ![Resultado](images\tabnet_models_2025-03-29_boxplot.png)
+
+
+
+## Estadisticas-Modelo-2025-04-26
+**Rivales (500 partidas contra la mejor implementacion de fantasmas (3704))**  
+es.ucm.fdi.ici.c2223.practica2.grupo02.Ghosts 
+
+------
+
+**Estadísticas Avanzadas**  
+- Media: 2630,08
+- Mediana: 2510,00
+- Desviación típica: 877,15
+- Varianza: 769390,22
+- Máximo: 5880,00
+- Mínimo: 590,00
+- Rango: 5290,00
+- Percentil 25: 2110,00
+- Percentil 75: 3117,50
+- Percentil 90: 3669,00
+- Asimetría (Skewness): 0,74
+- Curtosis (Kurtosis): 1,56
+
+![Resultado](images\histograma_tabnet_Exp4.jpg)
+![Resultado](images\boxplot_tabnet_Exp4.jpg)

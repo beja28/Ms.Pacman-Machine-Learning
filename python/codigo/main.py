@@ -16,7 +16,6 @@ import os
                 
 
 
-
 # --- CREAR PATHS USANDO RUTAS RELATIVAS ---
 
 # Obtener la ruta de la carpeta 'codigo' donde está 'main.py'
@@ -36,8 +35,6 @@ path_trained = os.path.normpath(path_trained)
 
 
 
-
-
 def main():
     parser = argparse.ArgumentParser(description="Selecciona si quieres entrenar un modelo o utilizar uno para enviar la predicción o realizar la explicabilidad")
 
@@ -45,16 +42,16 @@ def main():
     subparsers = parser.add_subparsers(dest="command", help="Comandos disponibles")
 
     # Comando para seleccionar el modelo para las predicciones
-    parser_select_model = subparsers.add_parser("model", help="Selecciona el modelo a elegir para sacar la predicción (pytorch | sklearn)")
+    parser_select_model = subparsers.add_parser("model", help="Selecciona el modelo a elegir para sacar la predicción (pytorch | sklearn | tabnet)")
     parser_select_model.add_argument("model", choices=["pytorch", "sklearn", "tabnet"], help="Para usar el modelo Pytorch escriba -> model pytorch | Para usar el modelo MLP de scikit-learn escriba -> model sklearn")
 
     # Comando para entrenar el modelo
     parser_train_model = subparsers.add_parser("train_model", help="Elige el modelo a entrenar")
-    parser_train_model.add_argument("train_model", choices=["pytorch", "sklearn"], help="Para entrenar el modelo Pytorch escriba -> train_model pytorch | Para entrenar el modelo MLP de scikit-learn escriba -> train_model sklearn")
+    parser_train_model.add_argument("train_model", choices=["pytorch", "sklearn", "tabnet"], help="Para entrenar el modelo Pytorch escriba -> train_model pytorch | Scikit-learn escriba -> train_model sklearn | Tabnet escriba -> train_model tabnet")
     
     # Comando para realizar la explicabilidad
     parser_explain = subparsers.add_parser("explain", help="Explica el modelo seleccionado usando una técnica específica (SHAP, Feature Importance, LIME)")
-    parser_explain.add_argument("model", choices=["pytorch", "sklearn", "tabnet"], help="Selecciona el modelo a explicar (pytorch o sklearn)")
+    parser_explain.add_argument("model", choices=["pytorch", "sklearn", "tabnet"], help="Selecciona el modelo a explicar (pytorch, sklearn o tabnet)")
     parser_explain.add_argument("technique", choices=["shap", "feature_importance", "lime"], help="Selecciona la técnica de explicabilidad (SHAP, Feature Importance, LIME)")
 
     args = parser.parse_args()
@@ -72,7 +69,6 @@ def main():
         else:
             grouped_df = preprocess_csv(dataset_path)
             
-        # acceder al primer grupo por ej
         n_features = grouped_df.first().shape[1]
         n_classes = 5  # 5 posibles movimientos de Pac-Man
 
@@ -129,20 +125,20 @@ def main():
         explainer = Explainability()
         
         """ 
-        --------------------------------------------------------------------------------------------------
-        Importante seleccionar la carpeta de los modelos sklearn o pytorch para que funcione correctamente
-        --------------------------------------------------------------------------------------------------
+        ----------------------------------------------------------------------------------------------------------
+        Importante seleccionar la carpeta de los modelos sklearn, pytorch o tabnet para que funcione correctamente
+        ----------------------------------------------------------------------------------------------------------
         """
         
         if args.model == "tabnet":
-            model_directory = os.path.join(path_trained, "models_2025-04-26")
+            model_directory = os.path.join(path_trained, "models_2025-04-26") # Selecciona el modelo a explicar
             
             model_files = [
                 f"tabnet_model_{key}.zip"
                 for key, _ in grouped_df
             ]
-        else:
-            model_directory = os.path.join(path_trained, "models_2025-03-05")
+        else: # Para sklearn o pytorch
+            model_directory = os.path.join(path_trained, "models_2025-03-05") # Selecciona el modelo a explicar
             
             # Obtener todos los archivos con extensión .pkl o .pth
             model_files = [f for f in os.listdir(model_directory) if f.endswith(('.pkl', '.pth'))]
@@ -154,8 +150,7 @@ def main():
 
         # Ordenar por el número extraído
         sorted_model_files = sorted(model_files, key=extract_number)
-
-         
+      
         if len(model_files) != len(grouped_df):
             print("Error: El número de modelos no coincide con el número de grupos.")
             return
