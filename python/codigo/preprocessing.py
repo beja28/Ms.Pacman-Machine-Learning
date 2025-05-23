@@ -26,10 +26,10 @@ def preprocess_csv(path):
     df = pd.read_csv(path)
     
     # Compruebo que se hayan leido todas las lineas del csv
-    if len(df) == line_count:
-        print("Se han leído todas las líneas del CSV.")
-    else:
-        print("No se han leído todas las líneas del CSV.")
+    # if len(df) == line_count:
+    #     print("Se han leído todas las líneas del CSV.")
+    # else:
+    #     print("No se han leído todas las líneas del CSV.")
     
     # Mapeo de la columna 'PacmanMove' a números
     move_mapping = {

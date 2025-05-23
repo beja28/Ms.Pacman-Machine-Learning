@@ -59,9 +59,13 @@ def get_prediction(model_type, mensaje, mlp_model=None, modelPytorch=None):
         input_tensor = torch.tensor(preprocessed_state.values, dtype=torch.float32).unsqueeze(0)  # Agregar dimensión para batch (modelo espera recibir un batch de un solo ejemplo)
         # Realizar la predicción
         with torch.no_grad():  # No calcular gradientes
-            prediccion = modelPytorch(input_tensor)               
+            prediccion = modelPytorch(input_tensor)     
+                      
+        prediccion = prediccion.squeeze()
         # Seleccionar el índice con el valor máximo para obtener el movimiento predicho
-        predicted_index = torch.argmax(prediccion)      
+        probabilidades = torch.softmax(prediccion, dim=0).cpu().numpy()
+        predicted_index = np.argmax(probabilidades)      
+        print(predicted_index)
     elif model_type == 'sklearn':
         prediccion = mlp_model.predict(preprocessed_state) 
         predicted_index = prediccion[0] # Prediccion me devuelve el indice del movimiento
