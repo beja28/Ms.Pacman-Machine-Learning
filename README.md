@@ -32,32 +32,37 @@ Este repositorio incluye un archivo `requirements.txt` que especifica las versio
 3. **Instalar las dependencias**:
    Con el entorno virtual activado, instala las librerías necesarias:
    ```bash
+   python -m pip install pytorch-tabnet==4.1
+   ```
+   ```bash
    pip install -r requirements.txt
    ```
+### Preparación del workspace en Java
+   En un entorno como Eclipse haga lo siguiente:
+   #### 1. Cree una carpeta nueva que será usada como workspace.
+   #### 2. Copie las 3 carpetas (Evaluation, PacManEngine, PacmanNeuro) del proyecto descargado y peguelas en el workspace creado.
+   #### 3. Inicie Eclipse seleccionando el nuevo workspace.
+   #### 4. Importe la carpeta del workspace:
+      Import Proyects -> General -> Existing Proyects into Workspace -> Browse
+   #### 5. Si no se ha importado alguna carpeta:
+      1. File
+      2. New
+      3. Java Proyect
+      4. Remove check on Use default location
+      5. Browse
+      6. Select folder missing
+      7. Remove Create module-info.java file
+      8. Finish
 
-### Cómo ejecutar el programa
+### Cómo ejecutar el modelo final
 
-El programa incluye diferentes comandos que permiten entrenar modelos, realizar predicciones y aplicar técnicas de explicabilidad. A continuación, se detallan los comandos disponibles:
-
-#### 1. **Seleccionar un modelo para predicción**
+#### 1. **Seleccionar el modelo tabnet**
 
 ```bash
-python main.py model <model>
+python main.py model tabnet
 ```
 
-- `<model>`: Puede ser `pytorch` o `sklearn`, dependiendo del modelo que quieras usar.
-
-**Ejemplo**:
-
-```bash
-python main.py model pytorch
-```
-
-#### 2. **Entrenar un modelo**
-
-```bash
-python main.py train_model <train_model>
-```
+#### 2. **Ejecutar la partida desde Eclipse**
 
 - `<train_model>`: Puede ser `pytorch` o `sklearn`, según el modelo que desees entrenar.
 
