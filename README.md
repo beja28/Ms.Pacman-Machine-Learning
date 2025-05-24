@@ -79,17 +79,23 @@ Si alguna carpeta no se importa automáticamente, haz lo siguiente:
 
 ### Cómo ejecutar el modelo final
 
-#### 1. Seleccionar el modelo tabnet
+#### 1. Descargar el dataset empleado para cada experimento
+- Consulta el [Dataset](DataSets/info_datasets_modelos.md) empleado para cada experimento.
+- Descarga el Dataset correspondiente y guardalo en la carpeta Datasets.
+   - https://drive.google.com/drive/folders/1JAVIr6Yl94kzg011YRiNgcJwPQtBpZ0N?usp=drive_link
+  
+
+#### 2. Seleccionar el modelo tabnet
 
 ```bash
 python main.py model tabnet
 ```
 
-#### 2. Ejecutar la partida desde Eclipse
+#### 3. Ejecutar la partida desde Eclipse
 
 - En Evaluation, seleccione la clase **ExecutorTest**: `Run As` → `Java Application`
 
-#### 3. Posible error al ejecutar ExecutorTest
+#### 4. Posible error al ejecutar ExecutorTest
 Al ejecutar la clase `ExecutorTest`, podría aparecer un error como el siguiente:
 
       Exception in thread "main" java.lang.ExceptionInInitializerError
