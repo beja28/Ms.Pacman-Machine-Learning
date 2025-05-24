@@ -32,10 +32,10 @@ Este repositorio incluye un archivo `requirements.txt` que especifica las versio
 3. **Instalar las dependencias**:
    Con el entorno virtual activado, instala las librerías necesarias:
    ```bash
-   python -m pip install pytorch-tabnet==4.1
+   pip install -r requirements.txt
    ```
    ```bash
-   pip install -r requirements.txt
+   python -m pip install pytorch-tabnet==4.1
    ```
 ### Preparación del Workspace en Java (Eclipse)
 
