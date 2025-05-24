@@ -32,65 +32,100 @@ Este repositorio incluye un archivo `requirements.txt` que especifica las versio
 3. **Instalar las dependencias**:
    Con el entorno virtual activado, instala las librerías necesarias:
    ```bash
+   python -m pip install pytorch-tabnet==4.1
+   ```
+   ```bash
    pip install -r requirements.txt
    ```
+### Preparación del Workspace en Java (Eclipse)
 
-### Cómo ejecutar el programa
+Tanto para la preparación del workspace como para ejecutar el modelo final ha de estar en la rama `multi-network`.
 
-El programa incluye diferentes comandos que permiten entrenar modelos, realizar predicciones y aplicar técnicas de explicabilidad. A continuación, se detallan los comandos disponibles:
+#### 1. Crear el Workspace
+Crea una **nueva carpeta vacía** que funcionará como tu workspace de Eclipse.
 
-#### 1. **Seleccionar un modelo para predicción**
+#### 2. Copiar los Proyectos
+Desde el proyecto descargado, copia las siguientes carpetas al workspace creado:
+
+- `Evaluation`
+- `PacManEngine`
+- `PacmanNeuro`
+
+#### 3. Iniciar Eclipse
+Abre **Eclipse** y, cuando se te solicite, selecciona el **nuevo workspace** que creaste.
+
+#### 4. Importar los Proyectos al Workspace
+Sigue estos pasos para importar los proyectos:
+
+1. Ve a: `File` → `Import`.
+2. Selecciona: `General` → `Existing Projects into Workspace`.
+3. Haz clic en **Browse** y selecciona la carpeta del workspace.
+4. Marca los proyectos detectados.
+5. Haz clic en **Finish**.
+
+#### 5. Importar Manualmente Proyectos No Detectados
+Si alguna carpeta no se importa automáticamente, haz lo siguiente:
+
+1. Ve a: `File` → `New` → `Java Project`.
+2. Desmarca la opción: **Use default location**.
+3. Haz clic en **Browse** y selecciona la carpeta del proyecto que falta.
+4. Desactiva la opción: **Create module-info.java file**.
+5. Haz clic en **Finish**.
+
+---
+
+> Asegúrate de que todos los proyectos estén correctamente configurados como proyectos Java dentro de Eclipse para evitar errores de compilación.
+
+
+### Cómo ejecutar el modelo final
+
+#### 1. Seleccionar el modelo tabnet
 
 ```bash
-python main.py model <model>
+python main.py model tabnet
 ```
 
-- `<model>`: Puede ser `pytorch` o `sklearn`, dependiendo del modelo que quieras usar.
+#### 2. Ejecutar la partida desde Eclipse
 
-**Ejemplo**:
+- En Evaluation, seleccione la clase **ExecutorTest**: `Run As` → `Java Application`
 
+#### 3. Posible error al ejecutar ExecutorTest
+Al ejecutar la clase `ExecutorTest`, podría aparecer un error como el siguiente:
+
+      Exception in thread "main" java.lang.ExceptionInInitializerError
+      Caused by: java.lang.NullPointerException
+      at pacman.game.internal.Maze.loadNodes(Maze.java:42)
+      at pacman.game.Game.<clinit>(Game.java:77)
+
+Para solucionarlo ve a `Project` → `Clean`, y seleccione todos los proyectos.
+
+### Cómo probar los primeros modelos
+
+#### Evaluación 1: Una sola red neuronal
+1. Selecciona la rama `single-network` y prepara el workspace como se explica arriba.
+2. Para ejecutar los modelos:
 ```bash
-python main.py model pytorch
-```
+python main.py model <arquitecture>
+```   
+- <arquitecture> Puede ser pytorch o sklearn, dependiendo del modelo que quieras usar.
+3. En `ExecutorTest`: `Run As` → `Java Application`
 
-#### 2. **Entrenar un modelo**
-
+#### Evaluación 2: Una red por intersección con Scikit-Learn y Pytorch
+1. Selecciona el tag `v2.0` y prepara el workspace como se explica arriba.
+2. Para ejecutar los modelos:
 ```bash
-python main.py train_model <train_model>
-```
+python main.py model <arquitecture>
+```   
+- <arquitecture> Puede ser pytorch o sklearn, dependiendo del modelo que quieras usar.
+3. En `ExecutorTest`: `Run As` → `Java Application`
 
-- `<train_model>`: Puede ser `pytorch` o `sklearn`, según el modelo que desees entrenar.
-
-**Ejemplo**:
-
-- Entrenar el modelo PyTorch:
-  ```bash
-  python main.py train_model pytorch
-  ```
-- Entrenar el modelo Scikit-Learn:
-  ```bash
-  python main.py train_model sklearn
-  ```
-
-#### 3. **Realizar explicabilidad**
-
+#### Evaluación 3: Una red por intersección con Tabnet
+1. Selecciona el tag `v3.0` y prepara el workspace como se explica arriba.
+2. Para ejecutar los modelos:
 ```bash
-python main.py explain <model> <technique>
-```
-
-- `<model>`: Selecciona el modelo a explicar (`pytorch` o `sklearn`).
-- `<technique>`: Técnica de explicabilidad a aplicar (`shap`, `feature_importance`, o `lime`).
-
-**Ejemplos**:
-
-- Explicar el modelo PyTorch usando SHAP:
-  ```bash
-  python main.py explain pytorch shap
-  ```
-- Explicar el modelo Scikit-Learn usando LIME:
-  ```bash
-  python main.py explain sklearn lime
-  ```
+python main.py model tabnet
+```   
+3. En `ExecutorTest`: `Run As` → `Java Application`
 
 ### Notas
 
