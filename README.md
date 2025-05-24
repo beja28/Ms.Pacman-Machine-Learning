@@ -90,7 +90,7 @@ Si alguna carpeta no se importa automáticamente, haz lo siguiente:
 cd python/codigo
 ```
 ```bash
-python main.py model tabnet
+python .\main.py model tabnet
 ```
 
 #### 3. Ejecutar la partida desde Eclipse
@@ -114,7 +114,7 @@ Recuerda seleccionar el Dataset necesario para cada modelo.
 1. Selecciona la rama `single-network` y prepara el workspace como se explica arriba.
 2. Para ejecutar los modelos:
 ```bash
-python main.py model <arquitecture>
+python .\main.py model <arquitecture>
 ```   
 - <arquitecture> Puede ser pytorch o sklearn, dependiendo del modelo que quieras usar.
 3. En `ExecutorTest`: `Run As` → `Java Application`
@@ -123,7 +123,7 @@ python main.py model <arquitecture>
 1. Selecciona el tag `v2.0` y prepara el workspace como se explica arriba.
 2. Para ejecutar los modelos:
 ```bash
-python main.py model <arquitecture>
+python .\main.py model <arquitecture>
 ```   
 - <arquitecture> Puede ser pytorch o sklearn, dependiendo del modelo que quieras usar.
 3. En `ExecutorTest`: `Run As` → `Java Application`
@@ -132,7 +132,7 @@ python main.py model <arquitecture>
 1. Selecciona el tag `v3.0` y prepara el workspace como se explica arriba.
 2. Para ejecutar los modelos:
 ```bash
-python main.py model tabnet
+python .\main.py model tabnet
 ```   
 3. En `ExecutorTest`: `Run As` → `Java Application`
 
