@@ -106,6 +106,7 @@ Al ejecutar la clase `ExecutorTest`, podría aparecer un error como el siguiente
 Para solucionarlo ve a `Project` → `Clean`, y seleccione todos los proyectos.
 
 ### Cómo probar los primeros modelos
+Recuerda seleccionar el Dataset necesario para cada modelo.
 
 #### Evaluación 1: Una sola red neuronal
 1. Selecciona la rama `single-network` y prepara el workspace como se explica arriba.
