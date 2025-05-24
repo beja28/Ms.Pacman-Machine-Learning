@@ -79,7 +79,6 @@ def preprocess_game_state_aux(game_state, path):
     data.pop(1)
     data.pop(0)
 
-    print(len(data), len(columns_csv))
     if len(columns_csv) != len(data):
         raise ValueError("Distinto número de datos que de columnas")
 

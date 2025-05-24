@@ -87,10 +87,6 @@ def main():
             X_train, X_, y_train, y_ = train_test_split(X, Y, test_size=0.50, random_state=1)
             X_cv, X_test, y_cv, y_test = train_test_split(X_, y_, test_size=0.20, random_state=1)
 
-            print(torch.cuda.is_available())
-            print(torch.cuda.get_device_name(0))
-            print(device)
-
             # Convertir a tensores
             X_train_tensor = torch.tensor(X_train.values, dtype=torch.float32).to(device)
             X_cv_tensor = torch.tensor(X_cv.values, dtype=torch.float32).to(device)

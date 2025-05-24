@@ -129,8 +129,6 @@ def get_prediction(model_type, mensaje, n_features, n_classes):
         class_list = [inverse_move_mapping[c] for c in class_list]
         predicted_move = class_list[predicted_index]
 
-        print(f'Predicción: {predicted_move}')
-        print(f'Movimientos válidos: {valid_moves}')
         # Validación frente a movimientos válidos
         if predicted_move not in valid_moves:
             print('=' * 50)
@@ -216,8 +214,7 @@ def start_socket(model_type, n_features, n_classes):
                     mensaje = data.decode('utf-8')
                     predicted_move = get_prediction(model_type, mensaje, n_features, n_classes)
                     
-
-                    print(f"\nDatos recibidos: {mensaje}", end="")
+                    
                     print(f"Enviando respuesta: {predicted_move}")
                     print("\n---\n")
 
