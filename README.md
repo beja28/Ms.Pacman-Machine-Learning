@@ -86,7 +86,9 @@ Si alguna carpeta no se importa automáticamente, haz lo siguiente:
   
 
 #### 2. Seleccionar el modelo tabnet
-
+```bash
+cd python/codigo
+```
 ```bash
 python main.py model tabnet
 ```
