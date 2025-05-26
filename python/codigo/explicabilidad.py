@@ -6,14 +6,10 @@ from sklearn.inspection import permutation_importance
 import pandas as pd
 import matplotlib.pyplot as plt
 
+# Ejecuta la técnica de explicabilidad seleccionada.
 class explicabilidad:
     def ejecutar_explicabilidad(self, model, technique, X, Y=None):
-        """Ejecuta la técnica de explicabilidad seleccionada.
-        Args:
-            model: El modelo entrenado (PyTorch o Scikit-Learn).
-            technique (str): La técnica a aplicar ("shap", "feature_importance", "lime").
-            data (DataFrame o np.array): Los datos a usar para la explicabilidad.
-        """
+
         if technique == "shap":
             self.explicabilidad_shap(model, X)
         elif technique == "feature_importance":
@@ -54,7 +50,6 @@ class explicabilidad:
 
                 data_to_explain = X.sample(n=50)
                 shap_values = explainer.shap_values(data_to_explain) # Calcula los valores SHAP
-                #shap.summary_plot(shap_values, data_to_explain, plot_type="bar") # Gráfico de los datos SHAP
                 shap_values_sample =  shap_values[0]
                 explanation = shap.Explanation(values=shap_values_sample,
                                 base_values=explainer.expected_value,

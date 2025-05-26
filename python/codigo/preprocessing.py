@@ -25,12 +25,6 @@ def preprocess_csv(path):
         
     df = pd.read_csv(path)
     
-    # Compruebo que se hayan leido todas las lineas del csv
-    # if len(df) == line_count:
-    #     print("Se han leído todas las líneas del CSV.")
-    # else:
-    #     print("No se han leído todas las líneas del CSV.")
-    
     # Mapeo de la columna 'PacmanMove' a números
     move_mapping = {
         'UP': 0,
@@ -98,9 +92,7 @@ def preprocess_game_state(game_state, path):
     
     # Convertimos a DataFrame
     encoded_state = pd.DataFrame(one_hot_encoded, columns=encoder.get_feature_names_out(columns_to_encode))
-    
-    #encoded_state.to_csv('D:/Documentos/diego/Universidad/4 Curso/pruebaGS.csv', index =False)
-    
+        
     
     # Casteo las variables booleanas
     for key in boolean_col:

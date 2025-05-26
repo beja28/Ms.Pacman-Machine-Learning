@@ -27,12 +27,9 @@ path_trained = os.path.join(directorio_actual, 'Redes_Entrenadas')
 path_trained = os.path.normpath(path_trained)
 
 
-
+# Cargar el modelo deseado
 def model_for_prediction(model_type,n_features, n_classes):
 
-    """
-    Cargar el modelo deseado
-    """
     if model_type == 'sklearn':
         model_filename= 'mlp_trained_model_2025-03-18.pkl' 
         full_model_path = os.path.join(path_trained, model_filename)
