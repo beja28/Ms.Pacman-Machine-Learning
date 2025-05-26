@@ -114,6 +114,9 @@ Recuerda seleccionar el Dataset necesario para cada modelo.
 1. Selecciona la rama `single-network` y prepara el workspace como se explica arriba.
 2. Para ejecutar los modelos:
 ```bash
+cd python/codigo
+```
+```bash
 python .\main.py model <arquitecture>
 ```   
 - <arquitecture> Puede ser pytorch o sklearn, dependiendo del modelo que quieras usar.
@@ -121,16 +124,23 @@ python .\main.py model <arquitecture>
 
 #### Evaluación 2: Una red por intersección con Scikit-Learn y Pytorch
 1. Selecciona el tag `v2.0` y prepara el workspace como se explica arriba.
-2. Para ejecutar los modelos:
+2. Cree el entorno virtual empleado en esta rama.
+3. Para ejecutar los modelos:
+```bash
+cd python/codigo
+```
 ```bash
 python .\main.py model <arquitecture>
 ```   
 - <arquitecture> Puede ser pytorch o sklearn, dependiendo del modelo que quieras usar.
-3. En `ExecutorTest`: `Run As` → `Java Application`
+4. En `ExecutorTest`: `Run As` → `Java Application`
 
 #### Evaluación 3: Una red por intersección con Tabnet
 1. Selecciona el tag `v3.0` y prepara el workspace como se explica arriba.
 2. Para ejecutar los modelos:
+```bash
+cd python/codigo
+```
 ```bash
 python .\main.py model tabnet
 ```   
